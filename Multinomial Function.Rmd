@@ -1,0 +1,43 @@
+---
+title: "Multinomial function"
+output: html_document
+date: "2023-03-16"
+---
+
+```{r setup, include=FALSE}
+library(MASS)
+library(nnet)
+library(RVAideMemoire)
+```
+
+```{r,include=FALSE}
+#multinomial function
+
+MultiThesis<-function(Data,variable) {
+#1. Specify the reference group
+  Data$Ex_3cat <- relevel(Data$Ex_3cat, ref = "Insufficient")
+#2. run model 1
+  df <- multinom(Ex_3cat ~ variable + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+#3. Specify the reference group2
+  Data$Ex_3cat_act <- relevel(Data$Ex_3cat, ref = "Active")
+#4. run model 2
+  df2<- multinom(Ex_3cat_act ~ variable + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+#5. Odds ratio
+  OR_var <- print(OR.multinom(df, variable , conf.level = 0.95))
+#6 Coefficients 
+
+}
+
+MultiThesis(thesis_NHRVS,thesis_NHRVS$Cancer)
+
+
+#coefs_df <- coef(df)[,2]
+#coefs_df2 <- coef(df2)[,2]
+#}
+#odds_ratio(df,Any_Disability)
+
+#P_value <- function(model) {
+ # z <- summary(model)$coefficients/summary(model)$standard.errors
+  #p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  #return(p[,2])
+  #}
