@@ -1,0 +1,571 @@
+---
+title: "Thesis Forrest Plots"
+output: html_document
+date: "2023-02-18"
+---
+
+```{r,include=FALSE}
+# knit: (function(input_file, encoding) {
+#     out_dir <- 'docs';
+#     rmarkdown::render(input_file,
+#       encoding=encoding,
+#       output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+```
+
+      
+This markdown shows the steps taken to make detailed Forrest plots for several 
+multinomial regressions. This includes variable names, the Odds ratios (OR), and 
+their associated P values. Results for the current study are from the following 
+publication:
+
+Hubert T., Adams T., Pizerkt R., (In Preparation) Associations between Physical Activity Levels and Physical and Mental Health and Illness in U.S. Military Veterans: Results from the 2019/2020 National Health and Resilience in Veterans Study.
+
+## Study design
+
+The current study is examining how physical and mental health conditions are 
+associated with levels of physical activity (e.g., insufficiently active, moderately
+active, and sufficiently active). The proposed study used several 
+multinomial logistic regressions to evaluate the odds of being in each physical 
+activity level when reporting a health condition. As such, the code below creates 
+three Forrest plots displaying the odds of reporting each condition between each 
+gorup relative to another. 
+
+```{r, include=FALSE}
+## load up the packages we will need: 
+library(tidyverse)
+library(gt)
+library(patchwork)
+## ---------------------------
+```
+
+## load data
+First thing to do is to load the data into R. I have already created tables 
+with all of the values needed for these plots. You can find my code my code to 
+make the tables <HERE>
+```{r}
+#### MET MINS
+Ins_Mod <- read_csv("~/Desktop/Coding/data/Ins_Mod.csv")
+Ins_Act <- read_csv("~/Desktop/Coding/data/Ins_Act.csv")
+Act_Mod <- read_csv( "~/Desktop/Coding/data/Act_Mod.csv")
+
+# Ins_Act <- Ins_Act[2:24,]
+# Act_Mod <- Act_Mod[2:24,]
+Ins_Act
+Ins_Mod
+Act_Mod
+```
+
+Because GGplot likes to sort things based upon its own "standards" we need to create 
+a variable (i.e., order) and manually assign the order that we want the plot and 
+values to be in. Additionally, I wanted to assign a variable that indicates which 
+ORs were significant after alpha corrections, so I created a variable (i.e., sig) 
+that we can use to color the significaant values later on.
+```{r}
+#create the variable within the dataframe
+Ins_Mod <- mutate(Ins_Mod, order = 0)
+#update the values of the dataset to reflect the order we want
+Ins_Mod[1,9]  = 2
+Ins_Mod[2,9]  = 3
+Ins_Mod[3,9]  = 4
+Ins_Mod[4,9]  = 5
+Ins_Mod[5,9]  = 6
+Ins_Mod[6,9]  = 7
+Ins_Mod[7,9]  = 8
+Ins_Mod[8,9]  = 9
+Ins_Mod[9,9]  = 10
+Ins_Mod[10,9] = 11
+Ins_Mod[11,9] = 12
+Ins_Mod[12,9] = 13
+Ins_Mod[13,9] = 14
+Ins_Mod[14,9] = 15
+Ins_Mod[15,9] = 16
+Ins_Mod[16,9] = 17
+Ins_Mod[17,9] = 18
+Ins_Mod[18,9] = 19
+Ins_Mod[19,9] = 20
+Ins_Mod[20,9] = 21
+Ins_Mod[21,9] = 22
+Ins_Mod[22,9] = 23
+Ins_Mod[23,9] = 24
+
+# create a varaible for significance 
+Ins_Mod <- mutate(Ins_Mod, sig = 0)
+
+# assign values to the significant models post alpha corrections.
+Ins_Mod[1,10] = 1
+Ins_Mod[3,10] = 1
+Ins_Mod[5,10] = 1
+Ins_Mod[21,10] = 1
+```
+
+We are going to split these conditions into a mental and physical health dataframes.
+because GGplot gets mad when we try to arrange these all together. 
+```{r}
+phc_IM <- Ins_Mod[1:17,]
+mhc_IM <- Ins_Mod[18:23,]
+phc_IM
+mhc_IM
+```
+Now we have a data frame for physical health conditions and a data frame for mental 
+health conditions. We will repeat these steps for the other 2 models.
+
+```{r, include=FALSE}
+Ins_Act <- mutate(Ins_Act, order = 0)
+Ins_Act[1,9]  = 2
+Ins_Act[2,9]  = 3
+Ins_Act[3,9]  = 4
+Ins_Act[4,9]  = 5
+Ins_Act[5,9]  = 6
+Ins_Act[6,9]  = 7
+Ins_Act[7,9]  = 8
+Ins_Act[8,9]  = 9
+Ins_Act[9,9]  = 10
+Ins_Act[10,9] = 11
+Ins_Act[11,9] = 12
+Ins_Act[12,9] = 13
+Ins_Act[13,9] = 14
+Ins_Act[14,9] = 15
+Ins_Act[15,9] = 16
+Ins_Act[16,9] = 17
+Ins_Act[17,9] = 18
+Ins_Act[18,9] = 2
+Ins_Act[19,9] = 3
+Ins_Act[20,9] = 4
+Ins_Act[21,9] = 5
+Ins_Act[22,9] = 6
+Ins_Act[23,9] = 7
+
+Ins_Act <- mutate(Ins_Act, sig = 0)
+Ins_Act[1,10] = 1
+Ins_Act[3,10] = 1
+Ins_Act[5,10] = 1
+Ins_Act[6,10] = 1
+Ins_Act[9,10] = 1
+Ins_Act[17,10] = 1
+Ins_Act[22,10] = 1
+
+phc_IA <- Ins_Act[1:17,]
+mhc_IA <- Ins_Act[18:23,]
+```
+
+```{r, include=FALSE}
+Act_Mod <- mutate(Act_Mod, order = 0)
+Act_Mod[1,9] = 2
+Act_Mod[2,9] = 3
+Act_Mod[3,9] = 4
+Act_Mod[4,9]  = 5
+Act_Mod[5,9]  = 6
+Act_Mod[6,9]  = 7
+Act_Mod[7,9]  = 8
+Act_Mod[8,9]  = 9
+Act_Mod[9,9]  = 10
+Act_Mod[10,9] = 11
+Act_Mod[11,9] = 12
+Act_Mod[12,9] = 13
+Act_Mod[13,9] = 14
+Act_Mod[14,9] = 15
+Act_Mod[15,9] = 16
+Act_Mod[16,9] = 17
+Act_Mod[17,9] = 18
+Act_Mod[18,9] = 2
+Act_Mod[19,9] = 3
+Act_Mod[20,9] = 4
+Act_Mod[21,9] = 5
+Act_Mod[22,9] = 6
+Act_Mod[23,9] = 7
+
+Act_Mod <- mutate(Act_Mod, sig = 0)
+
+phc_AM <- Act_Mod[1:17,]
+mhc_AM <- Act_Mod[18:23,]
+```
+
+## Middle: Create The Plot
+
+Now that we have the data all ready, we can create the plot. For the forrest plot 
+I am going to save the output of the plot into "phc_IA_mid". As I am repeating the 
+same plot 3 times, for both mental and physical health conditions I want my code to 
+be clear. We create the forrest plot with geom point & geom linerange, and I have 
+added color to signify which conditions were significant after corrections. 
+#### Forrest Plot Function
+
+```{r,include=FALSE}
+# Ins__plot <- Ins_Mod |>
+#   #Plot the value variable (in descending order) assigning significance to the 
+#   #values significant after Bon foroni alpha corrections
+#   ggplot(aes(y = reorder(variable, -order),color = as.factor(sig))) +
+#   #take away background
+#   theme_classic() +
+#   #make the forrest plot
+#   geom_point(aes(x=estimate), shape=15, size=3,show.legend = FALSE) +
+#   geom_linerange(aes(xmin=conf.low, xmax=conf.high),show.legend = FALSE) +
+#   #add color 
+#   scale_color_manual(values = c("#A6A6A6","blue"))+
+#   #change Cordinates
+#   labs(x="Odds Ratio") +
+#   #adjust the dimentions. 
+#   coord_cartesian(ylim = c(1,24), xlim=c(.25, 1.75)) +
+#   #add a line at 0 for reference 
+#   geom_vline(xintercept = 1, linetype="dashed") +
+#   #add anotations to help suggests what each side means.
+#   annotate("text", x = .5, y = 18, label = "Less Likely") +
+#   annotate("text", x = 1.5, y = 18, label = "More Likely") 
+#   #Git rid of the Y - Axis
+# Ins_act_plot
+```
+
+```{r}
+mid_Fplot <-function(data){
+output <- data |>
+  #Plot the value variable (in descending order) assigning significance to the 
+  #values significant after Bon foroni alpha corrections
+  ggplot(aes(y = reorder(variable, -order),color = as.factor(sig))) +
+  #take away background
+  theme_classic() +
+  #make the forrest plot
+  geom_point(aes(x=estimate), shape=15, size=3,show.legend = FALSE) +
+  geom_linerange(aes(xmin=conf.low, xmax=conf.high),show.legend = FALSE) +
+  #add color 
+  scale_color_manual(values = c("#A6A6A6","blue"))+
+  #change Cordinates
+  labs(x="Odds Ratio") +
+  #adjust the dimentions. 
+  coord_cartesian(ylim = c(1,18), xlim=c(.25, 1.75)) +
+  #add a line at 0 for reference 
+  geom_vline(xintercept = 1, linetype="dashed") +
+  #add anotations to help suggests what each side means.
+  annotate("text", x = .5, y = 18, label = "Less Likely") +
+  annotate("text", x = 1.5, y = 18, label = "More Likely") +
+  #Git rid of the Y - Axis
+  theme(axis.line.y = element_blank(),
+        axis.ticks.y= element_blank(),
+        axis.text.y= element_blank(),
+        axis.title.y= element_blank())
+return (output)
+}
+```
+
+#### Applying the function
+As we separated the datasets into mental health and physical health data frames, we can just call one function to do both parts of the plots.
+```{r}
+#Physical Health Conditions
+phc_IA_mid<-mid_Fplot(phc_IA)
+#Mental Health Conditions
+mhc_IA_mid<- mid_Fplot(mhc_IA)
+```
+
+No repeat this for the other 4 plots.
+```{r}
+# Insufficient vs Moderate
+phc_IM_mid <- mid_Fplot(phc_IM)
+mhc_IM_mid <- mid_Fplot(mhc_IM)
+# Active vs Moderate
+phc_AM_mid <- mid_Fplot(phc_AM)
+mhc_AM_mid <- mid_Fplot(mhc_AM)
+```
+       
+       
+We have our plots! We can interpret this as, "Compared to veterans who were are insufficient active, veterans who were moderately active were (less/no difference/more) likely to report X health condition." For these figures the blue lines indicate which health conditions are significant after alpha corrections. 
+```{r}
+#Physical Health Conditions
+phc_IA_mid
+#Mental Health Conditions
+mhc_IA_mid
+```
+
+## Left Side: labels for the forrest plot
+
+We took away the standard y axis of GGplot because it is simplistic. Now we are 
+now going to add a Y axis that includes the variable names (i.e., Health Conditions) 
+and their respective ORs.
+
+#### Update data frame
+The output from the statistical models (e.g., p values) is not rounded to clean 
+numbers. The code below tidy's up our data and creates new values. Additionally
+our table has seperate values for OR, and 95% CI. The code below combines these
+values into one variable so we can call it for the table.
+
+```{r}
+DF_update <- function(data){
+#assign the input and output of the data
+output <-data |>
+  # round estimates and 95% CIs to 2 decimal places for journal specifications
+  mutate(across(
+    c(estimate, conf.low, conf.high),
+    ~ str_pad(
+      round(.x, 2),
+      width = 4,
+      pad = "0",
+      side = "right"
+    )
+  ),
+  # add an "-" between HR estimate confidence intervals
+  estimate_lab = paste0(estimate, " (", conf.low, "-", conf.high, ")")) |>
+  # round p-values to two decimal places, except in cases where p < .001
+  mutate(p.value = case_when(
+    p.value < .001 ~ "<0.001",
+    round(p.value, 2) == .05 ~ as.character(round(p.value,3)),
+    p.value < .01 ~ str_pad( # if less than .01, go one more decimal place
+      as.character(round(p.value, 3)),
+      width = 4,
+      pad = "0",
+      side = "right"
+    ),
+    TRUE ~ str_pad( # otherwise just round to 2 decimal places and pad string so that .2 reads as 0.20
+      as.character(round(p.value, 2)),
+      width = 4,
+      pad = "0",
+      side = "right"
+    )
+  )) |>
+  # add a row of data that are actually column names which will be shown on the plot in the next step
+  bind_rows(
+    data.frame(
+      variable = "Condition",
+      estimate_lab = "Odd Ratio (95% CI)",
+      conf.low = "",
+      conf.high = "",
+      p.value = "p-value"
+    )
+  ) |>
+  mutate(model = fct_rev(fct_relevel(variable, "Condition")))
+# have the funciton spit out the new data
+return(output)
+}
+```
+
+Now that we have made a function, lets see what it does.
+```{r}
+# Insufficient vs Active
+phc_IA_plot <- DF_update(phc_IA)
+  #double check to make sure it worked.
+glimpse(phc_IA_plot$estimate_lab)
+```
+
+
+Update the rest of the data frames
+```{r}
+mhc_IA_plot <- DF_update(mhc_IA)
+
+# Insufficient vs moderate
+phc_IM_plot <- DF_update(phc_IM)
+mhc_IM_plot <- DF_update(mhc_IM)
+
+# active vs moderate
+phc_AM_plot <- DF_update(phc_AM)
+mhc_AM_plot <- DF_update(mhc_AM)
+```
+
+### Plotting the left side
+
+Now that we have the variables int he format for the plot, we can plot it! 
+```{r}
+left_FP <- function(plot_data,type){
+  # For Physical health condition plots
+  if(type == "PHC") {
+    # add the top row
+    plot_data<-mutate(plot_data, top_row = 0)
+    plot_data[18,9] = 1
+    plot_data <- arrange(plot_data,order)
+
+    # plot the left side of the plot 
+    output <- plot_data %>% 
+      ggplot(aes(y = model)) +
+      geom_text(aes(x = 0, label = variable), hjust = 0, fontface = "bold")+
+      geom_text(
+      aes(x = 1, label = estimate_lab),
+      hjust = 0,
+      fontface = ifelse(phc_IA_plot$estimate_lab == "Odds Ratio (95% CI)", "bold","plain")) +
+      theme_void() +
+      coord_cartesian(ylim = c(1,18), xlim = c(0, 4))
+  }
+  # For Mental health condition plots
+  if(type == "MHC"){
+    #arange the labels on top
+      plot_data<-mutate(plot_data, top_row = 0)
+      plot_data[7,9] = 1
+      plot_data <- arrange(plot_data,order)
+
+    # plot the left side of the plot 
+      output <- plot_data %>% 
+        ggplot(aes(y = model)) +
+        geom_text(aes(x = 0, label = variable), hjust = 0, fontface = "bold")+
+        geom_text(aes(x = 1, label = estimate_lab),
+        hjust = 0,
+        fontface = ifelse(mhc_IA_plot$estimate_lab == "Odds Ratio (95% CI)", "bold","plain")) +
+        theme_void() +
+        coord_cartesian(ylim = c(1,18), xlim = c(0, 4))
+  }
+  return(output)
+}
+```
+Run the function
+```{r}
+phc_IA_left<-left_FP(phc_IA_plot,"PHC")
+mhc_IA_left<-left_FP(mhc_IA_plot,"MHC")
+phc_IM_left<-left_FP(phc_IM_plot,"PHC")
+mhc_IM_left<-left_FP(mhc_IM_plot,"MHC")
+phc_AM_left<-left_FP(phc_AM_plot,"PHC")
+mhc_AM_left<-left_FP(mhc_AM_plot,"MHC")
+```
+Now we have our labels. In our labels we have the name of our conditions and the OR + 95 CI.
+```{r}
+phc_IA_left
+mhc_IA_left
+```
+
+## Right: P values 
+
+We now have the left side and the middle of the plot. The last thing we need is 
+to show the P values on the right side of the table. We have already updated our 
+data frame (above) so now we can just put them in the figure like how we did for 
+the left side.
+
+
+```{r}
+right_FP<-function(plot_data){
+    output <- plot_data |>
+      ggplot() +
+        geom_text(aes(x = 0, y = model, label = p.value), hjust = 0,
+        fontface = ifelse(plot_data$p.value == "p-value", "bold", "plain")) +
+        theme_void() +
+        coord_cartesian(ylim = c(1,18))
+return(output)
+}
+```
+
+run the function
+```{r}
+phc_IA_right <- right_FP(phc_IA_plot)
+mhc_IA_right <- right_FP(mhc_IA_plot)
+phc_IM_right <- right_FP(phc_IM_plot)
+mhc_IM_right <- right_FP(mhc_IM_plot)
+phc_AM_right <- right_FP(phc_AM_plot)
+mhc_AM_right <- right_FP(mhc_AM_plot)
+```
+
+Example of the p value output
+```{r}
+phc_IA_right
+mhc_IA_right
+```
+
+## Putting It Together
+We now have all of the pieces of the puzzle. Now we need to specify how much area
+all of these individual parts will take up in the final output. Below we specify where
+each of the individual plots starts and finishes. t = top, l = left, b = bottom, 
+r = right. We assign these to a a vector (e.g.layout) for the plot.
+```{r}
+layout <- c(
+  area(t = 0, l = 0, b = 30, r = 25),
+  area(t = 0, l = 14, b = 30, r = 25),
+  area(t = 0, l = 23, b = 30, r = 30) 
+)
+```
+
+### final plot arrangement
+Combine all of the parts together to get the final product! You may notice or 
+be wondering why the mental health plot is so weirdly formatted. This is because
+I will be moving them over to illustrator to combine the plots together to look
+like one cohesive plot. I gave up in GGplot. 
+
+## Likelihood of reporting health conditions for veterans with sufficient physical activity compared to insufficient activity.
+```{r}
+# physical health conditions. - Ins vs Mod
+phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
+```
+
+#### Note.
+
+Compared to veterans who are insufficiently active, those who are sufficiently
+active are less likely to report any disability, asthma, chronic pain, diabetes, 
+and hypertension. No other differences were observed between the odds of
+reporting other conditions between insufficient and moderate activity. 
+
+```{r}
+mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
+```
+
+#### Note.
+Compared to veterans who are insufficiently active, those who are sufficiently
+active are more likely to report PTSD.
+
+## Likelihood of reporting health conditions for veterans with moderate physical activity compared to insufficient activity.
+
+```{r}
+### Ins vs. Mod
+phc_IM_left + phc_IM_mid + phc_IM_right + plot_layout(design = layout)
+```
+
+#### Note. 
+Compared to veterans who are insufficiently active, those who are moderately
+active are less likely to report any disability, asthma, chronic pain, diabetes, 
+high cholesterol, and stroke. No other differences were observed between the odds of
+reporting other conditions between insufficient and moderate activity.
+
+```{r}
+mhc_IM_left + mhc_IM_mid + mhc_IM_right + plot_layout(design = layout)
+```
+
+#### Note 
+Compared to veterans who are insufficiently active, those who are moderately
+active are less likely to report nicotine dependence. No other differences were observed between the odds of
+reporting other conditions between insufficient and moderate activity.
+
+
+## Likelihood of reporting health conditions for veterans with sufficient physical activity compared to moderate activity.
+
+```{r}
+phc_AM_left + phc_AM_mid + phc_AM_right + plot_layout(design = layout)
+```
+
+#### Note
+No other differences were observed between the odds of
+reporting physical health conditions between insufficient and moderate activity.
+
+```{r}
+mhc_AM_left + mhc_AM_mid + mhc_AM_right + plot_layout(design = layout)
+
+```
+
+#### Note
+
+No other differences were observed between the odds of
+reporting mental health conditions between insufficient and moderate activity.
+
+
+## Save the plots as png
+
+```{r,results='hide'}
+png(file="IvA_phc.png",
+width=700, height=450)
+phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
+dev.off()
+
+png(file="IvA_mhc.png",
+width=700, height=450)
+mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
+dev.off()
+
+png(file="IvM_phc.png",
+width=700, height=450)
+phc_IM_left + phc_IM_mid + phc_IM_right + plot_layout(design = layout)
+dev.off()
+
+png(file="IvM_mhc.png",
+width=700, height=450)
+mhc_IM_left + mhc_IM_mid + mhc_IM_right + plot_layout(design = layout)
+dev.off()
+
+png(file="AvM_phc.png",
+width=700, height=450)
+phc_AM_left + phc_AM_mid + phc_AM_right + plot_layout(design = layout)
+dev.off()
+
+png(file="AvM_mhc.png",
+width=700, height=450)
+mhc_AM_left + mhc_AM_mid + mhc_AM_right + plot_layout(design = layout)
+dev.off()
+```
+
+

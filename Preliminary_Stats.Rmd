@@ -1,0 +1,1044 @@
+---
+title: "Preliminary_Statistics_Figures"
+output: html_document
+date: "2023-03-22"
+---
+
+```{r,include=FALSE}
+#data stuff
+library(tidyverse)
+library(dplyr)
+  #CSV/CAV files
+library(haven)
+library(tableone)
+  #regression stuff
+library(aod)
+
+library(gtsummary)
+#library(emmeans)
+#library(ggeffects)
+    #used for log regression
+library(lmtest)
+library(DescTools)
+library(manipulate)
+library(psych)
+
+### Import dataset 
+setwd("~/Desktop/Adams_lab/SPSS_stuff")
+NHRVS_2019 <- read_sav("~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav")
+
+### Select and rename Variables
+thesis_NHRVS <- dplyr::select(NHRVS_2019,
+    #Background Variables __________
+      caseid,weight,Age,Male_Gender,White_Race,SomeCollege_or_Higher,
+      Married_Partnered,Income_60k_plus,YN_work,
+      PCS_FINAL,MCS_FINAL,Weight_kg,BMI,
+    #Military variables__________
+      Combat_Veteran,Years_in_Military,Branch_5cat,Enlistment_status_3cat,
+      MilitaryRank_3cat,
+    #Mental Health Variables___________
+      TOTAL_TRAUMAS,LT_PCL_33,LT_MDD_Sx_only,LT_Suicide_4cat,Suicide_Attempt_LT,
+      LT_Suicide_Plan,LT_AUD,LT_NicotineDep,LT_DUD,tot_MHC,Any_MHC,
+    #Physical health Variables_________
+      ANY_ADL_DISABILITY,ANY_IADL_DISABILITY,Any_Disability,tot_phc,Any_PHC,Q22A_1,Q22A_2,
+      Q22A_3,Q22A_4,Q22A_5,Q22A_6,Q22A_7,Q22A_8,Q22A_9,Q22A_10,Q22A_11,Q22B_1,
+      Q22B_2,Q22B_3,Q22B_4,Q22B_5,
+    #Exercise variables ___________
+      godin_mild_winsor,godin_Mod_winsor,godin_Stren_winsor,HCS,HCS_Cats,
+      godin_total_ac,god3cat,god2cat,GODIN_outliers)
+    
+#Rename variabes
+thesis_NHRVS <- rename(thesis_NHRVS,
+      MET_total = godin_total_ac,
+      God_mild = godin_mild_winsor,
+      God_mod = godin_Mod_winsor,
+      God_stren = godin_Stren_winsor,
+      College = SomeCollege_or_Higher,
+      MCS = MCS_FINAL,
+      PCS = PCS_FINAL,
+      Arthritis = Q22A_1,
+      Athsma =  Q22A_2,
+      Cancer = Q22A_3,
+      Chron_pain = Q22A_4,
+      Liv_dis = Q22A_5,
+      Diabetes = Q22A_6,
+      Hrt_dis = Q22A_7,
+      Hrt_atk = Q22A_8,
+      High_chol = Q22A_9,
+      High_bld_press = Q22A_10,
+      Kid_dis = Q22A_11,
+      Migrane = Q22B_1,
+      MS = Q22B_2,
+      Osteoporosis = Q22B_3,
+      Rhum_arth = Q22B_4,
+      Stroke = Q22B_5,
+      LT_MDD = LT_MDD_Sx_only,
+      LT_PTSD = LT_PCL_33
+)
+
+library(tableone)
+  #regression stuff
+library(aod)
+
+library(gtsummary)
+#library(emmeans)
+#library(ggeffects)
+    #used for log regression
+library(lmtest)
+library(DescTools)
+library(manipulate)
+# We need exercsie variables that are in MET minutes, not just HCS. 
+# We also need to create demographic and health variables
+
+thesis_NHRVS<- thesis_NHRVS %>%
+  # First Create all of the variables
+  mutate(thesis_NHRVS, 
+    # Exercise variables
+         Ex_time = (God_mild + God_mod + God_stren)*15,
+            # Tells us how long people exercised for.
+         MET_min = MET_total* 15,
+         MET_min_W = ifelse(MET_min > 2000, 2000, MET_min),
+            # Total METs per week times the duration of exercise
+         Ex_rec = as.factor(ifelse(MET_min >= 500, "Sufficient", "Insufficient")),
+            # Meeting activity levels (i.e., sufficient vs insufficient)
+         Ex_3cat = as.factor(ifelse(MET_min < 290, 1,
+                              ifelse(MET_min < 500 & MET_min >= 290, 2,3))),
+         Ex_4cats = as.factor(ifelse(MET_min < 290, "Sed",
+                              ifelse(MET_min < 500 & MET_min >= 290, "Mod",
+                              ifelse(MET_min < 1000 & MET_min >= 500, "Active", 
+                              ifelse(MET_min < 2000 & MET_min >= 1000, "Super", NA))))),
+# 3 godin (HCS) categories converted to MET_min 
+    # Other Variables 
+         HCS_win = (God_mod*5) + (God_stren*9),
+         HCS3cat = as.factor(ifelse(HCS_win < 14, "Insufficient",
+                              ifelse(HCS_win < 24 & HCS_win >= 290, "Moderate", "Active"))),
+         Yr5_Military = as.factor(ifelse(Years_in_Military >= 5, "5+", "<5")),
+         Active_PA = as.factor(ifelse(Ex_3cat == 3,1,0)),
+         Moderate_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
+         Insuf_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
+         Total_HC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke +
+                    LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+         Total_PHC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke,
+        Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+    
+    ) %>%
+
+mutate(thesis_NHRVS,
+      #Physical health variables
+           Any_Disability = as.factor(Any_Disability),
+           Arthritis = as.factor(Arthritis),
+           Athsma = as.factor(Athsma),
+           Cancer = as.factor(Cancer),
+           Chron_pain = as.factor(Chron_pain),
+           Liv_dis = as.factor(Liv_dis),
+           Diabetes = as.factor(Diabetes),
+           Hrt_dis = as.factor(Hrt_dis),
+           Hrt_atk = as.factor(Hrt_atk),
+           High_chol = as.factor(High_chol),
+           High_bld_press = as.factor(High_bld_press),
+           Kid_dis = as.factor(Kid_dis),
+           Migrane = as.factor(Migrane),
+           MS = as.factor(MS),
+           Osteoporosis = as.factor(Osteoporosis),
+           Rhum_arth = as.factor(Rhum_arth),
+           Stroke = as.factor(Stroke),
+           Ex_3cat = as.factor(Ex_3cat),  
+           Male_Gender = as.factor(Male_Gender), 
+           Married_Partnered = as.factor(Married_Partnered),
+           White_Race = as.factor(White_Race),
+           College = as.factor(College),
+           Income_60k_plus = as.factor(Income_60k_plus),
+           YN_work = as.factor(YN_work),
+           Combat_Veteran = as.factor(Combat_Veteran),
+           Any_MHC = as.factor(Any_MHC),
+           Any_PHC = as.factor(Any_PHC),
+           god2cat = as.factor(god2cat),
+      #Mental health variables
+          LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+          LT_MDD = as.factor(LT_MDD),
+          LT_PTSD = as.factor(LT_PTSD),
+          LT_AUD = as.factor(LT_AUD),
+          LT_DUD = as.factor(LT_DUD),
+          LT_NicotineDep = as.factor(LT_NicotineDep)
+)%>%
+mutate(thesis_NHRVS, 
+        Ex_3cat = recode(Ex_3cat,
+                         "1" = "Insufficient",
+                         "2" = "Moderate",
+                         "3" = "Active"),
+        Married_Partnered = recode(Married_Partnered,
+                         "0" = "Married_Partnered",
+                         "1" = "Single"),
+        Male_Gender = as.factor(Male_Gender),
+        Male_Gender = recode(Male_Gender,
+                         "0" = "Female",
+                         "1" = "Male"),
+        White_Race = recode(White_Race,
+                         "0" = "Not_White",
+                         "1" = "White"),
+        College = recode(College,
+                         "0" = "No_Colege",
+                         "1" = "Some_Colege"),
+        Income_60k_plus = recode(Income_60k_plus,
+                         "0" = "Under_60k",
+                         "1" = "OVer_60k"),
+        YN_work = recode(YN_work,
+                         "1" = "No_Work",
+                         "2" = "Working"),
+        Combat_Veteran = as.factor(Combat_Veteran),
+        Combat_Veteran = recode(Combat_Veteran,
+                         "0" = "No_Combat",
+                         "1" = "Combat"),
+        Any_MHC = recode(Any_MHC,
+                         "0" = "No_con",
+                         "1" = "MHC"),
+        Any_PHC = recode(Any_PHC,
+                         "0" = "No_con",
+                         "1" = "PHC"),
+        LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+        LT_Suicidal = recode(LT_Suicide_4cat,
+                         "0" = "0",
+                         "1" = "0",
+                         "2" = "1",
+                         "3" = "1"
+                             ))
+#Filter out NA values
+thesis_NHRVS <- thesis_NHRVS %>%
+  filter(!is.na(Ex_rec)) %>%
+  filter(!is.na(Ex_3cat)) %>%
+  filter(!is.na(MCS)) %>%
+  filter(!is.na(PCS)) %>%
+  filter(!is.na(BMI)) %>%
+  filter(!is.na(Any_Disability)) %>%
+  filter(!is.na(Arthritis)) %>%
+  filter(!is.na(Cancer)) %>%
+  filter(!is.na(Chron_pain)) %>%
+  filter(!is.na(Liv_dis)) %>%
+  filter(!is.na(Diabetes)) %>%
+  filter(!is.na(Hrt_dis)) %>%
+  filter(!is.na(Hrt_atk)) %>%
+  filter(!is.na(High_chol)) %>%
+  filter(!is.na(High_bld_press)) %>%
+  filter(!is.na(Kid_dis)) %>%
+  filter(!is.na(Migrane)) %>%
+  filter(!is.na(MS)) %>%
+  filter(!is.na(Osteoporosis)) %>%
+  filter(!is.na(Rhum_arth)) %>%
+  filter(!is.na(Stroke)) %>%
+  filter(!is.na(LT_MDD)) %>%
+  filter(!is.na(LT_PTSD)) %>%
+  filter(!is.na(LT_AUD)) %>%
+  filter(!is.na(LT_DUD)) %>%
+  filter(!is.na(LT_NicotineDep)) %>%
+  filter(!is.na(LT_Suicidal))
+thesis_NHRVS
+```
+
+## Export new file to CSV
+Now that we have a clean and prepped data file to analyze lets create a CSV of that for future reference.
+```{r}
+haven::write_sav(thesis_NHRVS, "~/Desktop/Coding/data/thesis_dataset
+                 .csv" )
+```
+
+
+### Descriptives of variables
+Here are some discriptive statistics and basic plots to see an overview of the data.
+```{r}
+# Physical activity level value (MET minutes)
+#install.packages("table1")
+
+data.frame(table1::table1(~MET_min_W + tot_MHC + tot_phc | Ex_3cat, data=thesis_NHRVS))
+
+```
+
+And some plots of the same values
+```{r}
+#Plotting Met mins and Physical activity
+ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = MET_min_W)) +
+  geom_violin()+
+  geom_boxplot(width=0.1, color="blue", alpha=0.2)
+  ggtitle("Met minutes per physical activity level")
+
+# Total Mental health conditions
+ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_MHC)) +
+  geom_violin()+
+  geom_boxplot(width=0.1, color="blue", alpha=0.2)
+  ggtitle("Total number of physical health conditions by PA level")
+
+# Total physical health conditions
+ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_phc)) +
+  geom_violin()+
+  geom_boxplot(width=0.1, color="blue", alpha=0.2)
+  ggtitle("Total number of mental health conditions by PA level")
+```
+These descriptive are helpful for us to  see 
+
+### Barcharts of physical activity level by Health condition
+
+Below is the code to create a barchart. This code was replicated for the remaining
+health conditions. 
+```{r}
+library(scales)
+#Any Physical Health Condition
+Any_PHC_plot <-ggplot(thesis_NHRVS,aes(x=Any_PHC, fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Any PHC')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+Any_PHC_plot 
+```
+
+
+```{r,include=FALSE}
+#Any disability
+library(scales)
+AD_Plot<- ggplot(thesis_NHRVS,aes(x=as.factor(Any_Disability), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+           stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Any Disability')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Arthritis
+ARTH_Plot<- ggplot(thesis_NHRVS, aes(x=as.factor(Arthritis), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Arthritis')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Asthma
+Aths_Plot<- ggplot(thesis_NHRVS, aes(x= as.factor(Athsma), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+            stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Asthma')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#cancer
+Cancer_plot <- ggplot(thesis_NHRVS, aes(x= as.factor(Cancer), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Cancer')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Chronic Pain
+Chron_pain_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Chron_pain), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Chronic Pain')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Liver Disease
+Liv_dis_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Liv_dis), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Liver Disease')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Diabetes
+Diabetes_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Diabetes), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Diabetes')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Hrt_dis
+Hrt_dis_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Hrt_dis), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Heart Disease')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+
+#Hrt_atk
+Hrt_atk_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Hrt_atk), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Heart Attack')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#High_chol
+High_chol_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(High_chol), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('High Cholesterol')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#High_bld_press
+HBP_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(High_bld_press), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('High Blood Pressure')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+
+#Kid_dis
+KD_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Kid_dis), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Kidney Disease')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Migrane
+Migrane_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Migrane), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Migrane')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#MS
+MS_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(MS), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('MS')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Osteoporosis
+Osteo_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Osteo), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Osteoporosis')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Rhum_arth
+Rhum_arth_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Rhum_arth), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  ylab('Percent of Veterans, %') +
+  xlab('Rheumatoid Arthritis')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size=8)+
+  theme(legend.position="none")+
+  coord_flip()
+
+#Stroke
+Stroke_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Stroke), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('Stroke')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+```
+
+### Physical Health Plots
+```{r}
+library(ggpubr)
+ggarrange(AD_Plot, ARTH_Plot, Aths_Plot, Cancer_plot, 
+                   Chron_pain_plot, Liv_dis_plot, Diabetes_plot, Hrt_dis_plot,
+                   nrow = 4, ncol = 2)
+
+ggarrange(Hrt_atk_plot, High_chol_plot, HBP_plot, KD_plot, Migrane_plot, 
+                   MS_plot, Rhum_arth_plot, Stroke_plot, 
+                   nrow = 4, ncol = 2)
+
+```
+
+```{r, include=FALSE}
+Any_MHC_plot <-ggplot(thesis_NHRVS,aes(x=as.factor(Any_MHC), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+           stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('Any MHC')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+
+LT_MDD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_MDD), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+      stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('MDD')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+
+
+LT_PTSD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_PTSD), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+         stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('PTSD')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+
+LT_AUD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_AUD), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('AUD')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+
+LT_DUD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_DUD), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('DUD')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+
+LT_NicotineDep_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_NicotineDep), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('Nicotine Dep')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+
+Suicidal_plot <-
+  ggplot(thesis_NHRVS,aes(x= as.factor(LT_Suicidal), fill = as.factor(Ex_3cat))) +
+  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+ geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], 
+                label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
+  ylab('Percent of Veterans, %') +
+  xlab('Suicidal')+
+  labs(fill='Physical Activity') +
+  scale_y_continuous(labels = scales::percent) +
+  theme_classic(base_size = 8) +
+  theme(legend.position="none")+
+  coord_flip()
+
+
+
+
+```
+
+
+### Mental Health. Plots
+```{r}
+ggarrange(LT_AUD_plot, LT_DUD_plot, LT_MDD_plot, LT_NicotineDep_plot, LT_PTSD_plot,
+                   Suicidal_plot, nrow = 3, ncol = 2)
+```
+
+## Exploratory Data Analysis (EDA)
+
+#### Associations With Exercsie
+```{r,results="hide"}
+library(tableone)
+EX_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "PCS", 
+                 "MCS", "Weight_kg", "BMI", "Combat_Veteran", 
+                 "Yr5_Military", "TOTAL_TRAUMAS", "tot_phc", 
+                 "tot_MHC")
+
+EX_catVars     <- c("Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "Combat_Veteran", 
+                 "Yr5_Military","Ex_3cat")
+Exercise_EDA <- CreateTableOne(vars = EX_Vars, strata = "Ex_3cat", data = thesis_NHRVS, 
+               factorVars = EX_catVars)
+
+
+full_sample<- CreateTableOne(vars = EX_Vars, data = thesis_NHRVS, 
+               factorVars = EX_catVars)
+full_sample <- print(full_sample, formatOptions = list(big.mark = ","))
+
+test_tab <- print(Exercise_EDA, formatOptions = list(big.mark = ","))
+#Demo_tab <- 
+  test_tab[,1:4]
+#View(Demo_tab)
+Demo_tab <- cbind(full_sample, test_tab[,1:4])
+```
+
+#### Associations With Health Conditions
+```{r, include=FALSE}
+MH_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "PCS", 
+                 "MCS", "Weight_kg", "BMI", "Combat_Veteran", 
+                 "Yr5_Military", "TOTAL_TRAUMAS", "tot_phc", 
+                 "tot_MHC")
+
+MH_catVars     <- c("Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work",   "Combat_Veteran", 
+                 "Yr5_Military","Any_MHC")
+MH_EDA <- CreateTableOne(vars = MH_Vars, strata = "Any_MHC", data = thesis_NHRVS, 
+               factorVars = MH_catVars)
+
+
+mh_tab <- print(MH_EDA, formatOptions = list(big.mark = ","))
+mh_tab
+Demo_tab <- cbind(Demo_tab,mh_tab[,1:3])
+
+PH_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "PCS", 
+                 "MCS", "Weight_kg", "BMI", "Combat_Veteran", 
+                 "Yr5_Military", "TOTAL_TRAUMAS", "tot_phc", 
+                 "tot_MHC")
+
+PH_catVars     <- c("Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "Combat_Veteran", 
+                 "Yr5_Military","Any_PHC")
+
+PH_EDA <- CreateTableOne(vars = MH_Vars, strata = "Any_PHC", data = thesis_NHRVS, 
+               factorVars = MH_catVars)
+
+PH_EDA
+ph_tab <- print(PH_EDA, formatOptions = list(big.mark = ","))
+Demo_tab <- cbind(Demo_tab,ph_tab[,1:3])
+```
+
+```{r}
+Demo_tab<- as.data.frame(Demo_tab)
+Demo_tab
+write_csv(Demo_tab, "~/Desktop/Coding/data/Demo_tab_basic.csv")
+```
+
+This table lets us see differences between all of the variables for the exercise 
+categories. If you look to the right of the Moderate category, you'll see the 
+p-value for the tests done. The default test used by CreateTableOne are chi-squares
+for categorical variables and a t-test for continuous variables.
+
+These variables should be used for the regressions/ancovas 
+  - Age,Some_college_or_higher, Income_60K_plus, YN_work, PCS_final or MCS_final, combat veteran (maybe), weight (maybe?)
+
+## Test of difference
+This next section is extracting the F test score and chi square test (X) values for the analysis above. These values will be used in the final demogrpahics table
+
+#### Physical activity levels 
+```{r}
+library(gmodels)
+#### Create test of difference values and put them into a table
+
+#Age
+Age_test_act <- aov(Age~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars = c('Age')
+Activity_val = c(summary(Age_test_act)[[1]]$`F value`[[1]])
+Activity_p = c(summary(Age_test_act)[[1]]$`Pr(>F)`[[1]])
+Activity_val
+Activity_p
+```
+
+F test and chi square will be extracted for the remaining variables:
+- Gender, White, some college, Married_partnered, Income 60k +, Working status, physical composite score, mental composite score, BMI, 5 years + in the military, total traumas, total physical health conditions, total mental health conditions.
+```{r,include=FALSE}
+#Gender
+Male_test_act<- xtabs(~Ex_3cat+Male_Gender, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Male')
+Activity_val <- append(Activity_val,summary(Male_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Male_test_act)[[6]])
+
+#White
+White_test_act<- xtabs(~Ex_3cat+White_Race, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'White')
+Activity_val <- append(Activity_val,summary(White_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(White_test_act)[[6]])
+
+#some College
+College_test_act<- xtabs(~Ex_3cat+College, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'College')
+Activity_val <- append(Activity_val,summary(College_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(College_test_act)[[6]])
+
+#Married_Partnered
+Married_Partnered_test_act<- xtabs(~Ex_3cat+Married_Partnered, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Married_Partnered')
+Activity_val <- append(Activity_val,summary(Married_Partnered_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Married_Partnered_test_act)[[6]])
+
+#Income_60k_plus
+Income_60k_plus_test_act<- xtabs(~Ex_3cat+Income_60k_plus, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Income_60k_plus')
+Activity_val <- append(Activity_val,summary(Income_60k_plus_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Income_60k_plus_test_act)[[6]])
+
+#YN_work
+YN_work_test_act<- xtabs(~Ex_3cat+YN_work, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'YN_work')
+Activity_val <- append(Activity_val,summary(YN_work_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(YN_work_test_act)[[6]])
+
+#PCS
+PCS_test_act <- aov(PCS~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'PCS')
+Activity_val <- append(Activity_val,summary(PCS_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(PCS_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#MCS
+MCS_test_act <- aov(MCS~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'MCS')
+Activity_val <- append(Activity_val,summary(MCS_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(MCS_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#BMI
+BMI_test_act <- aov(BMI~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'BMI')
+Activity_val <- append(Activity_val,summary(BMI_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(BMI_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#Combat_Veteran
+Combat_Veteran_test_act<- xtabs(~Ex_3cat+Combat_Veteran, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Combat Veteran')
+Activity_val <- append(Activity_val,summary(Combat_Veteran_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Combat_Veteran_test_act)[[6]])
+
+#Yr5_Military
+Yr5_Military_test_act<- xtabs(~Ex_3cat+Yr5_Military, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'5+ Years in Military')
+Activity_val <- append(Activity_val,summary(Yr5_Military_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Yr5_Military_test_act)[[6]])
+
+#TOTAL TRAUMAS
+TOTAL_TRAUMAS_test_act <- aov(TOTAL_TRAUMAS~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'TOTAL TRAUMAS')
+Activity_val <- append(Activity_val,summary(TOTAL_TRAUMAS_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(TOTAL_TRAUMAS_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#TOTAL Physical Health Conditions
+tot_phc_test_act <- aov(tot_phc~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Total_PHC')
+Activity_val <- append(Activity_val,summary(tot_phc_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(tot_phc_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#TOTAL Physical Health Conditions
+tot_MHC_test_act <- aov(tot_MHC~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Total MHC')
+Activity_val <- append(Activity_val,summary(tot_MHC_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(tot_MHC_test_act)[[1]]$`Pr(>F)`[[1]])
+```
+
+
+```{r}
+val_df <- data.frame(test_act_vars,Activity_val)
+val_df <- cbind(val_df,Activity_p)
+val_df
+```
+#### Physical health Conditions
+The same analysis will be conducted for these covariates by physical health condition as well. 
+
+```{r,include=FALSE}
+
+#### Create test of difference values and put them into a table
+#Age
+# Age_test_PHC <- aov(Age~ Any_PHC, data = thesis_NHRVS)
+# PHC_val = c(summary(Age_test_PHC)[[1]]$`F value`[[1]])
+# PHC_p = c(summary(Age_test_PHC)[[1]]$`Pr(>F)`[[1]])
+PHC_val <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_PHC)[[3]])
+
+#Gender
+Male_test_PHC<- xtabs(~Any_PHC+Male_Gender, data=thesis_NHRVS)
+summary(Male_test_PHC)
+PHC_val <- append(PHC_val,Male_test_PHC[[3]])
+PHC_p <- append(PHC_p,summary(Male_test_PHC)[[6]])
+
+#White
+White_test_PHC<- xtabs(~Any_PHC+White_Race, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(White_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(White_test_PHC)[[6]])
+
+#some College
+College_test_PHC<- xtabs(~Any_PHC+College, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(College_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(College_test_PHC)[[6]])
+
+#Married_Partnered
+Married_Partnered_test_PHC<- xtabs(~Any_PHC+Married_Partnered, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Married_Partnered_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Married_Partnered_test_PHC)[[6]])
+
+#Income_60k_plus
+Income_60k_plus_test_PHC<- xtabs(~Any_PHC+Income_60k_plus, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Income_60k_plus_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Income_60k_plus_test_PHC)[[6]])
+
+#YN_work
+YN_work_test_PHC<- xtabs(~Any_PHC+YN_work, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(YN_work_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(YN_work_test_PHC)[[6]])
+
+#PCS
+#PCS_test_PHC <- xtabs(PCS~ Any_PHC, data = thesis_NHRVS)
+#PHC_val <- append(PHC_val,summary(PCS_test_PHC)[[1]]$`F value`[[1]])
+#PHC_p <- append(PHC_p,summary(PCS_test_PHC)[[1]]$`Pr(>F)`[[1]])
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_PHC)[[3]])
+
+#MCS
+# MCS_test_PHC <- aov(MCS~ Any_PHC, data = thesis_NHRVS)
+# PHC_val <- append(PHC_val,summary(MCS_test_PHC)[[1]]$`F value`[[1]])
+# PHC_p <- append(PHC_p,summary(MCS_test_PHC)[[1]]$`Pr(>F)`[[1]])
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_PHC)[[3]])
+
+#BMI
+# BMI_test_PHC <- aov(BMI~ Any_PHC, data = thesis_NHRVS)
+# PHC_val <- append(PHC_val,summary(BMI_test_PHC)[[1]]$`F value`[[1]])
+# PHC_p <- append(PHC_p,summary(BMI_test_PHC)[[1]]$`Pr(>F)`[[1]])
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[3]])
+
+#Combat_Veteran
+Combat_Veteran_test_PHC<- xtabs(~Any_PHC+Combat_Veteran, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Combat_Veteran_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Combat_Veteran_test_PHC)[[6]])
+
+#Yr5_Military
+Yr5_Military_test_PHC<- xtabs(~Any_PHC+Yr5_Military, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Yr5_Military_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Yr5_Military_test_PHC)[[6]])
+
+#TOTAL TRAUMAS
+# TOTAL_TRAUMAS_test_PHC <- aov(TOTAL_TRAUMAS~ Any_PHC, data = thesis_NHRVS)
+# PHC_val <- append(PHC_val,summary(TOTAL_TRAUMAS_test_PHC)[[1]]$`F value`[[1]])
+# PHC_p <- append(PHC_p,summary(TOTAL_TRAUMAS_test_PHC)[[1]]$`Pr(>F)`[[1]])
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_PHC)[[3]])
+
+#TOTAL Physical Health Conditions
+# tot_PHC_test_PHC <- aov(tot_PHC~ Any_PHC, data = thesis_NHRVS)
+# PHC_val <- append(PHC_val,summary(tot_PHC_test_PHC)[[1]]$`F value`[[1]])
+# PHC_p <- append(PHC_p,summary(tot_PHC_test_PHC)[[1]]$`Pr(>F)`[[1]])
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)[[3]])
+
+t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)
+
+#TOTAL Mental Health Conditions
+# tot_PHC_test_PHC <- aov(tot_PHC~ Any_PHC, data = thesis_NHRVS)
+# PHC_val <- append(PHC_val,summary(tot_PHC_test_PHC)[[1]]$`F value`[[1]])
+# PHC_p <- append(PHC_p,summary(tot_PHC_test_PHC)[[1]]$`Pr(>F)`[[1]])
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[3]])
+
+
+val_df <- cbind(val_df,PHC_val,PHC_p)
+val_df
+```
+#### Mental Health Conditions
+
+```{r,include=FALSE}
+#### Create test of difference values and put them into a table
+#Age
+# Age_test_MHC <- aov(Age~ Any_MHC, data = thesis_NHRVS)
+# MHC_val = c(summary(Age_test_MHC)[[1]]$`F value`[[1]])
+# MHC_p = c(summary(Age_test_MHC)[[1]]$`Pr(>F)`[[1]])
+MHC_val <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_MHC)[[3]])
+
+#Gender
+Male_test_MHC<- xtabs(~Any_MHC+Male_Gender, data=thesis_NHRVS)
+summary(Male_test_MHC)
+MHC_val <- append(MHC_val,Male_test_MHC[[3]])
+MHC_p <- append(MHC_p,summary(Male_test_MHC)[[6]])
+
+#White
+White_test_MHC<- xtabs(~Any_MHC+White_Race, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(White_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(White_test_MHC)[[6]])
+
+#some College
+College_test_MHC<- xtabs(~Any_MHC+College, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(College_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(College_test_MHC)[[6]])
+
+#Married_Partnered
+Married_Partnered_test_MHC<- xtabs(~Any_MHC+Married_Partnered, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Married_Partnered_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Married_Partnered_test_MHC)[[6]])
+
+#Income_60k_plus
+Income_60k_plus_test_MHC<- xtabs(~Any_MHC+Income_60k_plus, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Income_60k_plus_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Income_60k_plus_test_MHC)[[6]])
+
+#YN_work
+YN_work_test_MHC<- xtabs(~Any_MHC+YN_work, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(YN_work_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(YN_work_test_MHC)[[6]])
+
+#PCS
+#PCS_test_MHC <- xtabs(PCS~ Any_MHC, data = thesis_NHRVS)
+#MHC_val <- append(MHC_val,summary(PCS_test_MHC)[[1]]$`F value`[[1]])
+#MHC_p <- append(MHC_p,summary(PCS_test_MHC)[[1]]$`Pr(>F)`[[1]])
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_MHC)[[3]])
+
+#MCS
+# MCS_test_MHC <- aov(MCS~ Any_MHC, data = thesis_NHRVS)
+# MHC_val <- append(MHC_val,summary(MCS_test_MHC)[[1]]$`F value`[[1]])
+# MHC_p <- append(MHC_p,summary(MCS_test_MHC)[[1]]$`Pr(>F)`[[1]])
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_MHC)[[3]])
+
+#BMI
+# BMI_test_MHC <- aov(BMI~ Any_MHC, data = thesis_NHRVS)
+# MHC_val <- append(MHC_val,summary(BMI_test_MHC)[[1]]$`F value`[[1]])
+# MHC_p <- append(MHC_p,summary(BMI_test_MHC)[[1]]$`Pr(>F)`[[1]])
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_MHC)[[3]])
+
+#Combat_Veteran
+Combat_Veteran_test_MHC<- xtabs(~Any_MHC+Combat_Veteran, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Combat_Veteran_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Combat_Veteran_test_MHC)[[6]])
+
+#Yr5_Military
+Yr5_Military_test_MHC<- xtabs(~Any_MHC+Yr5_Military, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Yr5_Military_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Yr5_Military_test_MHC)[[6]])
+
+#TOTAL TRAUMAS
+# TOTAL_TRAUMAS_test_MHC <- aov(TOTAL_TRAUMAS~ Any_MHC, data = thesis_NHRVS)
+# MHC_val <- append(MHC_val,summary(TOTAL_TRAUMAS_test_MHC)[[1]]$`F value`[[1]])
+# MHC_p <- append(MHC_p,summary(TOTAL_TRAUMAS_test_MHC)[[1]]$`Pr(>F)`[[1]])
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_MHC)[[3]])
+
+#TOTAL Physical Health Conditions
+# tot_MHC_test_MHC <- aov(tot_MHC~ Any_MHC, data = thesis_NHRVS)
+# MHC_val <- append(MHC_val,summary(tot_MHC_test_MHC)[[1]]$`F value`[[1]])
+# MHC_p <- append(MHC_p,summary(tot_MHC_test_MHC)[[1]]$`Pr(>F)`[[1]])
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_MHC)[[3]])
+
+
+#TOTAL Physical Health Conditions
+# tot_MHC_test_MHC <- aov(tot_MHC~ Any_MHC, data = thesis_NHRVS)
+# MHC_val <- append(MHC_val,summary(tot_MHC_test_MHC)[[1]]$`F value`[[1]])
+# MHC_p <- append(MHC_p,summary(tot_MHC_test_MHC)[[1]]$`Pr(>F)`[[1]])
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[3]])
+```
+
+
+```{r}
+val_df <- cbind(val_df,MHC_val,MHC_p)
+val_df
+```
+
+
+### Export to CSV
+```{r}
+write_csv(val_df, "~/Desktop/Coding/data/thesis_test_dif.csv" )
+```
+
+

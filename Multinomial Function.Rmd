@@ -4,40 +4,524 @@ output: html_document
 date: "2023-03-16"
 ---
 
+
 ```{r setup, include=FALSE}
+# Thesis Preliminary Analyses
+  #data stuff
+library(tidyverse)
+library(dplyr)
+  #CSV/CAV files
+library(haven)
+  #EDA stuff
+
+## Prepare Data For Analysis 
+
+#### Import & Select data
+
+### Import dataset 
+setwd("~/Desktop/Adams_lab/SPSS_stuff")
+NHRVS_2019 <- read_sav("~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav")
+
+### Select and rename Variables
+thesis_NHRVS <- dplyr::select(NHRVS_2019,
+    #Background Variables __________
+      caseid,weight,Age,Male_Gender,White_Race,SomeCollege_or_Higher,
+      Married_Partnered,Income_60k_plus,YN_work,
+      PCS_FINAL,MCS_FINAL,Weight_kg,BMI,
+    #Military variables__________
+      Combat_Veteran,Years_in_Military,Branch_5cat,Enlistment_status_3cat,
+      MilitaryRank_3cat,
+    #Mental Health Variables___________
+      TOTAL_TRAUMAS,LT_PCL_33,LT_MDD_Sx_only,LT_Suicide_4cat,Suicide_Attempt_LT,
+      LT_Suicide_Plan,LT_AUD,LT_NicotineDep,LT_DUD,tot_MHC,Any_MHC,
+    #Physical health Variables_________
+      ANY_ADL_DISABILITY,ANY_IADL_DISABILITY,Any_Disability,tot_phc,Any_PHC,Q22A_1,Q22A_2,
+      Q22A_3,Q22A_4,Q22A_5,Q22A_6,Q22A_7,Q22A_8,Q22A_9,Q22A_10,Q22A_11,Q22B_1,
+      Q22B_2,Q22B_3,Q22B_4,Q22B_5,
+    #Exercise variables ___________
+      godin_mild_winsor,godin_Mod_winsor,godin_Stren_winsor,HCS,HCS_Cats,
+      godin_total_ac,god3cat,god2cat,GODIN_outliers)
+    
+#Rename variabes
+thesis_NHRVS <- rename(thesis_NHRVS,
+      MET_total = godin_total_ac,
+      God_mild = godin_mild_winsor,
+      God_mod = godin_Mod_winsor,
+      God_stren = godin_Stren_winsor,
+      College = SomeCollege_or_Higher,
+      MCS = MCS_FINAL,
+      PCS = PCS_FINAL,
+      Arthritis = Q22A_1,
+      Athsma =  Q22A_2,
+      Cancer = Q22A_3,
+      Chron_pain = Q22A_4,
+      Liv_dis = Q22A_5,
+      Diabetes = Q22A_6,
+      Hrt_dis = Q22A_7,
+      Hrt_atk = Q22A_8,
+      High_chol = Q22A_9,
+      High_bld_press = Q22A_10,
+      Kid_dis = Q22A_11,
+      Migrane = Q22B_1,
+      MS = Q22B_2,
+      Osteoporosis = Q22B_3,
+      Rhum_arth = Q22B_4,
+      Stroke = Q22B_5,
+      LT_MDD = LT_MDD_Sx_only,
+      LT_PTSD = LT_PCL_33
+)
+# We need exercsie variables that are in MET minutes, not just HCS. 
+# We also need to create demographic and health variables
+
+thesis_NHRVS<- thesis_NHRVS %>%
+  # First Create all of the variables
+  mutate(thesis_NHRVS, 
+    # Exercise variables
+         Ex_time = (God_mild + God_mod + God_stren)*15,
+            # Tells us how long people exercised for.
+         MET_min = MET_total* 15,
+         MET_min_W = ifelse(MET_min > 2500, 2500, MET_min),
+            # Total METs per week times the duration of exercise
+         Ex_rec = as.factor(ifelse(MET_min >= 500, "Sufficient", "Insufficient")),
+            # Meeting activity levels (i.e., sufficient vs insufficient)
+         Ex_3cat = as.factor(ifelse(MET_min < 290, 1,
+                              ifelse(MET_min < 500 & MET_min >= 290, 2,3))),
+         Ex_4cats = as.factor(ifelse(MET_min < 290, "Sed",
+                              ifelse(MET_min < 500 & MET_min >= 290, "Mod",
+                              ifelse(MET_min < 1000 & MET_min >= 500, "Active", 
+                              ifelse(MET_min < 2000 & MET_min >= 1000, "Super", NA))))),
+         Ex_3catW = as.factor(ifelse(MET_min_W < 290, 1,
+                              ifelse(MET_min_W < 500 & MET_min_W >= 290, 2,3))),
+         Ex_4catsW = as.factor(ifelse(MET_min_W < 290, "Sed",
+                              ifelse(MET_min_W < 500 & MET_min_W >= 290, "Mod",
+                              ifelse(MET_min_W < 1000 & MET_min_W >= 500, "Active", 
+                              ifelse(MET_min_W < 2500 & MET_min_W >= 1000, "Super", NA))))),
+# 3 godin (HCS) categories converted to MET_min 
+    # Other Variables 
+         HCS_win = (God_mod*5) + (God_stren*9),
+         HCS3cat = as.factor(ifelse(HCS_win < 14, "Insufficient",
+                              ifelse(HCS_win < 24 & HCS_win >= 290, "Moderate", "Active"))),
+         Yr5_Military = as.factor(ifelse(Years_in_Military >= 5, "5+", "<5")),
+         Active_PA = as.factor(ifelse(Ex_3cat == 3,1,0)),
+         Moderate_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
+         Insuf_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
+         Total_HC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke +
+                    LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+         Total_PHC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke,
+        Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+    
+    ) %>%
+mutate(thesis_NHRVS,
+      #Physical health variables
+           Any_Disability = as.factor(Any_Disability),
+           Arthritis = as.factor(Arthritis),
+           Athsma = as.factor(Athsma),
+           Cancer = as.factor(Cancer),
+           Chron_pain = as.factor(Chron_pain),
+           Liv_dis = as.factor(Liv_dis),
+           Diabetes = as.factor(Diabetes),
+           Hrt_dis = as.factor(Hrt_dis),
+           Hrt_atk = as.factor(Hrt_atk),
+           High_chol = as.factor(High_chol),
+           High_bld_press = as.factor(High_bld_press),
+           Kid_dis = as.factor(Kid_dis),
+           Migrane = as.factor(Migrane),
+           MS = as.factor(MS),
+           Osteoporosis = as.factor(Osteoporosis),
+           Rhum_arth = as.factor(Rhum_arth),
+           Stroke = as.factor(Stroke),
+           Ex_3cat = as.factor(Ex_3cat),  
+           Male_Gender = as.factor(Male_Gender), 
+           Married_Partnered = as.factor(Married_Partnered),
+           White_Race = as.factor(White_Race),
+           College = as.factor(College),
+           Income_60k_plus = as.factor(Income_60k_plus),
+           YN_work = as.factor(YN_work),
+           Combat_Veteran = as.factor(Combat_Veteran),
+           Any_MHC = as.factor(Any_MHC),
+           Any_PHC = as.factor(Any_PHC),
+           god2cat = as.factor(god2cat),
+      #Mental health variables
+          LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+          LT_MDD = as.factor(LT_MDD),
+          LT_PTSD = as.factor(LT_PTSD),
+          LT_AUD = as.factor(LT_AUD),
+          LT_DUD = as.factor(LT_DUD),
+          LT_NicotineDep = as.factor(LT_NicotineDep)
+    )
+thesis_NHRVS <- mutate(thesis_NHRVS, 
+        Ex_3cat = recode(Ex_3cat,
+                         "1" = "Insufficient",
+                         "2" = "Moderate",
+                         "3" = "Active"),
+        Married_Partnered = recode(Married_Partnered,
+                         "0" = "Married_Partnered",
+                         "1" = "Single"),
+        Male_Gender = as.factor(Male_Gender),
+        Male_Gender = recode(Male_Gender,
+                         "0" = "Female",
+                         "1" = "Male"),
+        White_Race = recode(White_Race,
+                         "0" = "Not_White",
+                         "1" = "White"),
+        College = recode(College,
+                         "0" = "No_Colege",
+                         "1" = "Some_Colege"),
+        Income_60k_plus = recode(Income_60k_plus,
+                         "0" = "Under_60k",
+                         "1" = "OVer_60k"),
+        YN_work = recode(YN_work,
+                         "1" = "No_Work",
+                         "2" = "Working"),
+        Combat_Veteran = as.factor(Combat_Veteran),
+        Combat_Veteran = recode(Combat_Veteran,
+                         "0" = "No_Combat",
+                         "1" = "Combat"),
+        Any_MHC = recode(Any_MHC,
+                         "0" = "No_con",
+                         "1" = "MHC"),
+        Any_PHC = recode(Any_PHC,
+                         "0" = "No_con",
+                         "1" = "PHC"),
+        LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+        LT_Suicidal = recode(LT_Suicide_4cat,
+                         "0" = "0",
+                         "1" = "0",
+                         "2" = "1",
+                         "3" = "1"
+                             ))
+
+#Filter out NA values
+thesis_NHRVS <- thesis_NHRVS %>%
+  filter(!is.na(Ex_rec)) %>%
+  filter(!is.na(Ex_3cat)) %>%
+  filter(!is.na(MCS)) %>%
+  filter(!is.na(PCS)) %>%
+  filter(!is.na(BMI)) %>%
+  filter(!is.na(Any_Disability)) %>%
+  filter(!is.na(Arthritis)) %>%
+  filter(!is.na(Cancer)) %>%
+  filter(!is.na(Chron_pain)) %>%
+  filter(!is.na(Liv_dis)) %>%
+  filter(!is.na(Diabetes)) %>%
+  filter(!is.na(Hrt_dis)) %>%
+  filter(!is.na(Hrt_atk)) %>%
+  filter(!is.na(High_chol)) %>%
+  filter(!is.na(High_bld_press)) %>%
+  filter(!is.na(Kid_dis)) %>%
+  filter(!is.na(Migrane)) %>%
+  filter(!is.na(MS)) %>%
+  filter(!is.na(Osteoporosis)) %>%
+  filter(!is.na(Rhum_arth)) %>%
+  filter(!is.na(Stroke)) %>%
+  filter(!is.na(LT_MDD)) %>%
+  filter(!is.na(LT_PTSD)) %>%
+  filter(!is.na(LT_AUD)) %>%
+  filter(!is.na(LT_DUD)) %>%
+  filter(!is.na(LT_NicotineDep)) %>%
+  filter(!is.na(LT_Suicidal))
+#$View(thesis_NHRVS)
+thesis_NHRVS
 library(MASS)
 library(nnet)
-library(RVAideMemoire)
 ```
 
-```{r,include=FALSE}
+## Create Data frames
+This first set of code is used to create the dataframes needed for our analysis. 
+Once the data frame is made, then we can use the function below to add values to 
+the data frames.
+```{r}
+variable  = 0 
+  statistic = 0
+  estimate  = 0
+  conf.low = 0
+  conf.high = 0
+  ci =0
+  p.value = 0
+  Wald=0
+
+Ins_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))[1,]
+Ins_Act  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))[1,]
+Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))[1,]
+```
+
+## The Multinomial Function
+```{r}
 #multinomial function
 
-MultiThesis<-function(Data,variable) {
+MultiThesis<-function(Data,condition,string,type,contrast){
 #1. Specify the reference group
-  Data$Ex_3cat <- relevel(Data$Ex_3cat, ref = "Insufficient")
+  #Data$Ex_3cat <- relevel(Data$Ex_3cat, ref = "Insufficient")
 #2. run model 1
-  df <- multinom(Ex_3cat ~ variable + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+  if(type == "PHC"){
+  df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+  }
+  if(type == "MHC"){ df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + PCS + BMI, data = Data)
+  }
 #3. Specify the reference group2
   Data$Ex_3cat_act <- relevel(Data$Ex_3cat, ref = "Active")
 #4. run model 2
-  df2<- multinom(Ex_3cat_act ~ variable + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+  if(type == "PHC"){
+   df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+  }
+  if(type == "MHC"){ 
+    df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + PCS + BMI, data = Data)
+  }
+#5 Coefficients 
+  coefs_df <- abs(coef(df))
+  coefs_df2 <- abs(coef(df2))
 #5. Odds ratio
-  OR_var <- print(OR.multinom(df, variable , conf.level = 0.95))
-#6 Coefficients 
-
+  OR_df <- exp(coef(df))
+  OR_df2 <- exp(coef(df2))
+#6. OR 95% CI
+  CI_df <- data.frame(exp(confint(df)))
+  CI_df2 <- data.frame(exp(confint(df2)))
+#7. P value function
+  P_value <- function(model) {
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p[,2])
+  }
+#8 P value 
+  p_val1<- P_value(df)
+  p_val2<- P_value(df2)
+#9 Insufficient vs Moderate data frame
+  if(contrast == "Ins_Mod"){
+    variable  = string 
+    statistic = coefs_df[[3]]
+    estimate  = OR_df[[3]]
+    conf.low = CI_df[2,1]
+    conf.high = CI_df[2,2]
+    ci <- paste(round(OR_df[[3]],2), "(",round(CI_df[2,1],2),"-", round(CI_df[2,2],2),")")
+    p.value = p_val1[[1]]
+    Wald=0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))
+    #Ins_Mod <- rbind(Ins_Mod,DF_IM)
+  }
+#10 Insufficient vs Active datafraame
+  if(contrast == "Ins_Act"){
+    variable  = string
+    statistic = coefs_df[[4]]
+    estimate  = OR_df[[4]]
+    conf.low = CI_df[2,3]
+    conf.high = CI_df[2,4]
+    ci <- paste(round(OR_df[[4]],2), "(",round(CI_df[2,3],2),"-", round(CI_df[2,4],2),")")
+    p.value = p_val1[[2]]
+    Wald2=0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))
+    #output <- rbind(Ins_Act,DF_IA)
+    }
+#11 Active vs Moderate table 
+  if(contrast == "Act_Mod"){
+    variable  = string  
+    statistic = coefs_df2[[4]]
+    estimate  = OR_df2[[4]]
+    conf.low = CI_df2[2,3]
+    conf.high = CI_df2[2,4]
+    ci <- paste(round(OR_df2[[4]],2),"(",round(CI_df[2,3],2),"-", round(CI_df[2,4],2),")")
+    p.value = p_val2[[2]]
+    Wald=0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))
+    #output <- rbind(Act_Mod,DF_AM)
+  }
+  return(output)
 }
+```
 
-MultiThesis(thesis_NHRVS,thesis_NHRVS$Cancer)
+## Use the function
+Now that we have created our function, we can use it to make our data frames for 
+each contrast. Being that the function just creates the values needed for each
+condition, we still need to add it to the exsisting data frame (i.e.,rbind())
+
+### Insufficient vs Moderate Dataframe
+```{r,results="hide"}
+### Physical Health Conditions 
+#1. Any Disability
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "PHC", "Ins_Mod"))
+#2. Arthritis
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "PHC", "Ins_Mod"))
+#3. Asthma
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma", "PHC", "Ins_Mod"))
+#4. Cancer
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer", "PHC", "Ins_Mod"))
+#5. Chronic Pain
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain", "PHC", "Ins_Mod"))
+#6. Diabetes
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,"Diabetes", "PHC", "Ins_Mod"))
+#7. Heart Attack
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack", "PHC", "Ins_Mod"))
+#8. Heart Disease
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease", "PHC", "Ins_Mod"))
+#9. High Cholesterol
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_chol,"High Cholesterol", "PHC", "Ins_Mod"))
+#10. Hypertension
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,"Hypertension", "PHC", "Ins_Mod"))
+#11. Kidney Disease
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease","PHC", "Ins_Mod"))
+#12. Liver Disease
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease", "PHC", "Ins_Mod"))
+#13. Migrane
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane", "PHC", "Ins_Mod"))
+#14. MS
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$MS,"MS", "PHC", "Ins_Mod"))
+#15. Osteoporosis
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis", "PHC", "Ins_Mod"))
+#16. Rheumatoid Arthritis
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA", "PHC", "Ins_Mod"))
+#17. Stroke
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke", "PHC", "Ins_Mod"))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD", "MHC", "Ins_Mod"))
+#19. Drug Use Disorder
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD", "MHC", "Ins_Mod"))
+#20. Major Depressive Disorder 
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD", "MHC", "Ins_Mod"))
+#21 Nicotine Dependence 
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,"Nicotine Dep", "MHC", "Ins_Mod"))
+#22 Posttraumatic Stress disorder
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MHC", "Ins_Mod"))
+#23. Suicidality
+Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Ins_Mod"))
+```
+We've now compiled all of our helath conditions and added them into the dataframe. However, we still have that pesky row of zeros. We can use negative indexing to remove this row from the dataframe leaving us with just the stuff we care about. 
+```{r}
+Ins_Mod <- Ins_Mod[-(1),]
+Ins_Mod
+```
+
+### Insufficient vs Active Dataframe
+```{r,results="hide"}
+### Physical Health Conditions 
+#1. Any Disability
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "PHC", "Ins_Act"))
+#2. Arthritis
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "PHC", "Ins_Act"))
+#3. Asthma
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma", "PHC", "Ins_Act"))
+#4. Cancer
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer", "PHC", "Ins_Act"))
+#5. Chronic Pain
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain", "PHC", "Ins_Act"))
+#6. Diabetes
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,"Diabetes", "PHC", "Ins_Act"))
+#7. Heart Attack
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack", "PHC", "Ins_Act"))
+#8. Heart Disease
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease", "PHC", "Ins_Act"))
+#9. High Cholesterol
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_chol,"High Cholesterol", "PHC", "Ins_Act"))
+#10. Hypertension
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,"Hypertension", "PHC", "Ins_Act"))
+#11. Kidney Disease
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease","PHC", "Ins_Act"))
+#12. Liver Disease
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease", "PHC", "Ins_Act"))
+#13. Migrane
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane", "PHC", "Ins_Act"))
+#14. MS
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$MS,"MS", "PHC", "Ins_Act"))
+#15. Osteoporosis
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis", "PHC", "Ins_Act"))
+#16. Rheumatoid Arthritis
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA", "PHC", "Ins_Act"))
+#17. Stroke
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke", "PHC", "Ins_Act"))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD", "MHC", "Ins_Act"))
+#19. Drug Use Disorder
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD", "MHC", "Ins_Act"))
+#20. Major Depressive Disorder 
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD", "MHC", "Ins_Act"))
+#21 Nicotine Dependence 
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,"Nicotine Dep", "MHC", "Ins_Act"))
+#22 Posttraumatic Stress disorder
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MHC", "Ins_Act"))
+#23. Suicidality
+Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Ins_Act"))
+Ins_Act <- Ins_Act[-(1),]
+```
 
 
-#coefs_df <- coef(df)[,2]
-#coefs_df2 <- coef(df2)[,2]
-#}
-#odds_ratio(df,Any_Disability)
+### Active vs Moderate Dataframe
+```{r,results="hide"}
+### Physical Health Conditions 
+#1. Any Disability
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "PHC", "Act_Mod"))
+#2. Arthritis
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "PHC", "Act_Mod"))
+#3. Asthma
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma", "PHC", "Act_Mod"))
+#4. Cancer
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer", "PHC", "Act_Mod"))
+#5. Chronic Pain
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain", "PHC", "Act_Mod"))
+#6. Diabetes
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,"Diabetes", "PHC", "Act_Mod"))
+#7. Heart Attack
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack", "PHC", "Act_Mod"))
+#8. Heart Disease
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease", "PHC", "Act_Mod"))
+#9. High Cholesterol
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_chol,"High Cholesterol", "PHC", "Act_Mod"))
+#10. Hypertension
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,"Hypertension", "PHC", "Act_Mod"))
+#11. Kidney Disease
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease","PHC", "Act_Mod"))
+#12. Liver Disease
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease", "PHC", "Act_Mod"))
+#13. Migrane
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane", "PHC", "Act_Mod"))
+#14. MS
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$MS,"MS", "PHC", "Act_Mod"))
+#15. Osteoporosis
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis", "PHC", "Act_Mod"))
+#16. Rheumatoid Arthritis
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA", "PHC", "Act_Mod"))
+#17. Stroke
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke", "PHC", "Act_Mod"))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD", "MHC", "Act_Mod"))
+#19. Drug Use Disorder
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD", "MHC", "Act_Mod"))
+#20. Major Depressive Disorder 
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD", "MHC", "Act_Mod"))
+#21 Nicotine Dependence 
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,"Nicotine Dep", "MHC", "Act_Mod"))
+#22 Posttraumatic Stress disorder
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MHC", "Act_Mod"))
+#23. Suicidality
+Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Act_Mod"))
+Act_Mod <- Act_Mod[-(1),]
 
-#P_value <- function(model) {
- # z <- summary(model)$coefficients/summary(model)$standard.errors
-  #p <- (1 - pnorm(abs(z), 0, 1)) * 2
-  #return(p[,2])
-  #}
+```
+
+
+```{r,include=FALSE}
+# ## Any health coniditon or total health conditions
+# # Insufficient vs moderate
+# health_con_IM<-MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_MHC,"MHC", "MHC", "Ins_Mod")
+# health_con_IM<-rbind(health_con,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_PHC,"PHC", "PHC", "Ins_Mod"))
+# health_con_IM
+# 
+# #Insufficient vs active
+# 
+# 
+# # Active vs Moderate
+# health_con_AM<-MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_MHC,"MHC", "MHC", "Act_Mod")
+# health_con_AM<-rbind(health_con,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_PHC,"PHC", "PHC", "Act_Mod"))
+# health_con_AM
+```
+
+## Export Tables to CSV
+```{r}
+write_csv(Ins_Mod, "~/Desktop/Coding/data/Ins_Mod.csv")
+write_csv(Ins_Act, "~/Desktop/Coding/data/Ins_Act.csv")
+write_csv(Act_Mod, "~/Desktop/Coding/data/Act_Mod.csv")
+```
