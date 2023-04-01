@@ -276,7 +276,7 @@ ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_phc)) +
   geom_boxplot(width=0.1, color="blue", alpha=0.2)
   ggtitle("Total number of mental health conditions by PA level")
 ```
-These descriptive are helpful for us to  see 
+These descriptive are helpful for us to see how the data looks. Also it can be helpful to see what may be or not be wrong within the data
 
 ### Barcharts of physical activity level by Health condition
 
