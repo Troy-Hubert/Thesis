@@ -330,6 +330,8 @@ MultiThesis<-function(Data,condition,string,type,contrast){
   }
   return(output)
 }
+
+#Its done!
 ```
 
 ## Use the function
