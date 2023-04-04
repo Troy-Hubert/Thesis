@@ -3,90 +3,87 @@ title: "Preliminary_Statistics_Figures"
 output: html_document
 date: "2023-03-22"
 ---
-```{r}
+
+```{r,include=FALSE}
 #data stuff
 library(tidyverse)
 library(dplyr)
-#CSV/CAV files
+  #CSV/CAV files
 library(haven)
 library(tableone)
-#regression stuff
+  #regression stuff
 library(aod)
 
 library(gtsummary)
 #library(emmeans)
 #library(ggeffects)
-#used for log regression
+    #used for log regression
 library(lmtest)
 library(DescTools)
 library(manipulate)
 library(psych)
-```
+
 ### Import dataset 
-```{r}
 setwd("~/Desktop/Adams_lab/SPSS_stuff")
 NHRVS_2019 <- read_sav("~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav")
-```
 
-
-```{r}
 ### Select and rename Variables
 thesis_NHRVS <- dplyr::select(NHRVS_2019,
-                              #Background Variables __________
-                              caseid,weight,Age,Male_Gender,White_Race,SomeCollege_or_Higher,
-                              Married_Partnered,Income_60k_plus,YN_work,
-                              PCS_FINAL,MCS_FINAL,Weight_kg,BMI,
-                              #Military variables__________
-                              Combat_Veteran,Years_in_Military,Branch_5cat,Enlistment_status_3cat,
-                              MilitaryRank_3cat,
-                              #Mental Health Variables___________
-                              TOTAL_TRAUMAS,LT_PCL_33,LT_MDD_Sx_only,LT_Suicide_4cat,Suicide_Attempt_LT,
-                              LT_Suicide_Plan,LT_AUD,LT_NicotineDep,LT_DUD,tot_MHC,Any_MHC,
-                              #Physical health Variables_________
-                              ANY_ADL_DISABILITY,ANY_IADL_DISABILITY,Any_Disability,tot_phc,Any_PHC,Q22A_1,Q22A_2,
-                              Q22A_3,Q22A_4,Q22A_5,Q22A_6,Q22A_7,Q22A_8,Q22A_9,Q22A_10,Q22A_11,Q22B_1,
-                              Q22B_2,Q22B_3,Q22B_4,Q22B_5,
-                              #Exercise variables ___________
-                              godin_mild_winsor,godin_Mod_winsor,godin_Stren_winsor,HCS,HCS_Cats,
-                              godin_total_ac,god3cat,god2cat,GODIN_outliers)
-
+    #Background Variables __________
+      caseid,weight,Age,Male_Gender,White_Race,SomeCollege_or_Higher,
+      Married_Partnered,Income_60k_plus,YN_work,
+      PCS_FINAL,MCS_FINAL,Weight_kg,BMI,
+    #Military variables__________
+      Combat_Veteran,Years_in_Military,Branch_5cat,Enlistment_status_3cat,
+      MilitaryRank_3cat,
+    #Mental Health Variables___________
+      TOTAL_TRAUMAS,LT_PCL_33,LT_MDD_Sx_only,LT_Suicide_4cat,Suicide_Attempt_LT,
+      LT_Suicide_Plan,LT_AUD,LT_NicotineDep,LT_DUD,tot_MHC,Any_MHC,
+    #Physical health Variables_________
+      ANY_ADL_DISABILITY,ANY_IADL_DISABILITY,Any_Disability,tot_phc,Any_PHC,Q22A_1,Q22A_2,
+      Q22A_3,Q22A_4,Q22A_5,Q22A_6,Q22A_7,Q22A_8,Q22A_9,Q22A_10,Q22A_11,Q22B_1,
+      Q22B_2,Q22B_3,Q22B_4,Q22B_5,
+    #Exercise variables ___________
+      godin_mild_winsor,godin_Mod_winsor,godin_Stren_winsor,HCS,HCS_Cats,
+      godin_total_ac,god3cat,god2cat,GODIN_outliers)
+    
 #Rename variabes
 thesis_NHRVS <- rename(thesis_NHRVS,
-                       MET_total = godin_total_ac,
-                       God_mild = godin_mild_winsor,
-                       God_mod = godin_Mod_winsor,
-                       God_stren = godin_Stren_winsor,
-                       College = SomeCollege_or_Higher,
-                       MCS = MCS_FINAL,
-                       PCS = PCS_FINAL,
-                       Arthritis = Q22A_1,
-                       Athsma =  Q22A_2,
-                       Cancer = Q22A_3,
-                       Chron_pain = Q22A_4,
-                       Liv_dis = Q22A_5,
-                       Diabetes = Q22A_6,
-                       Hrt_dis = Q22A_7,
-                       Hrt_atk = Q22A_8,
-                       High_chol = Q22A_9,
-                       High_bld_press = Q22A_10,
-                       Kid_dis = Q22A_11,
-                       Migrane = Q22B_1,
-                       MS = Q22B_2,
-                       Osteoporosis = Q22B_3,
-                       Rhum_arth = Q22B_4,
-                       Stroke = Q22B_5,
-                       LT_MDD = LT_MDD_Sx_only,
-                       LT_PTSD = LT_PCL_33
+      MET_total = godin_total_ac,
+      God_mild = godin_mild_winsor,
+      God_mod = godin_Mod_winsor,
+      God_stren = godin_Stren_winsor,
+      College = SomeCollege_or_Higher,
+      MCS = MCS_FINAL,
+      PCS = PCS_FINAL,
+      Arthritis = Q22A_1,
+      Athsma =  Q22A_2,
+      Cancer = Q22A_3,
+      Chron_pain = Q22A_4,
+      Liv_dis = Q22A_5,
+      Diabetes = Q22A_6,
+      Hrt_dis = Q22A_7,
+      Hrt_atk = Q22A_8,
+      High_chol = Q22A_9,
+      High_bld_press = Q22A_10,
+      Kid_dis = Q22A_11,
+      Migrane = Q22B_1,
+      MS = Q22B_2,
+      Osteoporosis = Q22B_3,
+      Rhum_arth = Q22B_4,
+      Stroke = Q22B_5,
+      LT_MDD = LT_MDD_Sx_only,
+      LT_PTSD = LT_PCL_33
 )
 
 library(tableone)
-#regression stuff
+  #regression stuff
 library(aod)
 
 library(gtsummary)
 #library(emmeans)
 #library(ggeffects)
-#used for log regression
+    #used for log regression
 library(lmtest)
 library(DescTools)
 library(manipulate)
@@ -96,119 +93,119 @@ library(manipulate)
 thesis_NHRVS<- thesis_NHRVS %>%
   # First Create all of the variables
   mutate(thesis_NHRVS, 
-         # Exercise variables
+    # Exercise variables
          Ex_time = (God_mild + God_mod + God_stren)*15,
-         # Tells us how long people exercised for.
+            # Tells us how long people exercised for.
          MET_min = MET_total* 15,
          MET_min_W = ifelse(MET_min > 2000, 2000, MET_min),
-         # Total METs per week times the duration of exercise
+            # Total METs per week times the duration of exercise
          Ex_rec = as.factor(ifelse(MET_min >= 500, "Sufficient", "Insufficient")),
-         # Meeting activity levels (i.e., sufficient vs insufficient)
+            # Meeting activity levels (i.e., sufficient vs insufficient)
          Ex_3cat = as.factor(ifelse(MET_min < 290, 1,
-                                    ifelse(MET_min < 500 & MET_min >= 290, 2,3))),
+                              ifelse(MET_min < 500 & MET_min >= 290, 2,3))),
          Ex_4cats = as.factor(ifelse(MET_min < 290, "Sed",
-                                     ifelse(MET_min < 500 & MET_min >= 290, "Mod",
-                                            ifelse(MET_min < 1000 & MET_min >= 500, "Active", 
-                                                   ifelse(MET_min < 2000 & MET_min >= 1000, "Super", NA))))),
-         # 3 godin (HCS) categories converted to MET_min 
-         # Other Variables 
+                              ifelse(MET_min < 500 & MET_min >= 290, "Mod",
+                              ifelse(MET_min < 1000 & MET_min >= 500, "Active", 
+                              ifelse(MET_min < 2000 & MET_min >= 1000, "Super", NA))))),
+# 3 godin (HCS) categories converted to MET_min 
+    # Other Variables 
          HCS_win = (God_mod*5) + (God_stren*9),
          HCS3cat = as.factor(ifelse(HCS_win < 14, "Insufficient",
-                                    ifelse(HCS_win < 24 & HCS_win >= 290, "Moderate", "Active"))),
+                              ifelse(HCS_win < 24 & HCS_win >= 290, "Moderate", "Active"))),
          Yr5_Military = as.factor(ifelse(Years_in_Military >= 5, "5+", "<5")),
          Active_PA = as.factor(ifelse(Ex_3cat == 3,1,0)),
          Moderate_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
          Insuf_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
          Total_HC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
-           Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
-           Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke +
-           LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke +
+                    LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
          Total_PHC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
-           Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
-           Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke,
-         Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
-         
-  ) %>%
-  
-  mutate(thesis_NHRVS,
-         #Physical health variables
-         Any_Disability = as.factor(Any_Disability),
-         Arthritis = as.factor(Arthritis),
-         Athsma = as.factor(Athsma),
-         Cancer = as.factor(Cancer),
-         Chron_pain = as.factor(Chron_pain),
-         Liv_dis = as.factor(Liv_dis),
-         Diabetes = as.factor(Diabetes),
-         Hrt_dis = as.factor(Hrt_dis),
-         Hrt_atk = as.factor(Hrt_atk),
-         High_chol = as.factor(High_chol),
-         High_bld_press = as.factor(High_bld_press),
-         Kid_dis = as.factor(Kid_dis),
-         Migrane = as.factor(Migrane),
-         MS = as.factor(MS),
-         Osteoporosis = as.factor(Osteoporosis),
-         Rhum_arth = as.factor(Rhum_arth),
-         Stroke = as.factor(Stroke),
-         Ex_3cat = as.factor(Ex_3cat),  
-         Male_Gender = as.factor(Male_Gender), 
-         Married_Partnered = as.factor(Married_Partnered),
-         White_Race = as.factor(White_Race),
-         College = as.factor(College),
-         Income_60k_plus = as.factor(Income_60k_plus),
-         YN_work = as.factor(YN_work),
-         Combat_Veteran = as.factor(Combat_Veteran),
-         Any_MHC = as.factor(Any_MHC),
-         Any_PHC = as.factor(Any_PHC),
-         god2cat = as.factor(god2cat),
-         #Mental health variables
-         LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
-         LT_MDD = as.factor(LT_MDD),
-         LT_PTSD = as.factor(LT_PTSD),
-         LT_AUD = as.factor(LT_AUD),
-         LT_DUD = as.factor(LT_DUD),
-         LT_NicotineDep = as.factor(LT_NicotineDep)
-  )%>%
-  mutate(thesis_NHRVS, 
-         Ex_3cat = recode(Ex_3cat,
-                          "1" = "Insufficient",
-                          "2" = "Moderate",
-                          "3" = "Active"),
-         Married_Partnered = recode(Married_Partnered,
-                                    "0" = "Married_Partnered",
-                                    "1" = "Single"),
-         Male_Gender = as.factor(Male_Gender),
-         Male_Gender = recode(Male_Gender,
-                              "0" = "Female",
-                              "1" = "Male"),
-         White_Race = recode(White_Race,
-                             "0" = "Not_White",
-                             "1" = "White"),
-         College = recode(College,
-                          "0" = "No_Colege",
-                          "1" = "Some_Colege"),
-         Income_60k_plus = recode(Income_60k_plus,
-                                  "0" = "Under_60k",
-                                  "1" = "OVer_60k"),
-         YN_work = recode(YN_work,
-                          "1" = "No_Work",
-                          "2" = "Working"),
-         Combat_Veteran = as.factor(Combat_Veteran),
-         Combat_Veteran = recode(Combat_Veteran,
-                                 "0" = "No_Combat",
-                                 "1" = "Combat"),
-         Any_MHC = recode(Any_MHC,
-                          "0" = "No_con",
-                          "1" = "MHC"),
-         Any_PHC = recode(Any_PHC,
-                          "0" = "No_con",
-                          "1" = "PHC"),
-         LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
-         LT_Suicidal = recode(LT_Suicide_4cat,
-                              "0" = "0",
-                              "1" = "0",
-                              "2" = "1",
-                              "3" = "1"
-         ))
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke,
+        Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+    
+    ) %>%
+
+mutate(thesis_NHRVS,
+      #Physical health variables
+           Any_Disability = as.factor(Any_Disability),
+           Arthritis = as.factor(Arthritis),
+           Athsma = as.factor(Athsma),
+           Cancer = as.factor(Cancer),
+           Chron_pain = as.factor(Chron_pain),
+           Liv_dis = as.factor(Liv_dis),
+           Diabetes = as.factor(Diabetes),
+           Hrt_dis = as.factor(Hrt_dis),
+           Hrt_atk = as.factor(Hrt_atk),
+           High_chol = as.factor(High_chol),
+           High_bld_press = as.factor(High_bld_press),
+           Kid_dis = as.factor(Kid_dis),
+           Migrane = as.factor(Migrane),
+           MS = as.factor(MS),
+           Osteoporosis = as.factor(Osteoporosis),
+           Rhum_arth = as.factor(Rhum_arth),
+           Stroke = as.factor(Stroke),
+           Ex_3cat = as.factor(Ex_3cat),  
+           Male_Gender = as.factor(Male_Gender), 
+           Married_Partnered = as.factor(Married_Partnered),
+           White_Race = as.factor(White_Race),
+           College = as.factor(College),
+           Income_60k_plus = as.factor(Income_60k_plus),
+           YN_work = as.factor(YN_work),
+           Combat_Veteran = as.factor(Combat_Veteran),
+           Any_MHC = as.factor(Any_MHC),
+           Any_PHC = as.factor(Any_PHC),
+           god2cat = as.factor(god2cat),
+      #Mental health variables
+          LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+          LT_MDD = as.factor(LT_MDD),
+          LT_PTSD = as.factor(LT_PTSD),
+          LT_AUD = as.factor(LT_AUD),
+          LT_DUD = as.factor(LT_DUD),
+          LT_NicotineDep = as.factor(LT_NicotineDep)
+)%>%
+mutate(thesis_NHRVS, 
+        Ex_3cat = recode(Ex_3cat,
+                         "1" = "Insufficient",
+                         "2" = "Moderate",
+                         "3" = "Active"),
+        Married_Partnered = recode(Married_Partnered,
+                         "0" = "Married_Partnered",
+                         "1" = "Single"),
+        Male_Gender = as.factor(Male_Gender),
+        Male_Gender = recode(Male_Gender,
+                         "0" = "Female",
+                         "1" = "Male"),
+        White_Race = recode(White_Race,
+                         "0" = "Not_White",
+                         "1" = "White"),
+        College = recode(College,
+                         "0" = "No_Colege",
+                         "1" = "Some_Colege"),
+        Income_60k_plus = recode(Income_60k_plus,
+                         "0" = "Under_60k",
+                         "1" = "OVer_60k"),
+        YN_work = recode(YN_work,
+                         "1" = "No_Work",
+                         "2" = "Working"),
+        Combat_Veteran = as.factor(Combat_Veteran),
+        Combat_Veteran = recode(Combat_Veteran,
+                         "0" = "No_Combat",
+                         "1" = "Combat"),
+        Any_MHC = recode(Any_MHC,
+                         "0" = "No_con",
+                         "1" = "MHC"),
+        Any_PHC = recode(Any_PHC,
+                         "0" = "No_con",
+                         "1" = "PHC"),
+        LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+        LT_Suicidal = recode(LT_Suicide_4cat,
+                         "0" = "0",
+                         "1" = "0",
+                         "2" = "1",
+                         "3" = "1"
+                             ))
 #Filter out NA values
 thesis_NHRVS <- thesis_NHRVS %>%
   filter(!is.na(Ex_rec)) %>%
@@ -247,6 +244,7 @@ Now that we have a clean and prepped data file to analyze lets create a CSV of t
 write_csv(thesis_NHRVS, "~/Desktop/Coding/data/thesis_dataset.csv" )
 haven::write_sav(thesis_NHRVS,"~/Desktop/Coding/data/thesis_SPSS.sav")
 ```
+
 
 ### Descriptives of variables
 Here are some discriptive statistics and basic plots to see an overview of the data.
