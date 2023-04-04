@@ -228,6 +228,7 @@ thesis_NHRVS <- thesis_NHRVS %>%
 thesis_NHRVS
 library(MASS)
 library(nnet)
+library(performance)
 ```
 
 ## Create Data frames
@@ -235,18 +236,18 @@ This first set of code is used to create the dataframes needed for our analysis.
 Once the data frame is made, then we can use the function below to add values to 
 the data frames.
 ```{r}
-variable  = 0 
+variable    = 0 
   statistic = 0
   estimate  = 0
-  conf.low = 0
+  conf.low  = 0
   conf.high = 0
-  ci =0
-  p.value = 0
-  Wald=0
+  ci        = 0
+  p.value   = 0
+  r2_change = 0
 
-Ins_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))[1,]
-Ins_Act  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))[1,]
-Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))[1,]
+Ins_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+Ins_Act  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
 ```
 
 ## The Multinomial Function
@@ -254,22 +255,21 @@ Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p
 #multinomial function
 
 MultiThesis<-function(Data,condition,string,type,contrast){
-#1. Specify the reference group
-  #Data$Ex_3cat <- relevel(Data$Ex_3cat, ref = "Insufficient")
+
 #2. run model 1
   if(type == "PHC"){
-  df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+  df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
   }
-  if(type == "MHC"){ df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + PCS + BMI, data = Data)
+  if(type == "MHC"){ df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
   }
 #3. Specify the reference group2
   Data$Ex_3cat_act <- relevel(Data$Ex_3cat, ref = "Active")
 #4. run model 2
   if(type == "PHC"){
-   df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + MCS + BMI, data = Data)
+   df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
   }
   if(type == "MHC"){ 
-    df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + PCS + BMI, data = Data)
+    df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
   }
 #5 Coefficients 
   coefs_df <- abs(coef(df))
@@ -289,7 +289,8 @@ MultiThesis<-function(Data,condition,string,type,contrast){
 #8 P value 
   p_val1<- P_value(df)
   p_val2<- P_value(df2)
-#9 Insufficient vs Moderate data frame
+
+#10 Insufficient vs Moderate data frame
   if(contrast == "Ins_Mod"){
     variable  = string 
     statistic = coefs_df[[3]]
@@ -298,11 +299,10 @@ MultiThesis<-function(Data,condition,string,type,contrast){
     conf.high = CI_df[2,2]
     ci <- paste(round(OR_df[[3]],2), "(",round(CI_df[2,1],2),"-", round(CI_df[2,2],2),")")
     p.value = p_val1[[1]]
-    Wald=0
-    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))
-    #Ins_Mod <- rbind(Ins_Mod,DF_IM)
+    r2_change = 0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
   }
-#10 Insufficient vs Active datafraame
+#11 Insufficient vs Active datafraame
   if(contrast == "Ins_Act"){
     variable  = string
     statistic = coefs_df[[4]]
@@ -311,11 +311,10 @@ MultiThesis<-function(Data,condition,string,type,contrast){
     conf.high = CI_df[2,4]
     ci <- paste(round(OR_df[[4]],2), "(",round(CI_df[2,3],2),"-", round(CI_df[2,4],2),")")
     p.value = p_val1[[2]]
-    Wald2=0
-    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))
-    #output <- rbind(Ins_Act,DF_IA)
+    r2_change = 0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
     }
-#11 Active vs Moderate table 
+#12 Active vs Moderate table 
   if(contrast == "Act_Mod"){
     variable  = string  
     statistic = coefs_df2[[4]]
@@ -324,17 +323,56 @@ MultiThesis<-function(Data,condition,string,type,contrast){
     conf.high = CI_df2[2,4]
     ci <- paste(round(OR_df2[[4]],2),"(",round(CI_df[2,3],2),"-", round(CI_df[2,4],2),")")
     p.value = p_val2[[2]]
-    Wald=0
-    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,Wald))
-    #output <- rbind(Act_Mod,DF_AM)
+    r2_change = 0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
   }
   return(output)
 }
 
 #Its done!
 ```
+### R^2 Change
+The following function allows us to look at the R^2 change between the covariates and the IV within the multinomial model. As this is a multinomial model, the R^2 change is only observed for the model as a whole.
+```{r,results='hide'}
+r2_change = 0
+  r2_chan<-function(condition){
+  multi_cov<-multinom(relevel(Ex_3cat,ref = "Insufficient") ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+  df <-multinom(relevel(Ex_3cat,ref = "Insufficient") ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+output<-  r2(df)[[1]] -  r2(multi_cov)[[1]]
+return(output)
+}
+R2CHANGE <- r2_chan(thesis_NHRVS$Any_Disability)[[1]]
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Arthritis)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Athsma)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Cancer)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Chron_pain )[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Diabetes )[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_atk )[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_dis)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_chol)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_bld_press)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Kid_dis)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Liv_dis)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Migrane)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$MS)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Osteoporosis)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Rhum_arth)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Stroke)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_AUD)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_DUD)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_MDD)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_NicotineDep)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_PTSD)[[1]])
+R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_Suicidal)[[1]])
+```
 
-## Use the function
+
+```{r}
+R2CHANGE<-R2CHANGE[,1]
+R2CHANGE
+```
+
+## Use the multinomial function
 Now that we have created our function, we can use it to make our data frames for 
 each contrast. Being that the function just creates the values needed for each
 condition, we still need to add it to the exsisting data frame (i.e.,rbind())
@@ -389,12 +427,20 @@ Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,"Nic
 Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MHC", "Ins_Mod"))
 #23. Suicidality
 Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Ins_Mod"))
+Ins_Mod
 ```
 We've now compiled all of our helath conditions and added them into the dataframe. However, we still have that pesky row of zeros. We can use negative indexing to remove this row from the dataframe leaving us with just the stuff we care about. 
 ```{r}
 Ins_Mod <- Ins_Mod[-(1),]
 Ins_Mod
 ```
+
+We can now add the R^2 change to the dataframe. 
+```{r}
+Ins_Mod$r2_change <- R2CHANGE
+Ins_Mod
+```
+
 
 ### Insufficient vs Active Dataframe
 ```{r,results="hide"}
@@ -447,6 +493,7 @@ Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MH
 #23. Suicidality
 Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Ins_Act"))
 Ins_Act <- Ins_Act[-(1),]
+Ins_Act$r2_change <- R2CHANGE
 ```
 
 
@@ -501,6 +548,7 @@ Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MH
 #23. Suicidality
 Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Act_Mod"))
 Act_Mod <- Act_Mod[-(1),]
+Act_Mod$r2_change <- R2CHANGE
 
 ```
 
