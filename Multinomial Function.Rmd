@@ -332,7 +332,9 @@ MultiThesis<-function(Data,condition,string,type,contrast){
 #Its done!
 ```
 ### R^2 Change
-The following function allows us to look at the R^2 change between the covariates and the IV within the multinomial model. As this is a multinomial model, the R^2 change is only observed for the model as a whole.
+The following function allows us to look at the [R^2 change](https://easystats.github.io/performance/reference/r2.html) between the covariates and the IV within the multinomial model. As this is a multinomial model, the R^2 change is only observed for the model as a whole.
+
+
 ```{r,results='hide'}
 r2_change = 0
   r2_chan<-function(condition){
