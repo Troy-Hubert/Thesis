@@ -241,8 +241,7 @@ thesis_NHRVS
 ## Export new file to CSV
 Now that we have a clean and prepped data file to analyze lets create a CSV of that for future reference.
 ```{r}
-haven::write_sav(thesis_NHRVS, "~/Desktop/Coding/data/thesis_dataset
-                 .csv" )
+haven::write_sav(thesis_NHRVS, "~/Desktop/Coding/data/thesis_dataset.csv" )
 ```
 
 
