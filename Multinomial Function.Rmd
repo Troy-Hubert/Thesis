@@ -321,7 +321,7 @@ MultiThesis<-function(Data,condition,string,type,contrast){
     estimate  = OR_df2[[4]]
     conf.low = CI_df2[2,3]
     conf.high = CI_df2[2,4]
-    ci <- paste(round(OR_df2[[4]],2),"(",round(CI_df[2,3],2),"-", round(CI_df[2,4],2),")")
+    ci <- paste(round(OR_df2[[4]],2),"(",round(CI_df2[2,3],2),"-", round(CI_df2[2,4],2),")")
     p.value = p_val2[[2]]
     r2_change = 0
     output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
@@ -332,17 +332,30 @@ MultiThesis<-function(Data,condition,string,type,contrast){
 #Its done!
 ```
 ### R^2 Change
-The following function allows us to look at the [R^2 change](https://easystats.github.io/performance/reference/r2.html) between the covariates and the IV within the multinomial model. As this is a multinomial model, the R^2 change is only observed for the model as a whole.
+The following function allows us to look at the [R^2 change](https://easystats.github.io/performance/reference/r2.html) between the covariates and the IV within the multinomial model. As this is a multinomial model, the R^2 change is only observed for the model as a whole. You want this function to do the following:
+1. Run a multinomial model without the predictor (i.e., just covariates) and with the predictor (i.e., the full model)
+2. Calculate the R^2 for both models, and find the difference between the covairates and full model.
+3. turn this R^2 change into a percentage, and save it as a string with the % sign. 
 
 
 ```{r,results='hide'}
+#assign the variable to 0
 r2_change = 0
+
+#create the function 
   r2_chan<-function(condition){
   multi_cov<-multinom(relevel(Ex_3cat,ref = "Insufficient") ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
   df <-multinom(relevel(Ex_3cat,ref = "Insufficient") ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
-output<-  r2(df)[[1]] -  r2(multi_cov)[[1]]
-return(output)
+Delta <-  (r2(df)[[1]] -  r2(multi_cov)[[1]])*100
+if(Delta >= 0.01){
+output <- paste(round(Delta,2), "%")
 }
+if(Delta < 0.01){
+output <- "< 0.01 %"
+}
+return(output)
+  }
+# run the function for all predictors
 R2CHANGE <- r2_chan(thesis_NHRVS$Any_Disability)[[1]]
 R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Arthritis)[[1]])
 R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Athsma)[[1]])
@@ -551,7 +564,6 @@ Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MH
 Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Act_Mod"))
 Act_Mod <- Act_Mod[-(1),]
 Act_Mod$r2_change <- R2CHANGE
-
 ```
 
 
