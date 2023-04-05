@@ -312,5 +312,56 @@ write.csv(uni_check,"~/Desktop/Coding/data/uni_check.csv")
 #4 Export Table
     write_csv(OR_Table,"~/Desktop/Coding/data/Thesis_OR_Table.csv")
 ```
+## Odds ratios and R^2 of covariates 
+This code creates a table displaying output for covariates for the multinomial model
+```{r}
+### Part 1 Create values for table
+#1. Run the models
+Cov_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+Cov_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+
+
+#2. Coefficients 
+  coefs_Cov_Reg <- abs(coef(Cov_Reg))
+  coefs_Cov_Reg2 <- abs(coef(Cov_Reg2))
+#3. Odds ratio
+  OR_Cov_Reg <- exp(coef(Cov_Reg))
+  OR_Cov_Reg2 <- exp(coef(Cov_Reg2))
+
+#4. OR 95% CI
+  CI_Cov_Reg <- data.frame(exp(confint(Cov_Reg)))
+  CI_Cov_Reg2 <- data.frame(exp(confint(Cov_Reg2)))
+#5. P value 
+  P_value <- function(model) {
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+  }
+  p_val1<- P_value(Cov_Reg)
+  p_val2<- P_value(Cov_Reg2)
+#6. R^2 for model
+  R2_Cov_Reg <- r2(Cov_Reg)
+  R2_Cov_Reg2 <- r2(Cov_Reg2)
+
+  OR.CI_IvA <- paste(round(OR_Cov_Reg[2,2:5],2), "(",round(CI_Cov_Reg[2:5,3],2),"-", round(CI_Cov_Reg[2:5,4],2),")")
+  OR.CI_IvM <- paste(round(OR_Cov_Reg[1,2:5],2), "(",round(CI_Cov_Reg[2:5,1],2),"-", round(CI_Cov_Reg[2:5,2],2),")")
+  OR.CI_AvM <- paste(round(OR_Cov_Reg2[2,2:5],2),"(",round(CI_Cov_Reg2[2:5,3],2),"-", round(CI_Cov_Reg2[2:5,4],2),")")
+
+#### Part 2. Make the table and export 
+
+#1. Create data frame
+cov_OR_tab <-  data.frame(cbind(
+  variable = Cov_Reg$coefnames[2:length(Cov_Reg$coefnames)],
+  IvA_ODDS = OR.CI_IvA,
+  IvA_p = round(p_val1[2,2:5],4),
+  IvM_ODDS = OR.CI_IvM,
+  IvM_p = round(p_val1[1,2:5],4),
+  AvM_ODDS = OR.CI_AvM, 
+  AvM_p = round(p_val2[2,2:5],4)
+))
+
+#2. Export
+write.csv(cov_OR_tab, "~/Desktop/Coding/data/cov_OR_Table.csv")
+```
 
 
