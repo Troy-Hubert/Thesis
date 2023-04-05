@@ -359,9 +359,19 @@ cov_OR_tab <-  data.frame(cbind(
   AvM_ODDS = OR.CI_AvM, 
   AvM_p = round(p_val2[2,2:5],4)
 ))
+#2. create the row for the R2
+  paste("Covariates R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
+  variable = paste("Covariates R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
+  R2TAB<-data.frame(cbind(
+                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
+                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
 
-#2. Export
-write.csv(cov_OR_tab, "~/Desktop/Coding/data/cov_OR_Table.csv")
+#3. Bind the stuff together
+  cov_OR_tab <- rbind(R2TAB, cov_OR_tab)
+  cov_OR_tab
+
+#4. Export
+  write_csv(cov_OR_tab,"~/Desktop/Coding/data/cov_OR_tab.csv")
 ```
 
 
