@@ -267,8 +267,6 @@ As we separated the datasets into mental health and physical health data frames,
 phc_IA_mid<-mid_Fplot(phc_IA)
 #Mental Health Conditions
 mhc_IA_mid<- mid_Fplot(mhc_IA)
-phc_IA_mid
-mhc_IA_mid
 ```
 
 No repeat this for the other 4 plots.
