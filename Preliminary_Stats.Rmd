@@ -123,7 +123,8 @@ thesis_NHRVS<- thesis_NHRVS %>%
          Total_PHC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
                     Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
                     Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke,
-        Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+         Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+         No_Condition = ifelse(Any_MHC == 1 | Any_PHC ==1, 0,1)
     
     ) %>%
 
@@ -164,6 +165,7 @@ mutate(thesis_NHRVS,
           LT_AUD = as.factor(LT_AUD),
           LT_DUD = as.factor(LT_DUD),
           LT_NicotineDep = as.factor(LT_NicotineDep)
+      #Create a non health condition variable 
 )%>%
 mutate(thesis_NHRVS, 
         Ex_3cat = recode(Ex_3cat,
@@ -280,6 +282,252 @@ These descriptive are helpful for us to see how the data looks. Also it can be h
 
 ### Barcharts of physical activity level by Health condition
 
+The following figure shows the number of veterans in each physical activity level based upon each health condition.
+```{r}
+#create cross tab of having condition
+  AD_xtab <- xtabs(Any_Disability~Ex_3cat,data = thesis_NHRVS)
+  xtable  <- rbind(AD_xtab,xtabs(Athsma~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Arthritis~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Cancer~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Chron_pain~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Liv_dis~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Diabetes~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Hrt_dis~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Hrt_atk~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(High_chol~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(High_bld_press~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Kid_dis~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Migrane~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(MS~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Osteoporosis~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Rhum_arth~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(Stroke~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(LT_AUD~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(LT_DUD~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(LT_MDD~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(LT_PTSD~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(LT_NicotineDep~Ex_3cat,data = thesis_NHRVS))
+  xtable  <- rbind(xtable,xtabs(~LT_Suicidal +Ex_3cat,data = thesis_NHRVS)[2,])
+  xtable  <- rbind(xtable,xtabs(No_Condition~Ex_3cat,data = thesis_NHRVS))
+xtable<-data.frame(xtable)
+
+
+#create cross tab of not having condition
+
+  AD_xtab3 <- xtabs(~Any_Disability +Ex_3cat,data = thesis_NHRVS)[1,]
+  xtable3  <- rbind(AD_xtab3,xtabs(~Athsma+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Arthritis+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Cancer+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Chron_pain+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Liv_dis+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Diabetes+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Hrt_dis+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Hrt_atk+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~High_chol+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~High_bld_press+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Kid_dis+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Migrane+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~MS+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Osteoporosis+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Rhum_arth+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~Stroke+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~LT_AUD+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~LT_DUD+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~LT_PTSD+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~LT_NicotineDep+Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~LT_Suicidal +Ex_3cat,data = thesis_NHRVS)[1,])
+  xtable3  <- rbind(xtable3,xtabs(~No_Condition+Ex_3cat,data = thesis_NHRVS)[1,])
+xtable3<-data.frame(xtable3)
+xtable3
+```
+
+With and without health conditions
+```{r}
+#table with and without health conditions
+  AD_xtab2 <- xtabs(~Any_Disability +Ex_3cat,data = thesis_NHRVS)
+  xtable2  <- rbind(AD_xtab2,xtabs(~Athsma+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Arthritis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Cancer+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Chron_pain+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Liv_dis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Diabetes+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Hrt_dis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Hrt_atk+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~High_chol+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~High_bld_press+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Kid_dis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Migrane+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~MS+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Osteoporosis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Rhum_arth+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Stroke+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_AUD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_DUD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_PTSD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_NicotineDep+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_Suicidal +Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~No_Condition+Ex_3cat,data = thesis_NHRVS))
+xtable2<-data.frame(xtable2)
+xtable2
+#create a varaible for diagnosis
+xtable2$condition<- NA
+diagnose<- c("No Condition","Condition")
+xtable2$condition = diagnose
+```
+
+
+```{r}
+#2. Varaible names for table 
+  var_names = c("Any Disability",
+                "Asthsma",
+                "Arthritis",
+                "Cancer",
+                "Chron pain",
+                "Liver Disease",
+                "Diabetes",
+                "Heart Disease", 
+                "Heart Attack", 
+                "High Cholesterol", 
+                "Hypertension", 
+                "Kidney Disease", 
+                "Migraine", 
+                "MS", 
+                "Osteoporosis", 
+                "Rheumatoid Arthritis", 
+                "Stroke",
+                "AUD", 
+                "DUD",
+                "MDD", 
+                "PTSD", 
+                "Nicotine Dep", 
+                "Suicidality",
+                "No Condition")
+
+
+ var_names2 = c("Any Disability","Any Disability","Asthsma","Asthsma",
+                "Arthritis", "Arthritis",
+                "Cancer","Cancer",
+                "Chron pain","Chron pain",
+                "Liver Disease","Liver Disease",
+                "Diabetes","Diabetes",
+                "Heart Disease", "Heart Disease",
+                "Heart Attack", "Heart Attack",
+                "High Cholesterol", "High Cholesterol",
+                "Hypertension", "Hypertension", 
+                "Kidney Disease", "Kidney Disease",
+                "Migraine",  "Migraine", 
+                "MS", "MS", 
+                "Osteoporosis", "Osteoporosis",
+                "Rheumatoid Arthritis", "Rheumatoid Arthritis",
+                "Stroke","Stroke",
+                "AUD", "AUD", 
+                "DUD","DUD",
+                "MDD", "MDD", 
+                "PTSD", "PTSD",
+                "Nicotine Dep", "Nicotine Dep",
+                "Suicidality","Suicidality",
+                "No Condition", "No Condition")
+
+
+#3. make data frame
+ #3.1 wide dataframe (tidy data)
+  var_num <- data.frame(cbind(var_names,
+                              Insufficient = xtable$Insufficient,
+                              Moderate = xtable$Moderate,
+                              Sufficient = xtable$Active))
+  
+  #3.2 long data (needed for plot)
+      condition_df          <- var_names
+      condition_df <- data.frame(condition_df) 
+      condition_df[1:24,1]  <- var_names              
+      condition_df[25:48,1] <- var_names
+      condition_df[49:72,1] <- var_names
+      condition_df[1:24,2]  <- xtable$Insufficient
+      condition_df[1:24,3]  =  "Insufficient"
+      condition_df[25:48,2] <- xtable$Moderate
+      condition_df[25:48,3] <- "Moderate"
+      condition_df[49:72,2] <- xtable$Active
+      condition_df[49:72,3] =  "Sufficient"
+      condition_df
+      names(condition_df) <- c("Variable","Value","Ex_3cat")
+      condition_df
+      
+      #with and without conditions
+      condition_df2          <- var_names2
+      condition_df2 <- data.frame(condition_df2) 
+      condition_df2[1:144,1]  <- var_names2              
+      condition_df2[1:48,2]  <- xtable2$Insufficient
+      condition_df2[1:48,3]  =  "Insufficient"
+      condition_df2[49:96,2] <- xtable2$Moderate
+      condition_df2[49:96,3] <- "Moderate"
+      condition_df2[97:144,2] <- xtable2$Active
+      condition_df2[97:144,3] =  "Sufficient"
+      condition_df2$Diagnosis = xtable2$condition
+      names(condition_df2) <- c("Variable","Value","Ex_3cat","Diagnosis")
+      condition_df2
+      
+      
+      #no conditions 
+      condition_df3          <- var_names
+      condition_df3 <- data.frame(condition_df3) 
+      condition_df3[1:24,1]  <- var_names              
+      condition_df3[25:48,1] <- var_names
+      condition_df3[49:72,1] <- var_names
+      condition_df3[1:24,2]  <- xtable3$Insufficient
+      condition_df3[1:24,3]  =  "Insufficient"
+      condition_df3[25:48,2] <- xtable3$Moderate
+      condition_df3[25:48,3] <- "Moderate"
+      condition_df3[49:72,2] <- xtable3$Active
+      condition_df3[49:72,3] =  "Sufficient"
+      condition_df3
+      names(condition_df3) <- c("Variable","Value","Ex_3cat")
+      condition_df3
+      
+```
+
+```{r}
+
+# con
+ggplot(condition_df, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
+  geom_bar(position="stack", stat="identity")+
+  ylab('Number of Veterans') +
+  xlab('Health Condition')+
+  labs(fill='Physical Activity') +
+  ylim(0,3000)+
+  theme_classic()+
+  theme(legend.position="none")+
+  coord_flip() 
+
+#no con
+ggplot(condition_df3, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
+  geom_bar(position="stack", stat="identity")+
+  ylab('Number of Veterans') +
+  xlab('Health Condition')+
+  labs(fill='Physical Activity') +
+  ylim(0,4000)+
+  theme_classic()+
+  theme(legend.position="none")+
+  coord_flip() +
+  scale_y_reverse()
+  
+
+
+# con v no con
+ggplot(condition_df2, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
+  geom_bar(position="stack", stat="identity")+
+  facet_grid(~ Diagnosis)+ #fct_reorder(as.factor(Diagnosis), desc(Diagnosis)))+
+  ylab('Number of Veterans') +
+  xlab('Health Condition')+
+  labs(fill='Physical Activity') +
+  theme_classic()+
+  theme(legend.position="none")+
+  coord_flip() 
+  
+```
+
+
 Below is the code to create a barchart. This code was replicated for the remaining
 health conditions. 
 ```{r}
@@ -300,22 +548,22 @@ Any_PHC_plot <-ggplot(thesis_NHRVS,aes(x=Any_PHC, fill = as.factor(Ex_3cat))) +
 Any_PHC_plot 
 ```
 
-
 ```{r,include=FALSE}
 #Any disability
 library(scales)
 AD_Plot<- ggplot(thesis_NHRVS,aes(x=as.factor(Any_Disability), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-           stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  # geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
+  # geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
+  #          stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
+  geom_bar()+
   ylab('Percent of Veterans, %') +
   xlab('Any Disability')+
   labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
+#  scale_y_continuous(labels = scales::percent) +
   theme_classic(base_size=8)+
   theme(legend.position="none")+
   coord_flip()
-
+AD_Plot
 #Arthritis
 ARTH_Plot<- ggplot(thesis_NHRVS, aes(x=as.factor(Arthritis), fill = as.factor(Ex_3cat))) +
   geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
