@@ -381,7 +381,7 @@ xtable2$condition = diagnose
 ```{r}
 #2. Varaible names for table 
   var_names = c("Any Disability",
-                "Asthsma",
+                "Asthma",
                 "Arthritis",
                 "Cancer",
                 "Chron pain",
@@ -517,6 +517,72 @@ ggplot(condition_df3, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, desc(V
   coord_flip()
 ```
 
+chi square values
+```{r}
+
+
+  AD_chi   <-  summary(xtabs(~Any_Disability +Ex_3cat,data = thesis_NHRVS))
+  chi_tab  = cbind(AD_chi[[3]],AD_chi[[6]])
+  ATH_chi  <- summary(xtabs(~Athsma+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(ATH_chi[[3]],ATH_chi[[6]]))
+  Arth_chi <- summary(xtabs(~Arthritis+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Arth_chi[[3]],Arth_chi[[6]]))
+  can_chi  <- summary(xtabs(~Cancer+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(can_chi[[3]],can_chi[[6]]))
+  CP_chi   <- summary(xtabs(~Chron_pain+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(CP_chi[[3]],CP_chi[[6]]))
+  Liv_dis_chi   <- summary(xtabs(~Liv_dis+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Liv_dis_chi[[3]],Liv_dis_chi[[6]]))
+  Diabetes_chi   <- summary(xtabs(~Diabetes+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Diabetes_chi[[3]],Diabetes_chi[[6]]))
+  Hrt_dis_chi   <- summary(xtabs(~Hrt_dis+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Hrt_dis_chi[[3]],Hrt_dis_chi[[6]]))
+  Hrt_atk_chi   <- summary(xtabs(~Hrt_atk+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Hrt_atk_chi[[3]],Hrt_atk_chi[[6]]))
+  High_chol_chi   <- summary(xtabs(~High_chol+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(High_chol_chi[[3]],High_chol_chi[[6]])) 
+  High_bld_press_chi   <- summary(xtabs(~High_bld_press+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(High_bld_press_chi[[3]],High_bld_press_chi[[6]]))
+  Kid_dis_chi   <- summary(xtabs(~Kid_dis+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Kid_dis_chi[[3]],Kid_dis_chi[[6]]))
+  Migrane_chi   <- summary(xtabs(~Migrane+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Migrane_chi[[3]],Migrane_chi[[6]]))
+  MS_chi   <- summary(xtabs(~MS+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(MS_chi[[3]],MS_chi[[6]]))
+  Osteoporosis_chi   <- summary(xtabs(~Osteoporosis+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Osteoporosis_chi[[3]],Osteoporosis_chi[[6]]))
+  Rhum_arth_chi   <- summary(xtabs(~Rhum_arth+Ex_3cat,data = thesis_NHRVS))
+  chi_tab  <- rbind(chi_tab,cbind(Rhum_arth_chi[[3]],Rhum_arth_chi[[6]]))
+  Stroke_chi   <- summary(xtabs(~Stroke+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(Stroke_chi[[3]],Stroke_chi[[6]]))
+  LT_AUD_chi   <- summary(xtabs(~LT_AUD+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(LT_AUD_chi[[3]],LT_AUD_chi[[6]]))
+  LT_DUD_chi   <- summary(xtabs(~LT_DUD+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(LT_DUD_chi[[3]],LT_DUD_chi[[6]]))
+  LT_MDD_chi   <- summary(xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(LT_MDD_chi[[3]],LT_MDD_chi[[6]]))
+  LT_PTSD_chi   <- summary(xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(LT_MDD_chi[[3]],LT_MDD_chi[[6]]))
+  LT_NicotineDep_chi   <- summary(xtabs(~LT_NicotineDep+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(LT_NicotineDep_chi[[3]],LT_NicotineDep_chi[[6]]))
+  LT_Suicidal_chi   <- summary(xtabs(~LT_Suicidal+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(LT_Suicidal_chi[[3]],LT_Suicidal_chi[[6]]))
+  No_Condition_chi   <- summary(xtabs(~No_Condition+Ex_3cat,data = thesis_NHRVS)) 
+  chi_tab  <- rbind(chi_tab,cbind(No_Condition_chi[[3]],No_Condition_chi[[6]]))
+chi_tab<-data.frame(chi_tab)
+chi_tab <- cbind(var_names,chi_tab)
+names(chi_tab) <- c("Variable","Chi.Sq","p.value")
+chi_tab
+
+write.csv(chi_tab,"~/Desktop/Coding/data/thesis_con_chi.csv")
+# gg_chi_tab <- chi_tab |>
+#       ggplot() +
+#         geom_text(aes(x = 0, y = Variable, label = Chi.Sq), hjust = 0,
+#         fontface = ifelse(chi_tab$p.value == "p-value", "bold", "plain")) +
+#         theme_void() +
+#         coord_cartesian(ylim = c(1,18))
+
+```
 
 ```{r}
 # con v no con
@@ -1088,7 +1154,6 @@ val_df
 The same analysis will be conducted for these covariates by physical health condition as well. 
 
 ```{r,include=FALSE}
-
 #### Create test of difference values and put them into a table
 #Age
 # Age_test_PHC <- aov(Age~ Any_PHC, data = thesis_NHRVS)
@@ -1153,7 +1218,10 @@ PHC_p <- append(PHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[3]])
 Combat_Veteran_test_PHC<- xtabs(~Any_PHC+Combat_Veteran, data=thesis_NHRVS)
 PHC_val <- append(PHC_val,summary(Combat_Veteran_test_PHC)[[3]])
 PHC_p <- append(PHC_p,summary(Combat_Veteran_test_PHC)[[6]])
+```
 
+
+```{r,include=FALSE}
 #Yr5_Military
 Yr5_Military_test_PHC<- xtabs(~Any_PHC+Yr5_Military, data=thesis_NHRVS)
 PHC_val <- append(PHC_val,summary(Yr5_Military_test_PHC)[[3]])
