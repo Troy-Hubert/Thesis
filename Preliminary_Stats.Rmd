@@ -488,32 +488,37 @@ xtable2$condition = diagnose
 ```
 
 ```{r}
-
+library(ggplot2)
 # con
 ggplot(condition_df, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
   geom_bar(position="stack", stat="identity")+
   ylab('Number of Veterans') +
   xlab('Health Condition')+
+  ggtitle("Health Condition")+
   labs(fill='Physical Activity') +
   ylim(0,3000)+
   theme_classic()+
-  theme(legend.position="none")+
+  theme(legend.position="none",
+        axis.title.y= element_blank())+
   coord_flip() 
 
 #no con
-ggplot(condition_df3, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
+ggplot(condition_df3, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, desc(Value)))) + 
   geom_bar(position="stack", stat="identity")+
   ylab('Number of Veterans') +
   xlab('Health Condition')+
   labs(fill='Physical Activity') +
+  ggtitle("No Health Condition") +
   ylim(0,4000)+
   theme_classic()+
-  theme(legend.position="none")+
-  coord_flip() +
-  scale_y_reverse()
-  
+  theme(legend.position="none",
+        axis.text.y= element_blank(),
+        axis.title.y= element_blank())+
+  coord_flip()
+```
 
 
+```{r}
 # con v no con
 ggplot(condition_df2, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
   geom_bar(position="stack", stat="identity")+
@@ -521,10 +526,10 @@ ggplot(condition_df2, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value)
   ylab('Number of Veterans') +
   xlab('Health Condition')+
   labs(fill='Physical Activity') +
+  ggitle("No Condition")
   theme_classic()+
   theme(legend.position="none")+
   coord_flip() 
-  
 ```
 
 
