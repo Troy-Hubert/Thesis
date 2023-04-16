@@ -244,34 +244,293 @@ variable    = 0
   ci        = 0
   p.value   = 0
   r2_change = 0
+  
+# Univariate Multinomial 
 
-Ins_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
-Ins_Act  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
-Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Mod_Uni <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act_Uni <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod_Uni <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  
+# Block 1 Covars - SF8
+
+  Ins_Mod_Cov <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act_Cov <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod_Cov <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  
+# Block 2 Covars + SF8
+  
+  Ins_Mod_SF8 <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act_SF8 <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod_SF8 <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+
+# Block 3 Full Model
+  Ins_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+
+
+
+
 ```
 
-## The Multinomial Function
+## Univariate Regression function
+This runs the regressions without covariates
+```{r}
+#multinomial function
+
+UniThesis<-function(Data,condition,string,contrast){
+
+#1. run model 1
+  df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition, data = Data)
+
+#2. run model 2
+  df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition, data = Data)
+
+#4 Coefficients 
+  coefs_df <- abs(coef(df))
+  coefs_df2 <- abs(coef(df2))
+#5. Odds ratio
+  OR_df <- exp(coef(df))
+  OR_df2 <- exp(coef(df2))
+#6. OR 95% CI
+  CI_df <- data.frame(exp(confint(df)))
+  CI_df2 <- data.frame(exp(confint(df2)))
+#7. P value function
+  P_value <- function(model) {
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p[,2])
+  }
+#8 P value 
+  p_val1<- P_value(df)
+  p_val2<- P_value(df2)
+
+#10 Insufficient vs Moderate data frame
+  if(contrast == "Ins_Mod"){
+    variable  = string 
+    statistic = coefs_df[[3]]
+    estimate  = OR_df[[3]]
+    conf.low = CI_df[2,1]
+    conf.high = CI_df[2,2]
+    ci <- paste(round(OR_df[[3]],2), "(",round(CI_df[2,1],2),"-", round(CI_df[2,2],2),")")
+    p.value = p_val1[[1]]
+    r2_change = 0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+  }
+#11 Insufficient vs Active datafraame
+  if(contrast == "Ins_Act"){
+    variable  = string
+    statistic = coefs_df[[4]]
+    estimate  = OR_df[[4]]
+    conf.low = CI_df[2,3]
+    conf.high = CI_df[2,4]
+    ci <- paste(round(OR_df[[4]],2), "(",round(CI_df[2,3],2),"-", round(CI_df[2,4],2),")")
+    p.value = p_val1[[2]]
+    r2_change = 0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+    }
+#12 Active vs Moderate table 
+  if(contrast == "Act_Mod"){
+    variable  = string  
+    statistic = coefs_df2[[4]]
+    estimate  = OR_df2[[4]]
+    conf.low = CI_df2[2,3]
+    conf.high = CI_df2[2,4]
+    ci <- paste(round(OR_df2[[4]],2),"(",round(CI_df2[2,3],2),"-", round(CI_df2[2,4],2),")")
+    p.value = p_val2[[2]]
+    r2_change = 0
+    output <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+  }
+  return(output)
+}
+```
+Ins_Mod
+```{r}
+### Physical Health Conditions 
+#1. Any Disability
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "Ins_Mod"))
+#2. Arthritis
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "Ins_Mod"))
+#3. Asthma
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma", "Ins_Mod"))
+#4. Cancer
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer", "Ins_Mod"))
+#5. Chronic Pain
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain", "Ins_Mod"))
+#6. Diabetes
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,"Diabetes", "Ins_Mod"))
+#7. Heart Attack
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack", "Ins_Mod"))
+#8. Heart Disease
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease", "Ins_Mod"))
+#9. High Cholesterol
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_chol,"High Cholesterol", "Ins_Mod"))
+#10. Hypertension
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,"Hypertension", "Ins_Mod"))
+#11. Kidney Disease
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease", "Ins_Mod"))
+#12. Liver Disease
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease", "Ins_Mod"))
+#13. Migrane
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane", "Ins_Mod"))
+#14. MS
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$MS,"MS", "Ins_Mod"))
+#15. Osteoporosis
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis", "Ins_Mod"))
+#16. Rheumatoid Arthritis
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA", "Ins_Mod"))
+#17. Stroke
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke", "Ins_Mod"))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD", "Ins_Mod"))
+#19. Drug Use Disorder
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD", "Ins_Mod"))
+#20. Major Depressive Disorder 
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD", "Ins_Mod"))
+#21 Nicotine Dependence 
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,"Nicotine Dep", "Ins_Mod"))
+#22 Posttraumatic Stress disorder
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "Ins_Mod"))
+#23. Suicidality
+Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "Ins_Mod"))
+Ins_Mod_Uni <- Ins_Mod_Uni[-(1),]
+Ins_Mod_Uni
+```
+
+```{r}
+##### INS_ACT
+### Physical Health Conditions 
+#1. Any Disability
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "Ins_Act"))
+#2. Arthritis
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "Ins_Act"))
+#3. Asthma
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma", "Ins_Act"))
+#4. Cancer
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer", "Ins_Act"))
+#5. Chronic Pain
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain", "Ins_Act"))
+#6. Diabetes
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,"Diabetes", "Ins_Act"))
+#7. Heart Attack
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack", "Ins_Act"))
+#8. Heart Disease
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease", "Ins_Act"))
+#9. High Cholesterol
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_chol,"High Cholesterol", "Ins_Act"))
+#10. Hypertension
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,"Hypertension", "Ins_Act"))
+#11. Kidney Disease
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease", "Ins_Act"))
+#12. Liver Disease
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease", "Ins_Act"))
+#13. Migrane
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane", "Ins_Act"))
+#14. MS
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$MS,"MS", "Ins_Act"))
+#15. Osteoporosis
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis", "Ins_Act"))
+#16. Rheumatoid Arthritis
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA", "Ins_Act"))
+#17. Stroke
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke", "Ins_Act"))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD", "Ins_Act"))
+#19. Drug Use Disorder
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD", "Ins_Act"))
+#20. Major Depressive Disorder 
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD", "Ins_Act"))
+#21 Nicotine Dependence 
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,"Nicotine Dep", "Ins_Act"))
+#22 Posttraumatic Stress disorder
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "Ins_Act"))
+#23. Suicidality
+Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "Ins_Act"))
+Ins_Act_Uni <- Ins_Act_Uni[-(1),]
+Ins_Act_Uni
+
+
+##### ACT_MOD
+
+### Physical Health Conditions 
+#1. Any Disability
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "Act_Mod"))
+#2. Arthritis
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "Act_Mod"))
+#3. Asthma
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma", "Act_Mod"))
+#4. Cancer
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer", "Act_Mod"))
+#5. Chronic Pain
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain", "Act_Mod"))
+#6. Diabetes
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,"Diabetes", "Act_Mod"))
+#7. Heart Attack
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack", "Act_Mod"))
+#8. Heart Disease
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease", "Act_Mod"))
+#9. High Cholesterol
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_chol,"High Cholesterol", "Act_Mod"))
+#10. Hypertension
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,"Hypertension", "Act_Mod"))
+#11. Kidney Disease
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease", "Act_Mod"))
+#12. Liver Disease
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease", "Act_Mod"))
+#13. Migrane
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane", "Act_Mod"))
+#14. MS
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$MS,"MS", "Act_Mod"))
+#15. Osteoporosis
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis", "Act_Mod"))
+#16. Rheumatoid Arthritis
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA", "Act_Mod"))
+#17. Stroke
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke", "Act_Mod"))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD", "Act_Mod"))
+#19. Drug Use Disorder
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD", "Act_Mod"))
+#20. Major Depressive Disorder 
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD", "Act_Mod"))
+#21 Nicotine Dependence 
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,"Nicotine Dep", "Act_Mod"))
+#22 Posttraumatic Stress disorder
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "Act_Mod"))
+#23. Suicidality
+Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "Act_Mod"))
+Act_Mod_Uni <- Act_Mod_Uni[-(1),]
+Act_Mod_Uni
+```
+
+
+
+## The Multivaraite Multinomial Function
+This runs the regressions with covariates
 ```{r}
 #multinomial function
 
 MultiThesis<-function(Data,condition,string,type,contrast){
 
-#2. run model 1
+#1. run model 1
   if(type == "PHC"){
-  df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
+  df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
   }
-  if(type == "MHC"){ df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
+  if(type == "MHC"){ df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
   }
-#3. Specify the reference group2
+#2 Specify the reference group2
   Data$Ex_3cat_act <- relevel(Data$Ex_3cat, ref = "Active")
-#4. run model 2
+#3. run model 2
   if(type == "PHC"){
-   df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
+   df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
   }
   if(type == "MHC"){ 
-    df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = Data)
+    df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
   }
-#5 Coefficients 
+#4 Coefficients 
   coefs_df <- abs(coef(df))
   coefs_df2 <- abs(coef(df2))
 #5. Odds ratio
@@ -331,6 +590,7 @@ MultiThesis<-function(Data,condition,string,type,contrast){
 
 #Its done!
 ```
+
 ### R^2 Change
 The following function allows us to look at the [R^2 change](https://easystats.github.io/performance/reference/r2.html) between the covariates and the IV within the multinomial model. As this is a multinomial model, the R^2 change is only observed for the model as a whole. You want this function to do the following:
 1. Run a multinomial model without the predictor (i.e., just covariates) and with the predictor (i.e., the full model)
