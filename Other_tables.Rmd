@@ -241,7 +241,7 @@ uni_check <- data.frame(variable, IA_OR, IM_OR, AM_OR)
 
 ```{r}
 #univariate multinomial stuff
-uni_thesis<-function(Data,condition,string){
+uni_OR_tab<-function(Data,condition,string){
 #1. Model 1
 df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition, data = Data)
 #2. Model 2
@@ -262,30 +262,30 @@ return(output)
 
 Run univariate function
 ```{r}
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$High_chol,"Hypertension"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$MS,"MS"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep ,"Nicotine Dep"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal ,"Arthritis"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
-uni_check<-rbind(uni_check,uni_thesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$High_chol,"Hypertension"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$MS,"MS"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep ,"Nicotine Dep"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_Suicidal ,"Arthritis"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
+uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
 uni_check<-uni_check[(-1),]
 uni_check
 ```
