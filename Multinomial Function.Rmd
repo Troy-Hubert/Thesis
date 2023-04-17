@@ -648,8 +648,6 @@ SF8_OR_tab
   SF8_OR_tab <- rbind(R2TAB2,SF8_OR_tab[1,],R2TAB3,SF8_OR_tab[2,])
   SF8_OR_tab
   
-  Full_OR_tab <- rbind(cov_OR_tab,SF8_OR_tab)
-Full_OR_tab
 #4. Export
   write_csv(SF8_OR_tab,"~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
   write_csv(Full_OR_tab, "~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
@@ -762,36 +760,49 @@ output <- "< 0.01 %"
 }
 return(output)
   }
-# run the function for all predictors
-R2CHANGE <- r2_chan(thesis_NHRVS$Any_Disability)[[1]]
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Arthritis)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Athsma)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Cancer)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Chron_pain )[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Diabetes )[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_atk )[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_dis)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_chol)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_bld_press)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Kid_dis)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Liv_dis)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Migrane)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$MS)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Osteoporosis)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Rhum_arth)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Stroke)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_AUD)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_DUD)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_MDD)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_NicotineDep)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_PTSD)[[1]])
-R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_Suicidal)[[1]])
+```
+
+
+```{r,results='hide'}
+# Block 1: Covariates
+    R2CHANGE <- NA
+    R2CHANGE  <- rbind(R2CHANGE,NA,NA,NA,NA)
+# Block 2:  MCS / PCS 
+  #MCS
+    R2CHANGE  <- rbind(R2CHANGE,NA,((r2(Cov.MCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100))
+  #PCS
+    R2CHANGE  <-rbind(R2CHANGE,NA,((r2(Cov.PCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100))
+    
+# Block 3: run the function for all predictors
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Any_Disability)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Arthritis)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Athsma)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Cancer)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Chron_pain )[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Diabetes )[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_atk )[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_dis)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_chol)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_bld_press)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Kid_dis)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Liv_dis)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Migrane)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$MS)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Osteoporosis)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Rhum_arth)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Stroke)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_AUD)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_DUD)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_MDD)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_NicotineDep)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_PTSD)[[1]])
+    R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_Suicidal)[[1]])
 ```
 
 
 ```{r}
-R2CHANGE<-R2CHANGE[,1]
-R2CHANGE
+R2CHANGE<-data.frame(R2CHANGE)
+write_csv(R2CHANGE,"~/Desktop/Coding/data/R2change.csv")
 ```
 
 ## Use the multinomial function
@@ -802,6 +813,7 @@ condition, we still need to add it to the exsisting data frame (i.e.,rbind())
 ### Insufficient vs Moderate Dataframe
 ```{r,results="hide"}
 ### Physical Health Conditions 
+Ins_Mod = 0
 #1. Any Disability
 Ins_Mod<-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "PHC", "Ins_Mod"))
 #2. Arthritis
@@ -859,7 +871,9 @@ Ins_Mod
 
 We can now add the R^2 change to the dataframe. 
 ```{r}
-Ins_Mod$r2_change <- R2CHANGE
+#1. Seperate R2 change by helath conditions
+R2_Conditions<- R2CHANGE[10:32,]
+Ins_Mod$r2_change <- R2_Conditions
 Ins_Mod
 ```
 
@@ -868,6 +882,7 @@ Ins_Mod
 ```{r,results="hide"}
 ### Physical Health Conditions 
 #1. Any Disability
+Ins_Act = 0
 Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "PHC", "Ins_Act"))
 #2. Arthritis
 Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "PHC", "Ins_Act"))
@@ -915,7 +930,7 @@ Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MH
 #23. Suicidality
 Ins_Act<-rbind(Ins_Act,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Ins_Act"))
 Ins_Act <- Ins_Act[-(1),]
-Ins_Act$r2_change <- R2CHANGE
+Ins_Act$r2_change <- R2_Conditions
 ```
 
 
@@ -923,6 +938,7 @@ Ins_Act$r2_change <- R2CHANGE
 ```{r,results="hide"}
 ### Physical Health Conditions 
 #1. Any Disability
+Act_Mod = 0
 Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability", "PHC", "Act_Mod"))
 #2. Arthritis
 Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis", "PHC", "Act_Mod"))
@@ -970,24 +986,7 @@ Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD", "MH
 #23. Suicidality
 Act_Mod<-rbind(Act_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "MHC", "Act_Mod"))
 Act_Mod <- Act_Mod[-(1),]
-Act_Mod$r2_change <- R2CHANGE
-```
-
-
-```{r,include=FALSE}
-# ## Any health coniditon or total health conditions
-# # Insufficient vs moderate
-# health_con_IM<-MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_MHC,"MHC", "MHC", "Ins_Mod")
-# health_con_IM<-rbind(health_con,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_PHC,"PHC", "PHC", "Ins_Mod"))
-# health_con_IM
-# 
-# #Insufficient vs active
-# 
-# 
-# # Active vs Moderate
-# health_con_AM<-MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_MHC,"MHC", "MHC", "Act_Mod")
-# health_con_AM<-rbind(health_con,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_PHC,"PHC", "PHC", "Act_Mod"))
-# health_con_AM
+Act_Mod$r2_change <- R2_Conditions
 ```
 
 ## Export Tables to CSV
@@ -996,3 +995,5 @@ write_csv(Ins_Mod, "~/Desktop/Coding/data/Ins_Mod.csv")
 write_csv(Ins_Act, "~/Desktop/Coding/data/Ins_Act.csv")
 write_csv(Act_Mod, "~/Desktop/Coding/data/Act_Mod.csv")
 ```
+
+
