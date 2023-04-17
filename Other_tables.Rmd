@@ -297,20 +297,60 @@ write.csv(uni_check,"~/Desktop/Coding/data/uni_check.csv")
 ## Odds Ratios and R^2 change tables 
 ```{r}
 #1. Import tables
+  r2_change <- read_csv("~/Desktop/Coding/data/R2change.csv")
+  cov.SF8_OR_tab <- read.csv("~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
   Ins_Mod <- read_csv("~/Desktop/Coding/data/Ins_Mod.csv")
   Ins_Act <- read_csv("~/Desktop/Coding/data/Ins_Act.csv")
   Act_Mod <- read_csv( "~/Desktop/Coding/data/Act_Mod.csv")
 
-#2. Create dataframe
-  OR_Table = data.frame(
-      Ins_Act$variable, Ins_Act$ci, Ins_Mod$ci, Act_Mod$ci, Ins_Act$r2_change
+#2. Create dataframes to be merged.
+    OR_Table = data.frame(
+      Ins_Act$variable, Ins_Act$ci, Ins_Mod$ci, Act_Mod$ci,Act_Mod$r2_change
       )
-  colnames(OR_Table) <- c("Helath Condition","Insufficient vs Sufficient ORs",
+    colnames(OR_Table) <- c("Variable","IvA_ODDS",
+                          "IvM_ODDS", "AvM_ODDS",
+                          "R2_Change")
+    
+#3. Create a block 3 row
+  Block_3 = cbind(
+    Variable = "Block 3: Health Conditions R^2 range = 0.032 - 0.052",
+    IvA_ODDS = NA,
+    IvM_ODDS = NA,
+    AvM_ODDS = NA,
+    R2_Change = NA
+  )
+
+#4. pull out values from covariates table
+  Cov_table = data.frame(
+    cov.SF8_OR_tab$variable,
+    cov.SF8_OR_tab$IvA_ODDS, 
+    cov.SF8_OR_tab$IvM_ODDS,
+    cov.SF8_OR_tab$AvM_ODDS
+  )
+  Cov_table$R2_Change = NA
+  colnames(Cov_table) <- c("Variable","IvA_ODDS",
+                          "IvM_ODDS", "AvM_ODDS",
+                          "R2_Change")
+
+#5. Merge all the data frames
+  OR_Table <- rbind(Cov_table,Block_3,OR_Table)
+
+```
+
+```{r}
+#6. update R2 change df and add it to OR tab
+  r2_change = rbind(r2_change[1:6,],NA,r2_change[7:33,])
+  OR_Table <- cbind(OR_Table[,1:4],r2_change)
+  OR_Table
+#6. Rename columns for table 
+  colnames(OR_Table) <- c("Variable","Insufficient vs Sufficient ORs",
                           "Insufficient vs Moderate ORs", "Active vs Moderate ORs", "R^2 Change")
-#3. View Table
+  
+  
+#X. View Table
     OR_Table
 
-#4 Export Table
+#X Export Table
     write_csv(OR_Table,"~/Desktop/Coding/data/Thesis_OR_Table.csv")
 ```
 ## Odds ratios and R^2 of covariates 

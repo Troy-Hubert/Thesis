@@ -769,9 +769,13 @@ return(output)
     R2CHANGE  <- rbind(R2CHANGE,NA,NA,NA,NA)
 # Block 2:  MCS / PCS 
   #MCS
-    R2CHANGE  <- rbind(R2CHANGE,NA,((r2(Cov.MCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100))
+    MCS_R2 = 
+    R2CHANGE  <- rbind(R2CHANGE,NA,
+                       paste(round(((r2(Cov.MCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100),2), "%"))
   #PCS
-    R2CHANGE  <-rbind(R2CHANGE,NA,((r2(Cov.PCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100))
+    R2CHANGE  <-rbind(R2CHANGE,NA,
+                      paste(round(((r2(Cov.PCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100),2), "%"),
+                      NA)
     
 # Block 3: run the function for all predictors
     R2CHANGE <- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Any_Disability)[[1]])
@@ -802,8 +806,20 @@ return(output)
 
 ```{r}
 R2CHANGE<-data.frame(R2CHANGE)
+R2CHANGE
 write_csv(R2CHANGE,"~/Desktop/Coding/data/R2change.csv")
 ```
+Range of R2 for block 3
+```{r}
+# Lowest R2 = MS
+r2(multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ MS + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS))
+
+# Highest R2 =  LT_NicotineDep
+
+r2(multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ MS + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS))
+
+```
+
 
 ## Use the multinomial function
 Now that we have created our function, we can use it to make our data frames for 
@@ -872,7 +888,7 @@ Ins_Mod
 We can now add the R^2 change to the dataframe. 
 ```{r}
 #1. Seperate R2 change by helath conditions
-R2_Conditions<- R2CHANGE[10:32,]
+R2_Conditions<- R2CHANGE[11:33,]
 Ins_Mod$r2_change <- R2_Conditions
 Ins_Mod
 ```
