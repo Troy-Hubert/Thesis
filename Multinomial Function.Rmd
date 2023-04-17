@@ -267,14 +267,10 @@ variable    = 0
   Ins_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
   Ins_Act  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
   Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
-
-
-
-
 ```
 
-## Univariate Regression function
-This runs the regressions without covariates
+## Preliminary regression: Univariate Regression function
+This runs the regressions without covariates. These regressions allow us to see how health conditions area associated with physical activity levels independent of covariates. 
 ```{r}
 #multinomial function
 
@@ -506,9 +502,160 @@ Act_Mod_Uni <- Act_Mod_Uni[-(1),]
 Act_Mod_Uni
 ```
 
+## Block 1: Covariates
+```{r}
+### Part 1 Create values for table
+#1. Run the models
+Cov_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+Cov_Reg<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
 
+#2. Coefficients 
+  coefs_Cov_Reg <- abs(coef(Cov_Reg))
+  coefs_Cov_Reg2 <- abs(coef(Cov_Reg2))
+#3. Odds ratio
+  OR_Cov_Reg <- exp(coef(Cov_Reg))
+  OR_Cov_Reg2 <- exp(coef(Cov_Reg2))
 
-## The Multivaraite Multinomial Function
+#4. OR 95% CI
+  CI_Cov_Reg <- data.frame(exp(confint(Cov_Reg)))
+  CI_Cov_Reg2 <- data.frame(exp(confint(Cov_Reg2)))
+#5. P value 
+  P_value <- function(model) {
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+  }
+  p_val1<- P_value(Cov_Reg)
+  p_val2<- P_value(Cov_Reg2)
+#6. R^2 for model
+  R2_Cov_Reg <- performance::r2(Cov_Reg)
+  R2_Cov_Reg2 <- performance::r2(Cov_Reg2)
+
+  OR.CI_IvA <- paste(round(OR_Cov_Reg[2,2:6],2), "(",round(CI_Cov_Reg[2:6,3],2),"-", round(CI_Cov_Reg[2:6,4],2),")")
+  OR.CI_IvM <- paste(round(OR_Cov_Reg[1,2:6],2), "(",round(CI_Cov_Reg[2:6,1],2),"-", round(CI_Cov_Reg[2:6,2],2),")")
+  OR.CI_AvM <- paste(round(OR_Cov_Reg2[2,2:6],2),"(",round(CI_Cov_Reg2[2:6,3],2),"-", round(CI_Cov_Reg2[2:6,4],2),")")
+
+#### Part 2. Make the table and export 
+
+#1. Create data frame
+cov_OR_tab <-  data.frame(cbind(
+  variable = Cov_Reg$coefnames[2:length(Cov_Reg$coefnames)],
+  IvA_ODDS = OR.CI_IvA,
+  IvA_p = round(p_val1[2,2:5],4),
+  IvM_ODDS = OR.CI_IvM,
+  IvM_p = round(p_val1[1,2:5],4),
+  AvM_ODDS = OR.CI_AvM, 
+  AvM_p = round(p_val2[2,2:5],4)
+))
+#2. create the row for the R2
+  paste("Block 1 R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
+  variable = paste("Block 1 R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
+  R2TAB<-data.frame(cbind(
+                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
+                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
+
+#3. Bind the stuff together
+  cov_OR_tab <- rbind(R2TAB, cov_OR_tab)
+  cov_OR_tab
+
+#4. Export
+  write_csv(cov_OR_tab,"~/Desktop/Coding/data/covSF8_OR_tab.csv")
+```
+
+## Block 2: Covariates with SF8
+```{r}
+### Part 1 SF8 values for table
+#1. Run the models
+
+  # Mental health composite score (MCS)
+  Cov.MCS_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
+  Cov.MCS_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
+
+  # Physical health composite score (PCS)
+  Cov.PCS_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
+  Cov.PCS_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
+
+#2. Coefficients 
+  #MCS
+    coefs_Cov.MCS_Reg <- abs(coef(Cov.MCS_Reg))
+    coefs_Cov.MCS_Reg2 <- abs(coef(Cov.MCS_Reg2))
+  #PCS
+    coefs_Cov.PCS_Reg <- abs(coef(Cov.PCS_Reg))
+    coefs_Cov.PCS_Reg2 <- abs(coef(Cov.PCS_Reg2))
+#3. Odds ratio
+  #MCS
+    OR_Cov.MCS_Reg <- exp(coef(Cov.MCS_Reg))
+    OR_Cov.MCS_Reg2 <- exp(coef(Cov.MCS_Reg2))
+  #PCS
+    OR_Cov.PCS_Reg <- exp(coef(Cov.PCS_Reg))
+    OR_Cov.PCS_Reg2 <- exp(coef(Cov.PCS_Reg2))
+#4. OR 95% CI
+  #MCS
+    CI_Cov.MCS_Reg <- data.frame(exp(confint(Cov.MCS_Reg)))
+    CI_Cov.MCS_Reg2 <- data.frame(exp(confint(Cov.MCS_Reg2)))
+  #PCS
+    CI_Cov.PCS_Reg <- data.frame(exp(confint(Cov.PCS_Reg)))
+    CI_Cov.PCS_Reg2 <- data.frame(exp(confint(Cov.PCS_Reg2)))
+#5. P value 
+  P_value <- function(model) {
+  z <- summary(model)$coefficients/summary(model)$standard.errors
+  p <- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+  }
+  MCS.p_val1<- P_value(Cov.MCS_Reg)
+  MCS.p_val2<- P_value(Cov.MCS_Reg2)
+  PCS.p_val1<- P_value(Cov.PCS_Reg)
+  PCS.p_val2<- P_value(Cov.PCS_Reg2)
+#6. R^2 for model
+  R2_Cov.MCS_Reg <- performance::r2(Cov.MCS_Reg)
+  R2_Cov.PCS_Reg <- performance::r2(Cov.PCS_Reg)
+
+#7. Confidence intervals
+  
+  MCS.OR.CI_IvA <- paste(round(OR_Cov.MCS_Reg[2,7],2), "(",round(CI_Cov.MCS_Reg[7,3],2),"-", round(CI_Cov.MCS_Reg[7,4],2),")")
+  MCS.OR.CI_IvM <- paste(round(OR_Cov.MCS_Reg[1,7],2), "(",round(CI_Cov.MCS_Reg[7,1],2),"-", round(CI_Cov.MCS_Reg[7,2],2),")")
+  MCS.OR.CI_AvM <- paste(round(OR_Cov.MCS_Reg2[2,7],2),"(",round(CI_Cov.MCS_Reg2[7,3],2),"-", round(CI_Cov.MCS_Reg2[7,4],2),")")
+  
+    PCS.OR.CI_IvA <- paste(round(OR_Cov.PCS_Reg[2,7],2), "(",round(CI_Cov.PCS_Reg[7,3],2),"-", round(CI_Cov.PCS_Reg[7,4],2),")")
+  PCS.OR.CI_IvM <- paste(round(OR_Cov.PCS_Reg[1,7],2), "(",round(CI_Cov.PCS_Reg[7,1],2),"-", round(CI_Cov.PCS_Reg[7,2],2),")")
+  PCS.OR.CI_AvM <- paste(round(OR_Cov.PCS_Reg2[2,7],2),"(",round(CI_Cov.PCS_Reg2[7,3],2),"-", round(CI_Cov.PCS_Reg2[7,4],2),")")
+
+#### Part 2. Make the table and export 
+
+#1. Create data frame
+SF8_OR_tab <-  data.frame(cbind(
+  variable = c("MCS","PCS"),
+  IvA_ODDS =c(MCS.OR.CI_IvA,PCS.OR.CI_IvA),
+  IvA_p = c(round(MCS.p_val1[2,6],4),round(PCS.p_val1[2,6],4)),
+  IvM_ODDS = c(MCS.OR.CI_IvM,PCS.OR.CI_IvM),
+  IvM_p =  c(round(MCS.p_val1[1,6],4),round(PCS.p_val1[1,6],4)),
+  AvM_ODDS = c(MCS.OR.CI_AvM,PCS.OR.CI_AvM),
+  AvM_p =  c(round(MCS.p_val2[2,6],4),round(PCS.p_val2[2,6],4))
+))
+SF8_OR_tab 
+
+#2. create the row for the R2
+  variable = paste("Block 2 MCS R^2 =", round((R2_Cov.MCS_Reg[[1]]*100),3),"%")
+  R2TAB2<-data.frame(cbind(
+                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
+                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
+
+  variable = paste("Block 2 PCS R^2 =", round((R2_Cov.PCS_Reg[[1]]*100),3),"%")
+  R2TAB3<-data.frame(cbind(
+                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
+                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
+#3. Bind the stuff together
+  SF8_OR_tab <- rbind(R2TAB2,SF8_OR_tab[1,],R2TAB3,SF8_OR_tab[2,])
+  SF8_OR_tab
+  
+  Full_OR_tab <- rbind(cov_OR_tab,SF8_OR_tab)
+Full_OR_tab
+#4. Export
+  write_csv(SF8_OR_tab,"~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
+  write_csv(Full_OR_tab, "~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
+```
+
+## Block 3: The Multivaraite Multinomial Function
 This runs the regressions with covariates
 ```{r}
 #multinomial function
