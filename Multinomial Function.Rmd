@@ -501,6 +501,13 @@ Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"
 Act_Mod_Uni <- Act_Mod_Uni[-(1),]
 Act_Mod_Uni
 ```
+#### Export as CSV
+```{r}
+write.csv(Ins_Act_Uni, "~/Desktop/Coding/data/Ins_Act_Uni.csv")
+write.csv(Ins_Mod_Uni, "~/Desktop/Coding/data/Ins_Mod_Uni.csv")
+write.csv(Act_Mod_Uni, "~/Desktop/Coding/data/Act_Mod_Uni.csv")
+```
+
 
 ## Block 1: Covariates
 ```{r}

@@ -35,7 +35,7 @@ gorup relative to another.
 ```{r, include=FALSE}
 ## load up the packages we will need: 
 library(tidyverse)
-
+library(dplyr)
 library(gt)
 # for putting ggplots together
 library(patchwork)
@@ -49,13 +49,20 @@ First thing to do is to load the data into R. I have already created tables
 with all of the values needed for these plots. You can find my code my code to 
 make the tables <HERE>
 ```{r}
-#### MET MINS
+#### Univariate regressions
+Ins_Mod_Uni <- read_csv("~/Desktop/Coding/data/Ins_Mod_Uni.csv")
+Ins_Act_Uni <- read_csv("~/Desktop/Coding/data/Ins_Act_Uni.csv")
+Act_Mod_Uni <- read_csv("~/Desktop/Coding/data/Act_Mod_Uni.csv")
+
+Ins_Mod_Uni
+Ins_Act_Uni 
+Act_Mod_Uni
+
+#### With Covariates
 Ins_Mod <- read_csv("~/Desktop/Coding/data/Ins_Mod.csv")
 Ins_Act <- read_csv("~/Desktop/Coding/data/Ins_Act.csv")
 Act_Mod <- read_csv( "~/Desktop/Coding/data/Act_Mod.csv")
 
-# Ins_Act <- Ins_Act[2:24,]
-# Act_Mod <- Act_Mod[2:24,]
 Ins_Act
 Ins_Mod
 Act_Mod
@@ -194,39 +201,154 @@ phc_AM <- Act_Mod[1:17,]
 mhc_AM <- Act_Mod[18:23,]
 ```
 
+
+Repeat for Univaraite analysis
+```{r,include=FALSE}
+#### INS_MOD
+#create the variable within the dataframe
+Ins_Mod_Uni <- mutate(Ins_Mod_Uni, order = 0)
+Ins_Mod_Uni <- cbind(Ins_Mod_Uni[,1:8],Ins_Mod_Uni[,10])
+colnames(Ins_Mod_Uni)[9] = "order"
+#update the values of the dataset to reflect the order we want
+Ins_Mod_Uni[1,9]  = 2
+Ins_Mod_Uni[2,9]  = 3
+Ins_Mod_Uni[3,9]  = 4
+Ins_Mod_Uni[4,9]  = 5
+Ins_Mod_Uni[5,9]  = 6
+Ins_Mod_Uni[6,9]  = 7
+Ins_Mod_Uni[7,9]  = 8
+Ins_Mod_Uni[8,9]  = 9
+Ins_Mod_Uni[9,9]  = 10
+Ins_Mod_Uni[10,9] = 11
+Ins_Mod_Uni[11,9] = 12
+Ins_Mod_Uni[12,9] = 13
+Ins_Mod_Uni[13,9] = 14
+Ins_Mod_Uni[14,9] = 15
+Ins_Mod_Uni[15,9] = 16
+Ins_Mod_Uni[16,9] = 17
+Ins_Mod_Uni[17,9] = 18
+Ins_Mod_Uni[18,9] = 19
+Ins_Mod_Uni[19,9] = 20
+Ins_Mod_Uni[20,9] = 21
+Ins_Mod_Uni[21,9] = 22
+Ins_Mod_Uni[22,9] = 23
+Ins_Mod_Uni[23,9] = 24
+# create a varaible for significance 
+Ins_Mod_Uni <- mutate(Ins_Mod_Uni, sig = 0)
+Ins_Mod_Uni[1,10]  = 1
+Ins_Mod_Uni[3,10]  = 1
+Ins_Mod_Uni[5,10]  = 1
+Ins_Mod_Uni[6,10]  = 1
+Ins_Mod_Uni[10,10] = 1
+Ins_Mod_Uni[11,10] = 1
+Ins_Mod_Uni[19,10] = 1
+Ins_Mod_Uni[21,10] = 1
+Ins_Mod_Uni
+
+phc_IM_Uni <- Ins_Mod_Uni[1:17,]
+mhc_IM_Uni <- Ins_Mod_Uni[18:23,]
+
+##### INS_ACT
+#create the variable within the dataframe
+Ins_Act_Uni <- mutate(Ins_Act_Uni, order = 0)
+Ins_Act_Uni <- cbind(Ins_Act_Uni[,1:8],Ins_Act_Uni[,10])
+colnames(Ins_Act_Uni)[9] = "order"
+#update the values of the dataset to reflect the order we want
+Ins_Act_Uni[1,9]  = 2
+Ins_Act_Uni[2,9]  = 3
+Ins_Act_Uni[3,9]  = 4
+Ins_Act_Uni[4,9]  = 5
+Ins_Act_Uni[5,9]  = 6
+Ins_Act_Uni[6,9]  = 7
+Ins_Act_Uni[7,9]  = 8
+Ins_Act_Uni[8,9]  = 9
+Ins_Act_Uni[9,9]  = 10
+Ins_Act_Uni[10,9] = 11
+Ins_Act_Uni[11,9] = 12
+Ins_Act_Uni[12,9] = 13
+Ins_Act_Uni[13,9] = 14
+Ins_Act_Uni[14,9] = 15
+Ins_Act_Uni[15,9] = 16
+Ins_Act_Uni[16,9] = 17
+Ins_Act_Uni[17,9] = 18
+Ins_Act_Uni[18,9] = 19
+Ins_Act_Uni[19,9] = 20
+Ins_Act_Uni[20,9] = 21
+Ins_Act_Uni[21,9] = 22
+Ins_Act_Uni[22,9] = 23
+Ins_Act_Uni[23,9] = 24
+# create a varaible for significance 
+Ins_Act_Uni <- mutate(Ins_Act_Uni, sig = 0)
+Ins_Act_Uni[1,10]  = 1
+Ins_Act_Uni[3,10]  = 1
+Ins_Act_Uni[5,10]  = 1
+Ins_Act_Uni[6,10]  = 1
+Ins_Act_Uni[7,10]  = 1
+Ins_Act_Uni[8,10]  = 1
+Ins_Act_Uni[9,10]  = 1
+Ins_Act_Uni[10,10]  = 1
+Ins_Act_Uni[15,10] = 1
+Ins_Act_Uni[17,10]  = 1
+Ins_Act_Uni[20,10]  = 1
+Ins_Act_Uni[21,10] = 1
+Ins_Act_Uni
+phc_IA_Uni <- Ins_Act_Uni[1:17,]
+mhc_IA_Uni <- Ins_Act_Uni[18:23,]
+
+
+#### Act_Mod
+#create the variable within the dataframe
+Act_Mod_Uni <- mutate(Act_Mod_Uni, order = 0)
+Act_Mod_Uni <- cbind(Act_Mod_Uni[,1:8],Act_Mod_Uni[,10])
+colnames(Act_Mod_Uni)[9] = "order"
+
+#update the values of the dataset to reflect the order we want
+Act_Mod_Uni[1,9]  = 2
+Act_Mod_Uni[2,9]  = 3
+Act_Mod_Uni[3,9]  = 4
+Act_Mod_Uni[4,9]  = 5
+Act_Mod_Uni[5,9]  = 6
+Act_Mod_Uni[6,9]  = 7
+Act_Mod_Uni[7,9]  = 8
+Act_Mod_Uni[8,9]  = 9
+Act_Mod_Uni[9,9]  = 10
+Act_Mod_Uni[10,9] = 11
+Act_Mod_Uni[11,9] = 12
+Act_Mod_Uni[12,9] = 13
+Act_Mod_Uni[13,9] = 14
+Act_Mod_Uni[14,9] = 15
+Act_Mod_Uni[15,9] = 16
+Act_Mod_Uni[16,9] = 17
+Act_Mod_Uni[17,9] = 18
+Act_Mod_Uni[18,9] = 19
+Act_Mod_Uni[19,9] = 20
+Act_Mod_Uni[20,9] = 21
+Act_Mod_Uni[21,9] = 22
+Act_Mod_Uni[22,9] = 23
+Act_Mod_Uni[23,9] = 24
+# create a varaible for significance 
+Act_Mod_Uni <- mutate(Act_Mod_Uni, sig = 0)
+Act_Mod_Uni[6,10]  = 1
+Act_Mod_Uni[9,10] = 1
+Act_Mod_Uni[10,10] = 1
+Act_Mod_Uni
+
+phc_AM_Uni <- Act_Mod_Uni[1:17,]
+mhc_AM_Uni <- Act_Mod_Uni[18:23,]
+```
+
+
+
 ## Middle: Create The Plot
 
 Now that we have the data all ready, we can create the plot. For the forrest plot 
 I am going to save the output of the plot into "phc_IA_mid". As I am repeating the 
 same plot 3 times, for both mental and physical health conditions I want my code to 
 be clear. We create the forrest plot with geom point & geom linerange, and I have 
-added color to signify which conditions were significant after corrections. 
+added color to signify which conditions were significant after corrections.
+
 #### Forrest Plot Function
 
-```{r,include=FALSE}
-# Ins__plot <- Ins_Mod |>
-#   #Plot the value variable (in descending order) assigning significance to the 
-#   #values significant after Bon foroni alpha corrections
-#   ggplot(aes(y = reorder(variable, -order),color = as.factor(sig))) +
-#   #take away background
-#   theme_classic() +
-#   #make the forrest plot
-#   geom_point(aes(x=estimate), shape=15, size=3,show.legend = FALSE) +
-#   geom_linerange(aes(xmin=conf.low, xmax=conf.high),show.legend = FALSE) +
-#   #add color 
-#   scale_color_manual(values = c("#A6A6A6","blue"))+
-#   #change Cordinates
-#   labs(x="Odds Ratio") +
-#   #adjust the dimentions. 
-#   coord_cartesian(ylim = c(1,24), xlim=c(.25, 1.75)) +
-#   #add a line at 0 for reference 
-#   geom_vline(xintercept = 1, linetype="dashed") +
-#   #add anotations to help suggests what each side means.
-#   annotate("text", x = .5, y = 18, label = "Less Likely") +
-#   annotate("text", x = 1.5, y = 18, label = "More Likely") 
-#   #Git rid of the Y - Axis
-# Ins_act_plot
-```
 
 ```{r}
 mid_Fplot <-function(data){
@@ -263,21 +385,32 @@ return (output)
 #### Applying the function
 As we separated the datasets into mental health and physical health data frames, we can just call one function to do both parts of the plots.
 ```{r}
-#Physical Health Conditions
+#Physical Health Conditions Insufficient vs active
 phc_IA_mid<-mid_Fplot(phc_IA)
-#Mental Health Conditions
+#Mental Health Conditions Insffucient vs active
 mhc_IA_mid<- mid_Fplot(mhc_IA)
 ```
 
-No repeat this for the other 4 plots.
+No repeat this for the other 10 plots.
 ```{r}
-# Insufficient vs Moderate
+# Insufficient vs Moderate Multi
 phc_IM_mid <- mid_Fplot(phc_IM)
 mhc_IM_mid <- mid_Fplot(mhc_IM)
-# Active vs Moderate
+# Active vs Moderate Muli
 phc_AM_mid <- mid_Fplot(phc_AM)
 mhc_AM_mid <- mid_Fplot(mhc_AM)
+
+##### Univariate 
+
+phc_IA_Uni_mid<-mid_Fplot(phc_IA_Uni)
+mhc_IA_Uni_mid<- mid_Fplot(mhc_IA_Uni)
+phc_IM_Uni_mid <- mid_Fplot(phc_IM_Uni)
+mhc_IM_Uni_mid <- mid_Fplot(mhc_IM_Uni)
+phc_AM_Uni_mid <- mid_Fplot(phc_AM_Uni)
+mhc_AM_Uni_mid <- mid_Fplot(mhc_AM_Uni)
 ```
+
+
        
        
 We have our plots! We can interpret this as, "Compared to veterans who were are insufficient active, veterans who were moderately active were (less/no difference/more) likely to report X health condition." For these figures the blue lines indicate which health conditions are significant after alpha corrections. 
@@ -369,6 +502,14 @@ mhc_IM_plot <- DF_update(mhc_IM)
 # active vs moderate
 phc_AM_plot <- DF_update(phc_AM)
 mhc_AM_plot <- DF_update(mhc_AM)
+
+### Univaraite 
+phc_IA_Uni_plot <- DF_update(phc_IA_Uni)
+mhc_IA_Uni_plot <- DF_update(mhc_IA_Uni)
+phc_IM_Uni_plot <- DF_update(phc_IM_Uni)
+mhc_IM_Uni_plot <- DF_update(mhc_IM_Uni)
+phc_AM_Uni_plot <- DF_update(phc_AM_Uni)
+mhc_AM_Uni_plot <- DF_update(mhc_AM_Uni)
 ```
 
 ### Plotting the left side
@@ -416,12 +557,21 @@ left_FP <- function(plot_data,type){
 ```
 Run the function
 ```{r}
+# Multivariate
 phc_IA_left<-left_FP(phc_IA_plot,"PHC")
 mhc_IA_left<-left_FP(mhc_IA_plot,"MHC")
 phc_IM_left<-left_FP(phc_IM_plot,"PHC")
 mhc_IM_left<-left_FP(mhc_IM_plot,"MHC")
 phc_AM_left<-left_FP(phc_AM_plot,"PHC")
 mhc_AM_left<-left_FP(mhc_AM_plot,"MHC")
+
+# Univariate 
+phc_IA_Uni_left<-left_FP(phc_IA_Uni_plot,"PHC")
+mhc_IA_Uni_left<-left_FP(mhc_IA_Uni_plot,"MHC")
+phc_IM_Uni_left<-left_FP(phc_IM_Uni_plot,"PHC")
+mhc_IM_Uni_left<-left_FP(mhc_IM_Uni_plot,"MHC")
+phc_AM_Uni_left<-left_FP(phc_AM_Uni_plot,"PHC")
+mhc_AM_Uni_left<-left_FP(mhc_AM_Uni_plot,"MHC")
 ```
 Now we have our labels. In our labels we have the name of our conditions and the OR + 95 CI.
 ```{r}
@@ -451,12 +601,21 @@ return(output)
 
 run the function
 ```{r}
+#. Multivaraite
 phc_IA_right <- right_FP(phc_IA_plot)
 mhc_IA_right <- right_FP(mhc_IA_plot)
 phc_IM_right <- right_FP(phc_IM_plot)
 mhc_IM_right <- right_FP(mhc_IM_plot)
 phc_AM_right <- right_FP(phc_AM_plot)
 mhc_AM_right <- right_FP(mhc_AM_plot)
+
+# Univaraite 
+phc_IA_Uni_right <- right_FP(phc_IA_Uni_plot)
+mhc_IA_Uni_right <- right_FP(mhc_IA_Uni_plot)
+phc_IM_Uni_right <- right_FP(phc_IM_Uni_plot)
+mhc_IM_Uni_right <- right_FP(mhc_IM_Uni_plot)
+phc_AM_Uni_right <- right_FP(phc_AM_Uni_plot)
+mhc_AM_Uni_right <- right_FP(mhc_AM_Uni_plot)
 ```
 
 Example of the p value output
@@ -549,6 +708,19 @@ mhc_AM_left + mhc_AM_mid + mhc_AM_right + plot_layout(design = layout)
 
 No other differences were observed between the odds of
 reporting mental health conditions between insufficient and moderate activity.
+
+### Univariate analysis
+```{r}
+
+phc_IA_Uni_left + phc_IA_Uni_mid + phc_IA_Uni_right + plot_layout(design = layout)
+mhc_IA_Uni_left + mhc_IA_Uni_mid + mhc_IA_Uni_right + plot_layout(design = layout)
+phc_IM_Uni_left + phc_IM_Uni_mid + phc_IM_Uni_right + plot_layout(design = layout)
+mhc_IM_Uni_left + mhc_IM_Uni_mid + mhc_IM_Uni_right + plot_layout(design = layout)
+phc_AM_Uni_left + phc_AM_Uni_mid + phc_AM_Uni_right + plot_layout(design = layout)
+mhc_AM_Uni_left + mhc_AM_Uni_mid + mhc_AM_Uni_right + plot_layout(design = layout)
+
+```
+
 
 
 ## Save the plots as png
