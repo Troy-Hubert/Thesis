@@ -161,12 +161,10 @@ Ins_Act[7,10] = 1
 Ins_Act[9,10] = 1
 Ins_Act[15,10] = 1
 Ins_Act[17,10] = 1
-Ins_Act[19,10] = 1
-Ins_Act[20,10] = 1
-Ins_Act[21,10] = 1
 
 phc_IA <- Ins_Act[1:17,]
 mhc_IA <- Ins_Act[18:23,]
+Ins_Act
 ```
 
 ```{r, include=FALSE}
