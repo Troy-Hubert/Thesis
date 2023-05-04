@@ -1,0 +1,2619 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Logistic Multinomial Regression</title>
+
+<script src="site_libs/header-attrs-2.19/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Masters Thesis Analyses</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="dropdown-header">Master Thesis background</li>
+<li>
+  <a href="index.html"></a>
+</li>
+<li class="dropdown-header">Preliminary Statistics</li>
+<li>
+  <a href="Preliminary_Stats.html"></a>
+</li>
+<li class="dropdown-header">Logistic Multinomial Regression</li>
+<li>
+  <a href="Multinomial_Function.html"></a>
+</li>
+<li class="dropdown-header">Thesis Forrest Plots</li>
+<li>
+  <a href="Thesis_FP.html"></a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Logistic Multinomial Regression</h1>
+
+</div>
+
+
+<p>The following code will show you how I created functions to run my
+multinomial regressions. This page includes:</p>
+<ol style="list-style-type: decimal">
+<li>Create function to run univariate multinomial regressions.</li>
+<li>Run block 1 of the step wise multivariate multinomial
+regression.</li>
+<li>Run block 2 of the step wise multivariate multinomial
+regression.</li>
+<li>Create function for block 3 of step wise multivariate multinomial
+regression.</li>
+<li>Obtain R^2 values for each varaible in regressio model, and R^2
+change between blocks of the stepwise regression</li>
+<li>Run function for block 3 of the step wise multivariate multinomial
+regression.</li>
+<li>Create table of output from stepwise regression model.</li>
+</ol>
+<hr />
+<div id="create-data-frames" class="section level2">
+<h2>Create Data frames</h2>
+<p>This first set of code is used to create the dataframes needed for
+our analysis. Once the data frame is made, then we can use the function
+below to add values to the data frames.</p>
+<pre class="r"><code>variable    = 0 
+  statistic = 0
+  estimate  = 0
+  conf.low  = 0
+  conf.high = 0
+  ci        = 0
+  p.value   = 0
+  r2_change = 0
+  
+# Univariate Multinomial 
+
+  Ins_Mod_Uni &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act_Uni &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod_Uni &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  
+# Block 1 Covars - SF8
+
+  Ins_Mod_Cov &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act_Cov &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod_Cov &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  
+# Block 2 Covars + SF8
+  
+  Ins_Mod_SF8 &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act_SF8 &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod_SF8 &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+
+# Block 3 Full Model
+  Ins_Mod  &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Ins_Act  &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
+  Act_Mod  &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]</code></pre>
+</div>
+<div id="preliminary-regression-univariate-regression-function"
+class="section level2">
+<h2>Preliminary Regression: Univariate Regression function</h2>
+<p>The first step in my analysis was to run the multinomial regressions
+without covariates so I can see how the health conditions are associated
+with physical activity level independent of covariates. The following
+<code>UniThesis()</code> function does the following:</p>
+<ol style="list-style-type: decimal">
+<li>Runs the multinomial models using <code>multinom()</code></li>
+<li>Manually calculates the coefficients <em>B</em>, the odds ratios
+(OR) + 95% Confideince interval (95% CI), and <em>p</em> values</li>
+<li>Extracts respective values for each type of comparison (e.g.,
+sufficiently active vs moderatly active)</li>
+<li>Returns respective values as a row in a dataframe which can be
+compiled into a larger data fram per comparison</li>
+</ol>
+<pre class="r"><code># Univariate Logistic Multinomial Regression function
+
+UniThesis&lt;-function(Data,condition,string,contrast){
+
+#1. run model 1
+  df &lt;- multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ condition, data = Data)
+
+#2. run model 2
+  df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Active&quot;) ~ condition, data = Data)
+
+#4 Coefficients 
+  coefs_df &lt;- abs(coef(df))
+  coefs_df2 &lt;- abs(coef(df2))
+#5. Odds ratio
+  OR_df &lt;- exp(coef(df))
+  OR_df2 &lt;- exp(coef(df2))
+#6. OR 95% CI
+  CI_df &lt;- data.frame(exp(confint(df)))
+  CI_df2 &lt;- data.frame(exp(confint(df2)))
+#7. P value function
+  P_value &lt;- function(model) {
+  z &lt;- summary(model)$coefficients/summary(model)$standard.errors
+  p &lt;- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p[,2])
+  }
+#8 P value 
+  p_val1&lt;- P_value(df)
+  p_val2&lt;- P_value(df2)
+
+#10 Insufficient vs Moderate data frame
+  if(contrast == &quot;Ins_Mod&quot;){
+    variable  = string 
+    statistic = coefs_df[[3]]
+    estimate  = OR_df[[3]]
+    conf.low = CI_df[2,1]
+    conf.high = CI_df[2,2]
+    ci &lt;- paste(round(OR_df[[3]],2), &quot;(&quot;,round(CI_df[2,1],2),&quot;-&quot;, round(CI_df[2,2],2),&quot;)&quot;)
+    p.value = p_val1[[1]]
+    r2_change = 0
+    output &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+  }
+#11 Insufficient vs Active datafraame
+  if(contrast == &quot;Ins_Act&quot;){
+    variable  = string
+    statistic = coefs_df[[4]]
+    estimate  = OR_df[[4]]
+    conf.low = CI_df[2,3]
+    conf.high = CI_df[2,4]
+    ci &lt;- paste(round(OR_df[[4]],2), &quot;(&quot;,round(CI_df[2,3],2),&quot;-&quot;, round(CI_df[2,4],2),&quot;)&quot;)
+    p.value = p_val1[[2]]
+    r2_change = 0
+    output &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+    }
+#12 Active vs Moderate table 
+  if(contrast == &quot;Act_Mod&quot;){
+    variable  = string  
+    statistic = coefs_df2[[4]]
+    estimate  = OR_df2[[4]]
+    conf.low = CI_df2[2,3]
+    conf.high = CI_df2[2,4]
+    ci &lt;- paste(round(OR_df2[[4]],2),&quot;(&quot;,round(CI_df2[2,3],2),&quot;-&quot;, round(CI_df2[2,4],2),&quot;)&quot;)
+    p.value = p_val2[[2]]
+    r2_change = 0
+    output &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+  }
+  return(output)
+}</code></pre>
+<p>Now that we have a function, we need to run it. The
+<code>UniThesis()</code> function is for each health condition and
+compiles it into one larger data frame <code>Ins_Mod_Uni</code>. The
+code below is used to extract values for the Insufficient vs
+Sufficiently active comparisons.</p>
+<div id="ins_mod" class="section level4">
+<h4>Ins_Mod</h4>
+<pre class="r"><code>### Physical Health Conditions 
+#1. Any Disability
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,&quot;Any Disability&quot;, &quot;Ins_Mod&quot;))
+#2. Arthritis
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,&quot;Arthritis&quot;, &quot;Ins_Mod&quot;))
+#3. Asthma
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Athsma,&quot;Athsma&quot;, &quot;Ins_Mod&quot;))
+#4. Cancer
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Cancer,&quot;Cancer&quot;, &quot;Ins_Mod&quot;))
+#5. Chronic Pain
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,&quot;Chronic Pain&quot;, &quot;Ins_Mod&quot;))
+#6. Diabetes
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,&quot;Diabetes&quot;, &quot;Ins_Mod&quot;))
+#7. Heart Attack
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,&quot;Heart Attack&quot;, &quot;Ins_Mod&quot;))
+#8. Heart Disease
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,&quot;Heart Disease&quot;, &quot;Ins_Mod&quot;))
+#9. High Cholesterol
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_chol,&quot;High Cholesterol&quot;, &quot;Ins_Mod&quot;))
+#10. Hypertension
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,&quot;Hypertension&quot;, &quot;Ins_Mod&quot;))
+#11. Kidney Disease
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,&quot;Kidney Disease&quot;, &quot;Ins_Mod&quot;))
+#12. Liver Disease
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,&quot;Liver Disease&quot;, &quot;Ins_Mod&quot;))
+#13. Migrane
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Migrane,&quot;Migrane&quot;, &quot;Ins_Mod&quot;))
+#14. MS
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$MS,&quot;MS&quot;, &quot;Ins_Mod&quot;))
+#15. Osteoporosis
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,&quot;Osteoporosis&quot;, &quot;Ins_Mod&quot;))
+#16. Rheumatoid Arthritis
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,&quot;RA&quot;, &quot;Ins_Mod&quot;))
+#17. Stroke
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Stroke,&quot;Stroke&quot;, &quot;Ins_Mod&quot;))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,&quot;AUD&quot;, &quot;Ins_Mod&quot;))
+#19. Drug Use Disorder
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,&quot;DUD&quot;, &quot;Ins_Mod&quot;))
+#20. Major Depressive Disorder 
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,&quot;MDD&quot;, &quot;Ins_Mod&quot;))
+#21 Nicotine Dependence 
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,&quot;Nicotine Dep&quot;, &quot;Ins_Mod&quot;))
+#22 Posttraumatic Stress disorder
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,&quot;PTSD&quot;, &quot;Ins_Mod&quot;))
+#23. Suicidality
+Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,&quot;Suicidality&quot;, &quot;Ins_Mod&quot;))
+Ins_Mod_Uni &lt;- Ins_Mod_Uni[-(1),]</code></pre>
+<p><strong>Lets look at the table!</strong></p>
+<pre class="r"><code>knitr::kable(Ins_Mod_Uni[1:3,]) %&gt;%
+    kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+statistic
+</th>
+<th style="text-align:left;">
+estimate
+</th>
+<th style="text-align:left;">
+conf.low
+</th>
+<th style="text-align:left;">
+conf.high
+</th>
+<th style="text-align:left;">
+ci
+</th>
+<th style="text-align:left;">
+p.value
+</th>
+<th style="text-align:left;">
+r2_change
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+Any Disability
+</td>
+<td style="text-align:left;">
+0.641804870673004
+</td>
+<td style="text-align:left;">
+0.526341587737195
+</td>
+<td style="text-align:left;">
+0.406587931217258
+</td>
+<td style="text-align:left;">
+0.681366675474878
+</td>
+<td style="text-align:left;">
+0.53 ( 0.41 - 0.68 )
+</td>
+<td style="text-align:left;">
+1.10027191291273e-06
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+Arthritis
+</td>
+<td style="text-align:left;">
+0.131641124556636
+</td>
+<td style="text-align:left;">
+0.876655548781944
+</td>
+<td style="text-align:left;">
+0.730159209754747
+</td>
+<td style="text-align:left;">
+1.05254435052365
+</td>
+<td style="text-align:left;">
+0.88 ( 0.73 - 1.05 )
+</td>
+<td style="text-align:left;">
+0.158231184859979
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+Athsma
+</td>
+<td style="text-align:left;">
+0.439914446936515
+</td>
+<td style="text-align:left;">
+0.644091522728985
+</td>
+<td style="text-align:left;">
+0.490118648374674
+</td>
+<td style="text-align:left;">
+0.84643563558962
+</td>
+<td style="text-align:left;">
+0.64 ( 0.49 - 0.85 )
+</td>
+<td style="text-align:left;">
+0.00159912089713932
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<p>We will repeat this step for the Insufficient vs active comparison
+(Ins_Act) and Active vs Moderate Comparison (Act_Mod). As most of the
+analysis in this markdown are repeated I will only be showing the first
+one, and not the 2 other comparisons to save space.</p>
+</div>
+<div id="export-as-csv" class="section level4">
+<h4>Export as CSV</h4>
+<pre class="r"><code>write.csv(Ins_Act_Uni, &quot;~/Desktop/Coding/data/Ins_Act_Uni.csv&quot;)
+write.csv(Ins_Mod_Uni, &quot;~/Desktop/Coding/data/Ins_Mod_Uni.csv&quot;)
+write.csv(Act_Mod_Uni, &quot;~/Desktop/Coding/data/Act_Mod_Uni.csv&quot;)</code></pre>
+</div>
+</div>
+<div id="step-wise-multivariate-logistic-multinomial-regression"
+class="section level2">
+<h2>Step Wise Multivariate Logistic Multinomial Regression</h2>
+<p>That’s a mouthful! For the following section we will be running code
+for the full regression model, extracting values like we did for the
+univariate function, and putting these values into tables for the 3
+comparisons at each of the 3 blocks. The blocks of this regession are as
+follows:</p>
+<ol style="list-style-type: decimal">
+<li>Covariates: Sociodemograpahic and health variables</li>
+<li>Physical and Mental Health Functioning: The short form 8 - MCS and
+PCS</li>
+<li>Health Conditions: Each health condition will be ran as a seperate
+regression and compiled into one dataframe</li>
+</ol>
+<div id="block-1-covariates" class="section level4">
+<h4>Block 1: Covariates</h4>
+<p>This first block of the stepwise regression will do the same thing as
+we did for the univariate analysis, being that this was not replicated
+we did not make a function for it.</p>
+<pre class="r"><code>### Part 1 Create values for table
+#1. Run the models
+Cov_Reg&lt;-multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+Cov_Reg2&lt;-multinom(relevel(Ex_3cat,ref = &quot;Active&quot;)  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+
+#2. Coefficients 
+  coefs_Cov_Reg &lt;- abs(coef(Cov_Reg))
+  coefs_Cov_Reg2 &lt;- abs(coef(Cov_Reg2))
+#3. Odds ratio
+  OR_Cov_Reg &lt;- exp(coef(Cov_Reg))
+  OR_Cov_Reg2 &lt;- exp(coef(Cov_Reg2))
+
+#4. OR 95% CI
+  CI_Cov_Reg &lt;- data.frame(exp(confint(Cov_Reg)))
+  CI_Cov_Reg2 &lt;- data.frame(exp(confint(Cov_Reg2)))
+#5. P value 
+  P_value &lt;- function(model) {
+  z &lt;- summary(model)$coefficients/summary(model)$standard.errors
+  p &lt;- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+  }
+  p_val1&lt;- P_value(Cov_Reg)
+  p_val2&lt;- P_value(Cov_Reg2)
+#6. R^2 for model
+  R2_Cov_Reg &lt;- performance::r2(Cov_Reg)
+  R2_Cov_Reg2 &lt;- performance::r2(Cov_Reg2)
+
+  OR.CI_IvA &lt;- paste(round(OR_Cov_Reg[2,2:6],2), &quot;(&quot;,round(CI_Cov_Reg[2:6,3],2),&quot;-&quot;, round(CI_Cov_Reg[2:6,4],2),&quot;)&quot;)
+  OR.CI_IvM &lt;- paste(round(OR_Cov_Reg[1,2:6],2), &quot;(&quot;,round(CI_Cov_Reg[2:6,1],2),&quot;-&quot;, round(CI_Cov_Reg[2:6,2],2),&quot;)&quot;)
+  OR.CI_AvM &lt;- paste(round(OR_Cov_Reg2[2,2:6],2),&quot;(&quot;,round(CI_Cov_Reg2[2:6,3],2),&quot;-&quot;, round(CI_Cov_Reg2[2:6,4],2),&quot;)&quot;)
+
+#### Part 2. Make the table and export 
+
+#1. Create data frame
+cov_OR_tab &lt;-  data.frame(cbind(
+  variable = Cov_Reg$coefnames[2:length(Cov_Reg$coefnames)],
+  IvA_ODDS = OR.CI_IvA,
+  IvA_p = round(p_val1[2,2:5],4),
+  IvM_ODDS = OR.CI_IvM,
+  IvM_p = round(p_val1[1,2:5],4),
+  AvM_ODDS = OR.CI_AvM, 
+  AvM_p = round(p_val2[2,2:5],4)
+))
+#2. create the row for the R2
+  paste(&quot;Block 1 R^2 =&quot;, round((R2_Cov_Reg[[1]]*100),3),&quot;%&quot;)
+  variable = paste(&quot;Block 1 R^2 =&quot;, round((R2_Cov_Reg[[1]]*100),3),&quot;%&quot;)
+  R2TAB&lt;-data.frame(cbind(
+                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
+                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
+
+#3. Bind the stuff together
+  cov_OR_tab &lt;- rbind(R2TAB, cov_OR_tab)
+   
+#4. Export
+  write_csv(cov_OR_tab,&quot;~/Desktop/Coding/data/covSF8_OR_tab.csv&quot;)</code></pre>
+<pre class="r"><code>  knitr::kable(cov_OR_tab) %&gt;%
+    kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+IvA_ODDS
+</th>
+<th style="text-align:left;">
+IvA_p
+</th>
+<th style="text-align:left;">
+IvM_ODDS
+</th>
+<th style="text-align:left;">
+IvM_p
+</th>
+<th style="text-align:left;">
+AvM_ODDS
+</th>
+<th style="text-align:left;">
+AvM_p
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Block 1 R^2 = 2.642 %
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Age
+</td>
+<td style="text-align:left;">
+0.99 ( 0.98 - 0.99 )
+</td>
+<td style="text-align:left;">
+3e-04
+</td>
+<td style="text-align:left;">
+1 ( 0.99 - 1.01 )
+</td>
+<td style="text-align:left;">
+0.4526
+</td>
+<td style="text-align:left;">
+1.02 ( 1.01 - 1.02 )
+</td>
+<td style="text-align:left;">
+1e-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CollegeSome_Colege
+</td>
+<td style="text-align:left;">
+1.8 ( 1.41 - 2.29 )
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1.11 ( 0.85 - 1.43 )
+</td>
+<td style="text-align:left;">
+0.4483
+</td>
+<td style="text-align:left;">
+0.62 ( 0.46 - 0.82 )
+</td>
+<td style="text-align:left;">
+9e-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Income_60k_plusOVer_60k
+</td>
+<td style="text-align:left;">
+1.28 ( 1.09 - 1.5 )
+</td>
+<td style="text-align:left;">
+0.002
+</td>
+<td style="text-align:left;">
+1.25 ( 1.04 - 1.51 )
+</td>
+<td style="text-align:left;">
+0.0184
+</td>
+<td style="text-align:left;">
+0.98 ( 0.81 - 1.18 )
+</td>
+<td style="text-align:left;">
+0.8173
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+YN_workWorking
+</td>
+<td style="text-align:left;">
+0.78 ( 0.65 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.0084
+</td>
+<td style="text-align:left;">
+0.76 ( 0.61 - 0.95 )
+</td>
+<td style="text-align:left;">
+0.0134
+</td>
+<td style="text-align:left;">
+0.97 ( 0.78 - 1.2 )
+</td>
+<td style="text-align:left;">
+0.7914
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BMI
+</td>
+<td style="text-align:left;">
+0.93 ( 0.91 - 0.94 )
+</td>
+<td style="text-align:left;">
+3e-04
+</td>
+<td style="text-align:left;">
+0.97 ( 0.95 - 0.98 )
+</td>
+<td style="text-align:left;">
+0.4526
+</td>
+<td style="text-align:left;">
+1.04 ( 1.02 - 1.06 )
+</td>
+<td style="text-align:left;">
+1e-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="block-2-covariates-with-sf8" class="section level4">
+<h4>Block 2: Covariates with SF8</h4>
+<p>Block to is idential to block one with the addition of the MCS and
+PCS to the regression model. We are running two different regession
+models (i.e., one with the MCS and one with the PCS) so you can see that
+below.</p>
+<pre class="r"><code>### Part 1 SF8 values for table
+#1. Run the models
+
+  # Mental health composite score (MCS)
+  Cov.MCS_Reg&lt;-multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
+  Cov.MCS_Reg2&lt;-multinom(relevel(Ex_3cat,ref = &quot;Active&quot;)  ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
+
+  # Physical health composite score (PCS)
+  Cov.PCS_Reg&lt;-multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
+  Cov.PCS_Reg2&lt;-multinom(relevel(Ex_3cat,ref = &quot;Active&quot;)  ~ Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
+
+#2. Coefficients 
+  #MCS
+    coefs_Cov.MCS_Reg &lt;- abs(coef(Cov.MCS_Reg))
+    coefs_Cov.MCS_Reg2 &lt;- abs(coef(Cov.MCS_Reg2))
+  #PCS
+    coefs_Cov.PCS_Reg &lt;- abs(coef(Cov.PCS_Reg))
+    coefs_Cov.PCS_Reg2 &lt;- abs(coef(Cov.PCS_Reg2))
+#3. Odds ratio
+  #MCS
+    OR_Cov.MCS_Reg &lt;- exp(coef(Cov.MCS_Reg))
+    OR_Cov.MCS_Reg2 &lt;- exp(coef(Cov.MCS_Reg2))
+  #PCS
+    OR_Cov.PCS_Reg &lt;- exp(coef(Cov.PCS_Reg))
+    OR_Cov.PCS_Reg2 &lt;- exp(coef(Cov.PCS_Reg2))
+#4. OR 95% CI
+  #MCS
+    CI_Cov.MCS_Reg &lt;- data.frame(exp(confint(Cov.MCS_Reg)))
+    CI_Cov.MCS_Reg2 &lt;- data.frame(exp(confint(Cov.MCS_Reg2)))
+  #PCS
+    CI_Cov.PCS_Reg &lt;- data.frame(exp(confint(Cov.PCS_Reg)))
+    CI_Cov.PCS_Reg2 &lt;- data.frame(exp(confint(Cov.PCS_Reg2)))
+#5. P value 
+  P_value &lt;- function(model) {
+  z &lt;- summary(model)$coefficients/summary(model)$standard.errors
+  p &lt;- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p)
+  }
+  MCS.p_val1&lt;- P_value(Cov.MCS_Reg)
+  MCS.p_val2&lt;- P_value(Cov.MCS_Reg2)
+  PCS.p_val1&lt;- P_value(Cov.PCS_Reg)
+  PCS.p_val2&lt;- P_value(Cov.PCS_Reg2)
+#6. R^2 for model
+  R2_Cov.MCS_Reg &lt;- performance::r2(Cov.MCS_Reg)
+  R2_Cov.PCS_Reg &lt;- performance::r2(Cov.PCS_Reg)
+
+#7. Confidence intervals
+  
+  MCS.OR.CI_IvA &lt;- paste(round(OR_Cov.MCS_Reg[2,7],2), &quot;(&quot;,round(CI_Cov.MCS_Reg[7,3],2),&quot;-&quot;, round(CI_Cov.MCS_Reg[7,4],2),&quot;)&quot;)
+  MCS.OR.CI_IvM &lt;- paste(round(OR_Cov.MCS_Reg[1,7],2), &quot;(&quot;,round(CI_Cov.MCS_Reg[7,1],2),&quot;-&quot;, round(CI_Cov.MCS_Reg[7,2],2),&quot;)&quot;)
+  MCS.OR.CI_AvM &lt;- paste(round(OR_Cov.MCS_Reg2[2,7],2),&quot;(&quot;,round(CI_Cov.MCS_Reg2[7,3],2),&quot;-&quot;, round(CI_Cov.MCS_Reg2[7,4],2),&quot;)&quot;)
+  
+    PCS.OR.CI_IvA &lt;- paste(round(OR_Cov.PCS_Reg[2,7],2), &quot;(&quot;,round(CI_Cov.PCS_Reg[7,3],2),&quot;-&quot;, round(CI_Cov.PCS_Reg[7,4],2),&quot;)&quot;)
+  PCS.OR.CI_IvM &lt;- paste(round(OR_Cov.PCS_Reg[1,7],2), &quot;(&quot;,round(CI_Cov.PCS_Reg[7,1],2),&quot;-&quot;, round(CI_Cov.PCS_Reg[7,2],2),&quot;)&quot;)
+  PCS.OR.CI_AvM &lt;- paste(round(OR_Cov.PCS_Reg2[2,7],2),&quot;(&quot;,round(CI_Cov.PCS_Reg2[7,3],2),&quot;-&quot;, round(CI_Cov.PCS_Reg2[7,4],2),&quot;)&quot;)
+
+#### Part 2. Make the table and export 
+
+#1. Create data frame
+SF8_OR_tab &lt;-  data.frame(cbind(
+  variable = c(&quot;MCS&quot;,&quot;PCS&quot;),
+  IvA_ODDS =c(MCS.OR.CI_IvA,PCS.OR.CI_IvA),
+  IvA_p = c(round(MCS.p_val1[2,6],4),round(PCS.p_val1[2,6],4)),
+  IvM_ODDS = c(MCS.OR.CI_IvM,PCS.OR.CI_IvM),
+  IvM_p =  c(round(MCS.p_val1[1,6],4),round(PCS.p_val1[1,6],4)),
+  AvM_ODDS = c(MCS.OR.CI_AvM,PCS.OR.CI_AvM),
+  AvM_p =  c(round(MCS.p_val2[2,6],4),round(PCS.p_val2[2,6],4))
+))
+
+#2. create the row for the R2
+  variable = paste(&quot;Block 2 MCS R^2 =&quot;, round((R2_Cov.MCS_Reg[[1]]*100),3),&quot;%&quot;)
+  R2TAB2&lt;-data.frame(cbind(
+                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
+                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
+
+  variable = paste(&quot;Block 2 PCS R^2 =&quot;, round((R2_Cov.PCS_Reg[[1]]*100),3),&quot;%&quot;)
+  R2TAB3&lt;-data.frame(cbind(
+                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
+                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
+#3. Bind the stuff together
+  SF8_OR_tab &lt;- rbind(R2TAB2,SF8_OR_tab[1,],R2TAB3,SF8_OR_tab[2,])
+  Full_OR_tab &lt;- rbind(cov_OR_tab,SF8_OR_tab)
+  
+#4. Export
+  write_csv(SF8_OR_tab,&quot;~/Desktop/Coding/data/SF8.cov_OR_tab.csv&quot;)
+  write_csv(Full_OR_tab, &quot;~/Desktop/Coding/data/SF8.cov_OR_tab.csv&quot;)</code></pre>
+<pre class="r"><code>  knitr::kable(Full_OR_tab) %&gt;%
+    kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+IvA_ODDS
+</th>
+<th style="text-align:left;">
+IvA_p
+</th>
+<th style="text-align:left;">
+IvM_ODDS
+</th>
+<th style="text-align:left;">
+IvM_p
+</th>
+<th style="text-align:left;">
+AvM_ODDS
+</th>
+<th style="text-align:left;">
+AvM_p
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Block 1 R^2 = 2.642 %
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+Age
+</td>
+<td style="text-align:left;">
+0.99 ( 0.98 - 0.99 )
+</td>
+<td style="text-align:left;">
+3e-04
+</td>
+<td style="text-align:left;">
+1 ( 0.99 - 1.01 )
+</td>
+<td style="text-align:left;">
+0.4526
+</td>
+<td style="text-align:left;">
+1.02 ( 1.01 - 1.02 )
+</td>
+<td style="text-align:left;">
+1e-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+CollegeSome_Colege
+</td>
+<td style="text-align:left;">
+1.8 ( 1.41 - 2.29 )
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1.11 ( 0.85 - 1.43 )
+</td>
+<td style="text-align:left;">
+0.4483
+</td>
+<td style="text-align:left;">
+0.62 ( 0.46 - 0.82 )
+</td>
+<td style="text-align:left;">
+9e-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+Income_60k_plusOVer_60k
+</td>
+<td style="text-align:left;">
+1.28 ( 1.09 - 1.5 )
+</td>
+<td style="text-align:left;">
+0.002
+</td>
+<td style="text-align:left;">
+1.25 ( 1.04 - 1.51 )
+</td>
+<td style="text-align:left;">
+0.0184
+</td>
+<td style="text-align:left;">
+0.98 ( 0.81 - 1.18 )
+</td>
+<td style="text-align:left;">
+0.8173
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:left;">
+YN_workWorking
+</td>
+<td style="text-align:left;">
+0.78 ( 0.65 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.0084
+</td>
+<td style="text-align:left;">
+0.76 ( 0.61 - 0.95 )
+</td>
+<td style="text-align:left;">
+0.0134
+</td>
+<td style="text-align:left;">
+0.97 ( 0.78 - 1.2 )
+</td>
+<td style="text-align:left;">
+0.7914
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+BMI
+</td>
+<td style="text-align:left;">
+0.93 ( 0.91 - 0.94 )
+</td>
+<td style="text-align:left;">
+3e-04
+</td>
+<td style="text-align:left;">
+0.97 ( 0.95 - 0.98 )
+</td>
+<td style="text-align:left;">
+0.4526
+</td>
+<td style="text-align:left;">
+1.04 ( 1.02 - 1.06 )
+</td>
+<td style="text-align:left;">
+1e-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:left;">
+Block 2 MCS R^2 = 3.159 %
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+22
+</td>
+<td style="text-align:left;">
+MCS
+</td>
+<td style="text-align:left;">
+1.03 ( 1.02 - 1.05 )
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1.02 ( 1.01 - 1.03 )
+</td>
+<td style="text-align:left;">
+1e-04
+</td>
+<td style="text-align:left;">
+0.99 ( 0.97 - 1 )
+</td>
+<td style="text-align:left;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+31
+</td>
+<td style="text-align:left;">
+Block 2 PCS R^2 = 5.217 %
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+21
+</td>
+<td style="text-align:left;">
+PCS
+</td>
+<td style="text-align:left;">
+1.06 ( 1.05 - 1.07 )
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1.04 ( 1.03 - 1.05 )
+</td>
+<td style="text-align:left;">
+0.037
+</td>
+<td style="text-align:left;">
+0.98 ( 0.97 - 0.99 )
+</td>
+<td style="text-align:left;">
+1e-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="block-3-the-multivaraite-multinomial-function"
+class="section level4">
+<h4>Block 3: The Multivaraite Multinomial Function</h4>
+<p>The final step in my analysis was to run the full multinomial model
+so I can see how the health conditions are associated with physical
+activity level after controling for covariates. The following
+<code>MultiThesis()</code> function does the following 1. Runs the 2
+different multinomial models using <a
+href="https://www.rdocumentation.org/packages/nnet/versions/7.3-18/topics/multinom">multinom()</a>
++ Physical health condtions include the MCS + Mental health conditions
+include the PCS 2. Manually calculates the coefficients <em>B</em>, the
+odds ratios (OR) + 95% Confideince interval (95% CI), and <em>p</em>
+values 3. Extracts respective values for each type of comparison (e.g.,
+sufficiently active vs moderatly active) 4. Returns respective values as
+a row in a dataframe which can be compiled into a larger data fram per
+comparison</p>
+<pre class="r"><code># Multivariate Logistic Multinomial Regression Function
+
+MultiThesis&lt;-function(Data,condition,string,type,contrast){
+
+#1. run model 1
+  if(type == &quot;PHC&quot;){
+  df &lt;- multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
+  }
+  if(type == &quot;MHC&quot;){ df &lt;- multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
+  }
+#2 Specify the reference group2
+  Data$Ex_3cat_act &lt;- relevel(Data$Ex_3cat, ref = &quot;Active&quot;)
+#3. run model 2
+  if(type == &quot;PHC&quot;){
+   df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Active&quot;) ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
+  }
+  if(type == &quot;MHC&quot;){ 
+    df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Active&quot;) ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
+  }
+#4 Coefficients 
+  coefs_df &lt;- abs(coef(df))
+  coefs_df2 &lt;- abs(coef(df2))
+#5. Odds ratio
+  OR_df &lt;- exp(coef(df))
+  OR_df2 &lt;- exp(coef(df2))
+#6. OR 95% CI
+  CI_df &lt;- data.frame(exp(confint(df)))
+  CI_df2 &lt;- data.frame(exp(confint(df2)))
+#7. P value function
+  P_value &lt;- function(model) {
+  z &lt;- summary(model)$coefficients/summary(model)$standard.errors
+  p &lt;- (1 - pnorm(abs(z), 0, 1)) * 2
+  return(p[,2])
+  }
+#8 P value 
+  p_val1&lt;- P_value(df)
+  p_val2&lt;- P_value(df2)
+
+#10 Insufficient vs Moderate data frame
+  if(contrast == &quot;Ins_Mod&quot;){
+    variable  = string 
+    statistic = coefs_df[[3]]
+    estimate  = OR_df[[3]]
+    conf.low = CI_df[2,1]
+    conf.high = CI_df[2,2]
+    ci &lt;- paste(round(OR_df[[3]],2), &quot;(&quot;,round(CI_df[2,1],2),&quot;-&quot;, round(CI_df[2,2],2),&quot;)&quot;)
+    p.value = p_val1[[1]]
+    r2_change = 0
+    output &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+  }
+#11 Insufficient vs Active datafraame
+  if(contrast == &quot;Ins_Act&quot;){
+    variable  = string
+    statistic = coefs_df[[4]]
+    estimate  = OR_df[[4]]
+    conf.low = CI_df[2,3]
+    conf.high = CI_df[2,4]
+    ci &lt;- paste(round(OR_df[[4]],2), &quot;(&quot;,round(CI_df[2,3],2),&quot;-&quot;, round(CI_df[2,4],2),&quot;)&quot;)
+    p.value = p_val1[[2]]
+    r2_change = 0
+    output &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+    }
+#12 Active vs Moderate table 
+  if(contrast == &quot;Act_Mod&quot;){
+    variable  = string  
+    statistic = coefs_df2[[4]]
+    estimate  = OR_df2[[4]]
+    conf.low = CI_df2[2,3]
+    conf.high = CI_df2[2,4]
+    ci &lt;- paste(round(OR_df2[[4]],2),&quot;(&quot;,round(CI_df2[2,3],2),&quot;-&quot;, round(CI_df2[2,4],2),&quot;)&quot;)
+    p.value = p_val2[[2]]
+    r2_change = 0
+    output &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))
+  }
+  return(output)
+}
+
+#Its done!</code></pre>
+</div>
+<div id="r2-change" class="section level4">
+<h4>R^2 Change</h4>
+<p>Before we can create the dataframes with the multinomial regession
+output, I need to find the R^2 change for all of the variables. The
+following function allows us to look at the <a
+href="https://easystats.github.io/performance/reference/r2.html">R^2
+change</a> between the covariates and the IV within the multinomial
+model. As this is a multinomial model, the R^2 change is only observed
+for the model as a whole. I created the <code>r2_chan()</code> function
+to do the following: 1. Run a multinomial model without the predictor
+(i.e., just covariates) and with the predictor (i.e., the full model) 2.
+Calculate the R^2 for both models, and find the difference between the
+covariates and full model. 3. turn this R^2 change into a percentage,
+and save it as a string with the % sign.</p>
+<pre class="r"><code>#assign the variable to 0
+r2_change = 0
+
+#create the function 
+  r2_chan&lt;-function(condition){
+  multi_cov&lt;-multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;) ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+  df &lt;-multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;) ~ condition + Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+Delta &lt;-  (r2(df)[[1]] -  r2(multi_cov)[[1]])*100
+if(Delta &gt;= 0.01){
+output &lt;- paste(round(Delta,2), &quot;%&quot;)
+}
+if(Delta &lt; 0.01){
+output &lt;- &quot;&lt; 0.01 %&quot;
+}
+return(output)
+  }</code></pre>
+<p>Now we get to run the <code>r2_chan()</code> function for all of the
+variables. The code below compiles a data frame of the
+<code>R2CHANGE</code> for each variable within each block of the step
+wise regression.</p>
+<pre class="r"><code># Block 1: Covariates
+    R2CHANGE &lt;- NA
+    R2CHANGE  &lt;- rbind(R2CHANGE,NA,NA,NA,NA)
+# Block 2:  MCS / PCS 
+  #MCS
+    MCS_R2 = 
+    R2CHANGE  &lt;- rbind(R2CHANGE,NA,
+                       paste(round(((r2(Cov.MCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100),2), &quot;%&quot;))
+  #PCS
+    R2CHANGE  &lt;-rbind(R2CHANGE,NA,
+                      paste(round(((r2(Cov.PCS_Reg)[[1]] - r2(Cov_Reg)[[1]])*100),2), &quot;%&quot;),
+                      NA)
+    
+# Block 3: run the function for all predictors
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Any_Disability)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Arthritis)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Athsma)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Cancer)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Chron_pain )[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Diabetes )[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_atk )[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Hrt_dis)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_chol)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$High_bld_press)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Kid_dis)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Liv_dis)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Migrane)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$MS)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Osteoporosis)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Rhum_arth)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$Stroke)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_AUD)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_DUD)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_MDD)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_NicotineDep)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_PTSD)[[1]])
+    R2CHANGE &lt;- rbind(R2CHANGE,r2_chan(thesis_NHRVS$LT_Suicidal)[[1]])</code></pre>
+<p>Lastly, we convert <code>R2CHANGE</code> to a dataframe and export it
+as a CSV. You can see the dataframe below.</p>
+<pre class="r"><code>R2CHANGE&lt;-data.frame(R2CHANGE)
+  knitr::kable(R2CHANGE) %&gt;%
+          kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+R2CHANGE
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+R2CHANGE
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.1
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.2
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.3
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.4
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.5
+</td>
+<td style="text-align:left;">
+0.52 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.6
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.7
+</td>
+<td style="text-align:left;">
+2.58 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.8
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.9
+</td>
+<td style="text-align:left;">
+0.65 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.10
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.11
+</td>
+<td style="text-align:left;">
+0.16 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.12
+</td>
+<td style="text-align:left;">
+0.04 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.13
+</td>
+<td style="text-align:left;">
+0.25 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.14
+</td>
+<td style="text-align:left;">
+0.14 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.15
+</td>
+<td style="text-align:left;">
+0.09 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.16
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.17
+</td>
+<td style="text-align:left;">
+0.11 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.18
+</td>
+<td style="text-align:left;">
+0.09 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.19
+</td>
+<td style="text-align:left;">
+0.06 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.20
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.21
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.22
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.23
+</td>
+<td style="text-align:left;">
+0.08 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.24
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.25
+</td>
+<td style="text-align:left;">
+0.12 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.26
+</td>
+<td style="text-align:left;">
+0.05 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.27
+</td>
+<td style="text-align:left;">
+0.11 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.28
+</td>
+<td style="text-align:left;">
+0.12 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.29
+</td>
+<td style="text-align:left;">
+0.21 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.30
+</td>
+<td style="text-align:left;">
+0.02 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X.31
+</td>
+<td style="text-align:left;">
+0.07 %
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>write_csv(R2CHANGE,&quot;~/Desktop/Coding/data/R2change.csv&quot;)</code></pre>
+<p>We have the R^2 change values for each value, but for the table. I
+want to know what the the range of R2 for the full model within block 3.
+The highest and lowest values are for multiple socrosis (lowest R^2) and
+Lifetime nictotine dependence (highest R^2)</p>
+<pre class="r"><code># Lowest R2 = MS
+r2(multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ MS + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS))</code></pre>
+<pre><code>## # weights:  27 (16 variable)
+## initial  value 3897.876400 
+## iter  10 value 3676.884042
+## iter  20 value 3633.802638
+## final  value 3633.801616 
+## converged</code></pre>
+<pre><code>## # R2 for Generalized Linear Regression
+##   McFadden&#39;s R2: 0.032</code></pre>
+<pre class="r"><code># Highest R2 =  LT_NicotineDep
+
+r2(multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ LT_NicotineDep + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS))</code></pre>
+<pre><code>## # weights:  27 (16 variable)
+## initial  value 3897.876400 
+## iter  10 value 3583.526084
+## iter  20 value 3552.954623
+## final  value 3552.953989 
+## converged</code></pre>
+<pre><code>## # R2 for Generalized Linear Regression
+##   McFadden&#39;s R2: 0.053</code></pre>
+</div>
+</div>
+<div id="run-the-multithesis-function" class="section level2">
+<h2>Run the <code>MultiThesis()</code> function</h2>
+<p>Now that we have created our function, we can use it to make our data
+frames for each contrast. Being that the function just creates the
+values needed for each condition, we still need to add it to the
+exsisting data frame (i.e.,rbind())</p>
+<div id="insufficient-vs-moderate-dataframe" class="section level3">
+<h3>Insufficient vs Moderate Dataframe</h3>
+<pre class="r"><code>### Physical Health Conditions 
+Ins_Mod = 0
+#1. Any Disability
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,&quot;Any Disability&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#2. Arthritis
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Arthritis,&quot;Arthritis&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#3. Asthma
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Athsma,&quot;Athsma&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#4. Cancer
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Cancer,&quot;Cancer&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#5. Chronic Pain
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Chron_pain,&quot;Chronic Pain&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#6. Diabetes
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Diabetes,&quot;Diabetes&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#7. Heart Attack
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_atk,&quot;Heart Attack&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#8. Heart Disease
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Hrt_dis,&quot;Heart Disease&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#9. High Cholesterol
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_chol,&quot;High Cholesterol&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#10. Hypertension
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$High_bld_press,&quot;Hypertension&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#11. Kidney Disease
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Kid_dis,&quot;Kidney Disease&quot;,&quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#12. Liver Disease
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Liv_dis,&quot;Liver Disease&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#13. Migrane
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Migrane,&quot;Migrane&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#14. MS
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$MS,&quot;MS&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#15. Osteoporosis
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Osteoporosis,&quot;Osteoporosis&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#16. Rheumatoid Arthritis
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Rhum_arth,&quot;RA&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+#17. Stroke
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$Stroke,&quot;Stroke&quot;, &quot;PHC&quot;, &quot;Ins_Mod&quot;))
+### Mental Health Conditions
+#18. Alcohol Use Disorder
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_AUD,&quot;AUD&quot;, &quot;MHC&quot;, &quot;Ins_Mod&quot;))
+#19. Drug Use Disorder
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_DUD,&quot;DUD&quot;, &quot;MHC&quot;, &quot;Ins_Mod&quot;))
+#20. Major Depressive Disorder 
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_MDD,&quot;MDD&quot;, &quot;MHC&quot;, &quot;Ins_Mod&quot;))
+#21 Nicotine Dependence 
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep,&quot;Nicotine Dep&quot;, &quot;MHC&quot;, &quot;Ins_Mod&quot;))
+#22 Posttraumatic Stress disorder
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,&quot;PTSD&quot;, &quot;MHC&quot;, &quot;Ins_Mod&quot;))
+#23. Suicidality
+Ins_Mod&lt;-rbind(Ins_Mod,MultiThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,&quot;Suicidality&quot;, &quot;MHC&quot;, &quot;Ins_Mod&quot;))
+Ins_Mod</code></pre>
+<p>We’ve now compiled all of our helath conditions and added them into
+the dataframe. However, we still have that pesky row of zeros. We can
+use negative indexing to remove this row from the dataframe leaving us
+with just the stuff we care about.</p>
+<pre class="r"><code>Ins_Mod &lt;- Ins_Mod[-(1),]</code></pre>
+<p>We can now add the R^2 change to the dataframe.</p>
+<pre class="r"><code>R2_Conditions&lt;- R2CHANGE[11:33,]
+Ins_Mod$r2_change &lt;- R2_Conditions
+knitr::kable(Ins_Mod[1:3,]) %&gt;%
+    kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+statistic
+</th>
+<th style="text-align:left;">
+estimate
+</th>
+<th style="text-align:left;">
+conf.low
+</th>
+<th style="text-align:left;">
+conf.high
+</th>
+<th style="text-align:left;">
+ci
+</th>
+<th style="text-align:left;">
+p.value
+</th>
+<th style="text-align:left;">
+r2_change
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+Any Disability
+</td>
+<td style="text-align:left;">
+0.471580584343876
+</td>
+<td style="text-align:left;">
+0.624015179776385
+</td>
+<td style="text-align:left;">
+0.475788279165653
+</td>
+<td style="text-align:left;">
+0.818420632963471
+</td>
+<td style="text-align:left;">
+0.62 ( 0.48 - 0.82 )
+</td>
+<td style="text-align:left;">
+0.000654183824832177
+</td>
+<td style="text-align:left;">
+0.65 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+Arthritis
+</td>
+<td style="text-align:left;">
+0.0253984833697793
+</td>
+<td style="text-align:left;">
+0.974921344671965
+</td>
+<td style="text-align:left;">
+0.807302237988491
+</td>
+<td style="text-align:left;">
+1.17734298701466
+</td>
+<td style="text-align:left;">
+0.97 ( 0.81 - 1.18 )
+</td>
+<td style="text-align:left;">
+0.791885208764693
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+Athsma
+</td>
+<td style="text-align:left;">
+0.340659436074763
+</td>
+<td style="text-align:left;">
+0.711301110459597
+</td>
+<td style="text-align:left;">
+0.539141100312293
+</td>
+<td style="text-align:left;">
+0.938435725727437
+</td>
+<td style="text-align:left;">
+0.71 ( 0.54 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.015980219803454
+</td>
+<td style="text-align:left;">
+0.16 %
+</td>
+</tr>
+</tbody>
+</table>
+<p>Now repeate that step for the other 2 comparisons!</p>
+</div>
+</div>
+<div id="export-tables-to-csv" class="section level2">
+<h2>Export Tables to CSV</h2>
+<pre class="r"><code>write_csv(Ins_Mod, &quot;~/Desktop/Coding/data/Ins_Mod.csv&quot;)
+write_csv(Ins_Act, &quot;~/Desktop/Coding/data/Ins_Act.csv&quot;)
+write_csv(Act_Mod, &quot;~/Desktop/Coding/data/Act_Mod.csv&quot;)</code></pre>
+<div id="create-tables-for-multinomial-logistic-regression-output"
+class="section level3">
+<h3>Create Tables for Multinomial Logistic Regression Output</h3>
+<p>We have everything we need for our final table output!</p>
+<pre class="r"><code>#1. Import tables
+   r2_change &lt;- read_csv(&quot;~/Desktop/Coding/data/R2change.csv&quot;)
+   cov.SF8_OR_tab &lt;- read.csv(&quot;~/Desktop/Coding/data/SF8.cov_OR_tab.csv&quot;)
+   Ins_Mod &lt;- read_csv(&quot;~/Desktop/Coding/data/Ins_Mod.csv&quot;)
+   Ins_Act &lt;- read_csv(&quot;~/Desktop/Coding/data/Ins_Act.csv&quot;)
+   Act_Mod &lt;- read_csv( &quot;~/Desktop/Coding/data/Act_Mod.csv&quot;)</code></pre>
+<pre class="r"><code>#2. Create dataframes to be merged.
+    OR_Table = data.frame(
+      Ins_Act$variable, Ins_Act$ci, Ins_Mod$ci, Act_Mod$ci,Act_Mod$r2_change
+      )
+    colnames(OR_Table) &lt;- c(&quot;Variable&quot;,&quot;IvA_ODDS&quot;,
+                          &quot;IvM_ODDS&quot;, &quot;AvM_ODDS&quot;,
+                          &quot;R2_Change&quot;)
+    
+#3. Create a block 3 row
+  Block_3 = cbind(
+    Variable = &quot;Block 3: Health Conditions R^2 range = 0.032 - 0.052&quot;,
+    IvA_ODDS = NA,
+    IvM_ODDS = NA,
+    AvM_ODDS = NA,
+    R2_Change = NA
+  )
+
+#4. pull out values from covariates table
+  Cov_table = data.frame(
+    Full_OR_tab$variable,
+    Full_OR_tab$IvA_ODDS, 
+    Full_OR_tab$IvM_ODDS,
+    Full_OR_tab$AvM_ODDS
+  )
+  Cov_table$R2_Change = NA
+  colnames(Cov_table) &lt;- c(&quot;Variable&quot;,&quot;IvA_ODDS&quot;,
+                          &quot;IvM_ODDS&quot;, &quot;AvM_ODDS&quot;,
+                          &quot;R2_Change&quot;)
+
+#5. Merge all the data frames
+  OR_Table &lt;- rbind(Cov_table,Block_3,OR_Table)
+
+#6. update R2 change df and add it to OR tab
+  r2_change = rbind(r2_change[1:6,],NA,r2_change[7:33,])
+  OR_Table &lt;- cbind(OR_Table[,1:4],r2_change)
+  
+#6. Rename columns for table 
+  colnames(OR_Table) &lt;- c(&quot;Variable&quot;,&quot;Insufficient vs Sufficient ORs&quot;,
+                          &quot;Insufficient vs Moderate ORs&quot;, &quot;Active vs Moderate ORs&quot;, &quot;R^2 Change&quot;)
+  
+  
+#7. View Table
+    knitr::kable(OR_Table) %&gt;%
+          kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Variable
+</th>
+<th style="text-align:left;">
+Insufficient vs Sufficient ORs
+</th>
+<th style="text-align:left;">
+Insufficient vs Moderate ORs
+</th>
+<th style="text-align:left;">
+Active vs Moderate ORs
+</th>
+<th style="text-align:left;">
+R^2 Change
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Block 1 R^2 = 2.642 %
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Age
+</td>
+<td style="text-align:left;">
+0.99 ( 0.98 - 0.99 )
+</td>
+<td style="text-align:left;">
+1 ( 0.99 - 1.01 )
+</td>
+<td style="text-align:left;">
+1.02 ( 1.01 - 1.02 )
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CollegeSome_Colege
+</td>
+<td style="text-align:left;">
+1.8 ( 1.41 - 2.29 )
+</td>
+<td style="text-align:left;">
+1.11 ( 0.85 - 1.43 )
+</td>
+<td style="text-align:left;">
+0.62 ( 0.46 - 0.82 )
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Income_60k_plusOVer_60k
+</td>
+<td style="text-align:left;">
+1.28 ( 1.09 - 1.5 )
+</td>
+<td style="text-align:left;">
+1.25 ( 1.04 - 1.51 )
+</td>
+<td style="text-align:left;">
+0.98 ( 0.81 - 1.18 )
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+YN_workWorking
+</td>
+<td style="text-align:left;">
+0.78 ( 0.65 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.76 ( 0.61 - 0.95 )
+</td>
+<td style="text-align:left;">
+0.97 ( 0.78 - 1.2 )
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BMI
+</td>
+<td style="text-align:left;">
+0.93 ( 0.91 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.97 ( 0.95 - 0.98 )
+</td>
+<td style="text-align:left;">
+1.04 ( 1.02 - 1.06 )
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Block 2 MCS R^2 = 3.159 %
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MCS
+</td>
+<td style="text-align:left;">
+1.03 ( 1.02 - 1.05 )
+</td>
+<td style="text-align:left;">
+1.02 ( 1.01 - 1.03 )
+</td>
+<td style="text-align:left;">
+0.99 ( 0.97 - 1 )
+</td>
+<td style="text-align:left;">
+0.52 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Block 2 PCS R^2 = 5.217 %
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PCS
+</td>
+<td style="text-align:left;">
+1.06 ( 1.05 - 1.07 )
+</td>
+<td style="text-align:left;">
+1.04 ( 1.03 - 1.05 )
+</td>
+<td style="text-align:left;">
+0.98 ( 0.97 - 0.99 )
+</td>
+<td style="text-align:left;">
+2.58 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Block 3: Health Conditions R^2 range = 0.032 - 0.052
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Any Disability
+</td>
+<td style="text-align:left;">
+0.53 ( 0.42 - 0.67 )
+</td>
+<td style="text-align:left;">
+0.62 ( 0.48 - 0.82 )
+</td>
+<td style="text-align:left;">
+1.17 ( 0.87 - 1.58 )
+</td>
+<td style="text-align:left;">
+0.65 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Arthritis
+</td>
+<td style="text-align:left;">
+1.14 ( 0.97 - 1.34 )
+</td>
+<td style="text-align:left;">
+0.97 ( 0.81 - 1.18 )
+</td>
+<td style="text-align:left;">
+0.85 ( 0.71 - 1.03 )
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Athsma
+</td>
+<td style="text-align:left;">
+0.75 ( 0.59 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.71 ( 0.54 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.95 ( 0.71 - 1.28 )
+</td>
+<td style="text-align:left;">
+0.16 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cancer
+</td>
+<td style="text-align:left;">
+1.18 ( 0.97 - 1.44 )
+</td>
+<td style="text-align:left;">
+0.98 ( 0.78 - 1.24 )
+</td>
+<td style="text-align:left;">
+0.83 ( 0.66 - 1.05 )
+</td>
+<td style="text-align:left;">
+0.04 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chronic Pain
+</td>
+<td style="text-align:left;">
+0.79 ( 0.66 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.73 ( 0.59 - 0.9 )
+</td>
+<td style="text-align:left;">
+0.93 ( 0.74 - 1.16 )
+</td>
+<td style="text-align:left;">
+0.25 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Diabetes
+</td>
+<td style="text-align:left;">
+0.75 ( 0.61 - 0.91 )
+</td>
+<td style="text-align:left;">
+0.93 ( 0.74 - 1.16 )
+</td>
+<td style="text-align:left;">
+1.24 ( 0.98 - 1.57 )
+</td>
+<td style="text-align:left;">
+0.14 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Heart Attack
+</td>
+<td style="text-align:left;">
+0.7 ( 0.52 - 0.94 )
+</td>
+<td style="text-align:left;">
+0.84 ( 0.61 - 1.17 )
+</td>
+<td style="text-align:left;">
+1.2 ( 0.84 - 1.72 )
+</td>
+<td style="text-align:left;">
+0.09 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Heart Disease
+</td>
+<td style="text-align:left;">
+0.89 ( 0.71 - 1.11 )
+</td>
+<td style="text-align:left;">
+1.01 ( 0.79 - 1.29 )
+</td>
+<td style="text-align:left;">
+1.13 ( 0.87 - 1.47 )
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+High Cholesterol
+</td>
+<td style="text-align:left;">
+0.82 ( 0.7 - 0.95 )
+</td>
+<td style="text-align:left;">
+0.95 ( 0.79 - 1.15 )
+</td>
+<td style="text-align:left;">
+1.17 ( 0.97 - 1.41 )
+</td>
+<td style="text-align:left;">
+0.11 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hypertension
+</td>
+<td style="text-align:left;">
+0.82 ( 0.7 - 0.97 )
+</td>
+<td style="text-align:left;">
+0.83 ( 0.68 - 1 )
+</td>
+<td style="text-align:left;">
+1 ( 0.83 - 1.21 )
+</td>
+<td style="text-align:left;">
+0.09 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kidney Disease
+</td>
+<td style="text-align:left;">
+0.99 ( 0.72 - 1.35 )
+</td>
+<td style="text-align:left;">
+0.67 ( 0.45 - 1.01 )
+</td>
+<td style="text-align:left;">
+0.68 ( 0.45 - 1.04 )
+</td>
+<td style="text-align:left;">
+0.06 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Liver Disease
+</td>
+<td style="text-align:left;">
+1.14 ( 0.66 - 1.98 )
+</td>
+<td style="text-align:left;">
+1.26 ( 0.68 - 2.35 )
+</td>
+<td style="text-align:left;">
+1.1 ( 0.58 - 2.07 )
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Migrane
+</td>
+<td style="text-align:left;">
+1.16 ( 0.88 - 1.55 )
+</td>
+<td style="text-align:left;">
+1.1 ( 0.78 - 1.54 )
+</td>
+<td style="text-align:left;">
+0.94 ( 0.67 - 1.32 )
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MS
+</td>
+<td style="text-align:left;">
+1.42 ( 0.43 - 4.65 )
+</td>
+<td style="text-align:left;">
+1.25 ( 0.29 - 5.3 )
+</td>
+<td style="text-align:left;">
+0.88 ( 0.23 - 3.46 )
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Osteoporosis
+</td>
+<td style="text-align:left;">
+0.69 ( 0.49 - 0.96 )
+</td>
+<td style="text-align:left;">
+0.89 ( 0.62 - 1.3 )
+</td>
+<td style="text-align:left;">
+1.3 ( 0.88 - 1.93 )
+</td>
+<td style="text-align:left;">
+0.08 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RA
+</td>
+<td style="text-align:left;">
+1.01 ( 0.73 - 1.41 )
+</td>
+<td style="text-align:left;">
+1.15 ( 0.79 - 1.66 )
+</td>
+<td style="text-align:left;">
+1.13 ( 0.77 - 1.66 )
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Stroke
+</td>
+<td style="text-align:left;">
+0.58 ( 0.38 - 0.88 )
+</td>
+<td style="text-align:left;">
+0.83 ( 0.53 - 1.3 )
+</td>
+<td style="text-align:left;">
+1.44 ( 0.87 - 2.38 )
+</td>
+<td style="text-align:left;">
+0.12 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AUD
+</td>
+<td style="text-align:left;">
+0.97 ( 0.82 - 1.13 )
+</td>
+<td style="text-align:left;">
+1.1 ( 0.91 - 1.33 )
+</td>
+<td style="text-align:left;">
+1.14 ( 0.95 - 1.38 )
+</td>
+<td style="text-align:left;">
+0.05 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DUD
+</td>
+<td style="text-align:left;">
+0.84 ( 0.65 - 1.07 )
+</td>
+<td style="text-align:left;">
+0.83 ( 0.62 - 1.11 )
+</td>
+<td style="text-align:left;">
+0.99 ( 0.73 - 1.34 )
+</td>
+<td style="text-align:left;">
+0.11 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MDD
+</td>
+<td style="text-align:left;">
+1.03 ( 0.84 - 1.25 )
+</td>
+<td style="text-align:left;">
+1.06 ( 0.84 - 1.35 )
+</td>
+<td style="text-align:left;">
+1.04 ( 0.82 - 1.31 )
+</td>
+<td style="text-align:left;">
+0.12 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicotine Dep
+</td>
+<td style="text-align:left;">
+0.89 ( 0.72 - 1.09 )
+</td>
+<td style="text-align:left;">
+0.71 ( 0.55 - 0.91 )
+</td>
+<td style="text-align:left;">
+0.8 ( 0.62 - 1.04 )
+</td>
+<td style="text-align:left;">
+0.21 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PTSD
+</td>
+<td style="text-align:left;">
+1.38 ( 1.06 - 1.79 )
+</td>
+<td style="text-align:left;">
+1.09 ( 0.79 - 1.49 )
+</td>
+<td style="text-align:left;">
+0.79 ( 0.58 - 1.08 )
+</td>
+<td style="text-align:left;">
+0.02 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Suicidality
+</td>
+<td style="text-align:left;">
+0.94 ( 0.72 - 1.24 )
+</td>
+<td style="text-align:left;">
+1.04 ( 0.76 - 1.43 )
+</td>
+<td style="text-align:left;">
+1.1 ( 0.8 - 1.52 )
+</td>
+<td style="text-align:left;">
+0.07 %
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>#8 Export Table
+    write_csv(OR_Table,&quot;~/Desktop/Coding/data/Thesis_OR_Table.csv&quot;)</code></pre>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
