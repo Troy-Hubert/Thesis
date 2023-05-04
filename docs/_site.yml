@@ -3,6 +3,8 @@ navbar:
   title: "Masters Thesis Analyses"
   left:
     - type: inverse
+    - text: "Main Page"
+    - href: index.html
     - text: "Preliminary Statistics"
     - href: Preliminary_Stats.html
     - text: "Logistic Multinomial Regression"
