@@ -2,7 +2,8 @@ name: "Masters-Thesis-Analyses"
 navbar:
   title: "Masters Thesis Analyses"
   left:
-    - type: inverse
+    - text: "Main Page""
+    - href: index.html
     - text: "Preliminary Statistics"
     - href: Preliminary_Stats.html
     - text: "Logistic Multinomial Regression"
@@ -10,6 +11,3 @@ navbar:
     - text: "Thesis Forrest Plots"
     - href: Thesis_FP.html
 output: 
-  html_document:
-    theme: yeti
-  
