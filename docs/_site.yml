@@ -9,7 +9,4 @@ navbar:
     - href: Multinomial_Function.html
     - text: "Thesis Forrest Plots"
     - href: Thesis_FP.html
-output: 
-  html_document:
-    theme: yeti
   
