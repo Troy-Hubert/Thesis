@@ -11,6 +11,8 @@ library(dplyr)
   #CSV/CAV files
 library(haven)
   #EDA stuff
+library(ggplot2)
+  #figures
 
 ## Prepare Data For Analysis 
 
@@ -111,7 +113,7 @@ thesis_NHRVS<- thesis_NHRVS %>%
                     Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
                     Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke,
         Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
-    
+        No_Condition = ifelse(Any_MHC == 1 | Any_PHC ==1, 0,1)
     ) %>%
 mutate(thesis_NHRVS,
       #Physical health variables
@@ -227,82 +229,21 @@ thesis_NHRVS
 library(MASS)
 library(nnet)
 ```
-### Odds ratios of health conditions without covariates.
-This will help us establish if our covariates are suppressing or negatively impacting the relationship of these variabes on our dependent variable (exericse)
-```{r}
-#First make empty data frame
-variable = 0
-IM_OR = 0
-IA_OR = 0
-AM_OR = 0
-uni_check <- data.frame(variable, IA_OR, IM_OR, AM_OR)
-```
 
+### Create Tables for Multinomial Logistic Regression Output
 
-```{r}
-#univariate multinomial stuff
-uni_OR_tab<-function(Data,condition,string){
-#1. Model 1
-df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition, data = Data)
-#2. Model 2
-df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition, data = Data)
-#3. Odds ratio
-  OR_df <- exp(coef(df))
-  OR_df2 <- exp(coef(df2))
-#4. assign values 
-variable = string
-IM_OR= OR_df[[3]]
-IA_OR = OR_df[[4]]
-AM_OR = OR_df2[[4]]
-output<-data.frame(variable, IA_OR, IM_OR, AM_OR)
-#return output
-return(output)
-}
-```
-
-Run univariate function
-```{r}
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Any_Disability,"Any Disability"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Athsma,"Athsma"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Cancer,"Cancer"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Chron_pain,"Chronic Pain"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Hrt_atk,"Heart Attack"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Hrt_dis,"Heart Disease"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$High_chol,"Hypertension"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Kid_dis,"Kidney Disease"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Liv_dis,"Liver Disease"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Migrane,"Migrane"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$MS,"MS"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Osteoporosis,"Osteoporosis"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Rhum_arth,"RA"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Stroke,"Stroke"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_AUD,"AUD"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_DUD,"DUD"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_MDD,"MDD"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_NicotineDep ,"Nicotine Dep"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$LT_Suicidal ,"Arthritis"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
-uni_check<-rbind(uni_check,uni_OR_tab(thesis_NHRVS,thesis_NHRVS$Arthritis,"Arthritis"))
-uni_check<-uni_check[(-1),]
-uni_check
-```
-### Write a CSV file to store these values
-```{r}
-write.csv(uni_check,"~/Desktop/Coding/data/uni_check.csv")
-```
-
-## Odds Ratios and R^2 change tables 
-```{r}
+The code below manually creates a table for the 3 blocks of the multinomial logistic regression. 
+```{r,message=FALSE}
 #1. Import tables
   r2_change <- read_csv("~/Desktop/Coding/data/R2change.csv")
   cov.SF8_OR_tab <- read.csv("~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
   Ins_Mod <- read_csv("~/Desktop/Coding/data/Ins_Mod.csv")
   Ins_Act <- read_csv("~/Desktop/Coding/data/Ins_Act.csv")
   Act_Mod <- read_csv( "~/Desktop/Coding/data/Act_Mod.csv")
+```
 
+
+```{r}
 #2. Create dataframes to be merged.
     OR_Table = data.frame(
       Ins_Act$variable, Ins_Act$ci, Ins_Mod$ci, Act_Mod$ci,Act_Mod$r2_change
@@ -335,109 +276,17 @@ write.csv(uni_check,"~/Desktop/Coding/data/uni_check.csv")
 #5. Merge all the data frames
   OR_Table <- rbind(Cov_table,Block_3,OR_Table)
 
-```
-
-```{r}
 #6. update R2 change df and add it to OR tab
   r2_change = rbind(r2_change[1:6,],NA,r2_change[7:33,])
   OR_Table <- cbind(OR_Table[,1:4],r2_change)
-  OR_Table
 #6. Rename columns for table 
   colnames(OR_Table) <- c("Variable","Insufficient vs Sufficient ORs",
                           "Insufficient vs Moderate ORs", "Active vs Moderate ORs", "R^2 Change")
   
   
-#X. View Table
-    OR_Table
+#7. View Table
+    knitr::kable(OR_Table, format="html")
 
-#X Export Table
+#8 Export Table
     write_csv(OR_Table,"~/Desktop/Coding/data/Thesis_OR_Table.csv")
 ```
-## Odds ratios and R^2 of covariates 
-This code creates a table displaying output for covariates for the multinomial model
-
-## difference between SF8 and withouot
-```{r,results='hide'}
-library(performance)
-Cov_big<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
-Cov_big2<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
-
-Cov_big_full<-multinom(relevel(Ex_3cat,ref = "Insufficient") ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
-Cov_big2_full<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~  Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
-
-#r2 for big
-R2_Cov_big <- performance::r2(Cov_big)
-R2_Cov_big2 <- performance::r2(Cov_big2)
-
-#r2 change
-MCS_delta <-  (r2(Cov_big_full)[[1]] -  r2(Cov_big)[[1]])*100
-PCS_delta <-  (r2(Cov_big2_full)[[1]] -  r2(Cov_big2)[[1]])*100
-```
-
-So, By including MCS and PCS in the model we are explaining an additional 3% and .5% of the variance explained in exercise by the covariates.
-```{r}
-#report
-MCS_delta
-PCS_delta
-```
-
-```{r}
-### Part 1 Create values for table
-#1. Run the models
-Cov_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
-Cov_Reg<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
-
-#2. Coefficients 
-  coefs_Cov_Reg <- abs(coef(Cov_Reg))
-  coefs_Cov_Reg2 <- abs(coef(Cov_Reg2))
-#3. Odds ratio
-  OR_Cov_Reg <- exp(coef(Cov_Reg))
-  OR_Cov_Reg2 <- exp(coef(Cov_Reg2))
-
-#4. OR 95% CI
-  CI_Cov_Reg <- data.frame(exp(confint(Cov_Reg)))
-  CI_Cov_Reg2 <- data.frame(exp(confint(Cov_Reg2)))
-#5. P value 
-  P_value <- function(model) {
-  z <- summary(model)$coefficients/summary(model)$standard.errors
-  p <- (1 - pnorm(abs(z), 0, 1)) * 2
-  return(p)
-  }
-  p_val1<- P_value(Cov_Reg)
-  p_val2<- P_value(Cov_Reg2)
-#6. R^2 for model
-  R2_Cov_Reg <- performance::r2(Cov_Reg)
-  R2_Cov_Reg2 <- performance::r2(Cov_Reg2)
-
-  OR.CI_IvA <- paste(round(OR_Cov_Reg[2,2:5],2), "(",round(CI_Cov_Reg[2:5,3],2),"-", round(CI_Cov_Reg[2:5,4],2),")")
-  OR.CI_IvM <- paste(round(OR_Cov_Reg[1,2:5],2), "(",round(CI_Cov_Reg[2:5,1],2),"-", round(CI_Cov_Reg[2:5,2],2),")")
-  OR.CI_AvM <- paste(round(OR_Cov_Reg2[2,2:5],2),"(",round(CI_Cov_Reg2[2:5,3],2),"-", round(CI_Cov_Reg2[2:5,4],2),")")
-
-#### Part 2. Make the table and export 
-
-#1. Create data frame
-cov_OR_tab <-  data.frame(cbind(
-  variable = Cov_Reg$coefnames[2:length(Cov_Reg$coefnames)],
-  IvA_ODDS = OR.CI_IvA,
-  IvA_p = round(p_val1[2,2:5],4),
-  IvM_ODDS = OR.CI_IvM,
-  IvM_p = round(p_val1[1,2:5],4),
-  AvM_ODDS = OR.CI_AvM, 
-  AvM_p = round(p_val2[2,2:5],4)
-))
-#2. create the row for the R2
-  paste("Covariates R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
-  variable = paste("Covariates R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
-  R2TAB<-data.frame(cbind(
-                    variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
-                    IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
-
-#3. Bind the stuff together
-  cov_OR_tab <- rbind(R2TAB, cov_OR_tab)
-  cov_OR_tab
-
-#4. Export
-  write_csv(cov_OR_tab,"~/Desktop/Coding/data/cov_OR_tab.csv")
-```
-
-
