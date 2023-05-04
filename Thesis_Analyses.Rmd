@@ -1,0 +1,56 @@
+---
+title: "Thesis_Analyses"
+output: html_document
+date: "2023-05-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## *Associations between Physical Activity Levels and Physical and Mental Health and Illness in U.S. Military Veterans: Results from the 2019/2020 National Health and Resilience in Veterans Study* 
+
+#### Explination of code
+
+The following markdowns display the code used for my masters thesis. The code is broke up into 4 sections:
+
+1. Preliminary Stats
+    + Read in data, clean data, and prepare data for analysis
+    + Create visualiations depicting number of health conditions in each level of physical activity
+    + Create data frame of descriptive statistics (chi squaures, t tests, anovas) to examine differences between sociodemographic variables 
+2. Multinomial Function
+    + Create function to calculate multinomial regression and extracts values for coefficients, Odds ratios and 95% CIs, p values)
+    + Calculate R^2 values for univariate and multivariate regressions.
+    + Run univariate and stepwise multivariate multinomial regressions (3 blocks) for all 26 health conditions for the 3 comparisons. 
+    + Store values into data frames for univaraite and multivariate regressions.
+3. Multinomial Output
+    + Create a table that displays Odds ratios of univariate analysis 
+    + Create a table that displays Odds ratios of all blocks of the stepwise multivariate multinomial logistic regression
+4. Univaraite and Multivariate Forrest Plots
+    + Create forrest plots
+    + Create left side of the plot with variable names and ORs/ 95% CIs
+    + Create right side of the plot with p values
+    + Combine 3 plot types together
+    + Final product + explination of results
+    
+---
+## Information about the study
+
+#### **Abstract**
+**Background:** U.S. military veterans have higher rates of multiple physical and mental health conditions compared to the general population. Research suggests that higher rates of health conditions are associated with lower levels of physical activity. There is a dearth of epidemiological research on associations between physical and mental health conditions and physical activity levels in U.S. military veterans. 
+
+**Method:** The proposed study will analyze cross-sectional data from a large sample of U.S. military veterans (n = 3,989) from the 2019-2020 National Health and Resiliency in Veterans Study (NHRVS). Physical activity levels (insufficient, moderate, and sufficiently active [i.e., meeting health gudinlines]) will be assessed with the self-report Godin-Shephard Leisure-Time Physical Activity Questionnaire. Physical and mental health will be evaluated with a variety of self-report questionnaires. Prelimiary analysis will be used to examine sociodemographic and military correlates of exercise; variables with significant assocaitions with exercsie level will be included as covariates in the regressions. Multinomial logistig regressions will be used to examine the odds of being in each respective physical activity level based upon veterans reporting physical or mental health conditions
+
+**Results:** 
+
+1. _Preliminary Analysis._
+The sample reported on average 3 physical health conditions and 1 mental health condition. Age, some college education, income ≥ $60,000, current employment, physical & mental composite score (i.e., health functioning), and body mass index were associated with differences in physical activity level.
+
+2. _Univariate Multinomial Logistic Regressions._
+Veterans with a variety of physical health and mental health conditions were less likely to report sufficient physical activity compared to moderate activity. to a lesser extent, Veterans with a variety of health conditions less likely to report moderate activity compared to inficient activity. Lastly, veterans were more likely to report sufficient activity compared to moderate activity for certain health conditions.
+
+3. _Multivariate Multinomial Logistic Regressions._
+The final regression moddel (i.e., covaraites, health functioning, and health conditions) for mental and phsyical health explained 3.2% - 5.2%, respectively, of the variance in physical activity level. Compared to insufficiently active veterans, sufficiently active veterans are less likely to report any disability, asthma, chronic pain, diabetes, high cholesterol, and stroke. Sufficiently active veterans were more likly too report PTSD compared to insufficiently active veterans. Compared to insufficiently active veterans, moderately active veterans are less likely to report any disability, asthma, chronic pain, and nicotine dependence. There were no differences in the likelihood of those with any heath condition to report moderate or sufficiently active levels of physical activity.
+
+
+**Discussion:** These results suggests that veterans with health conditions are less likly to report sufficient physical activity compared to insufficient activity with a similar, but less pronounced trend for moderate activity compared to insufficient activity. More health conditions were associated with differences in physical activity level before introducing coovariates to the regression model (24 vs 11). Adding physical and mental health functioning explained variance with health conditions in physical activity level; Mental health and physical health may combine to impact veterans ability to exercise. Simply put, mental health conditions may prevent those with physical health conditions from exercising. The findings of this study align with prior work indicating a negative association of health conditions and exercise, however, certain health condition were not statistically significant. 
