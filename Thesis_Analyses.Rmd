@@ -22,11 +22,10 @@ The following markdowns display the code used for my masters thesis. The code is
     + Create function to calculate multinomial regression and extracts values for coefficients, Odds ratios and 95% CIs, p values)
     + Calculate R^2 values for univariate and multivariate regressions.
     + Run univariate and stepwise multivariate multinomial regressions (3 blocks) for all 26 health conditions for the 3 comparisons. 
-    + Store values into data frames for univaraite and multivariate regressions.
-3. Multinomial Output
     + Create a table that displays Odds ratios of univariate analysis 
     + Create a table that displays Odds ratios of all blocks of the stepwise multivariate multinomial logistic regression
-4. Univaraite and Multivariate Forrest Plots
+
+3. Univaraite and Multivariate Forrest Plots
     + Create forrest plots
     + Create left side of the plot with variable names and ORs/ 95% CIs
     + Create right side of the plot with p values

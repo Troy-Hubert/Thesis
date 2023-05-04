@@ -15,7 +15,7 @@ date: "2023-02-18"
 ```
 
 
-```{r}
+```{r, setup, message=FALSE}
 ## load up the packages we will need: 
 library(tidyverse)
 library(dplyr)
@@ -24,7 +24,9 @@ library(gt)
 library(patchwork)
 # for reordering facctors in ggplot
 library(forcats)
-## ---------------------------
+library(kableExtra)
+
+options(knitr.table.format = "html") 
 ```
 
 ## load data
@@ -44,14 +46,15 @@ Act_Mod <- read_csv( "~/Desktop/Coding/data/Act_Mod.csv")
 
 Example of data frame 
 ```{r}
-knitr::kable(Ins_Mod[1:5,], format="html")
+knitr::kable(Ins_Mod[1:5,]) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-Because GGplot likes to sort things based upon its own "standards" we need to create 
+Because `ggplot()` likes to sort things based upon its own "standards" we need to create 
 a variable (i.e., order) and manually assign the order that we want the plot and 
 values to be in. Additionally, I wanted to assign a variable that indicates which 
 ORs were significant after alpha corrections, so I created a variable (i.e., sig) 
-that we can use to color the significaant values later on.
+that we can use to color the significaant values later on. I used `mutate()` to create new variables and then manually assign the vlaues for each condition.
 ```{r}
 #create the variable within the dataframe
 Ins_Mod <- mutate(Ins_Mod, order = 0)
@@ -94,15 +97,17 @@ Ins_Mod[21,10] = 1
 ```
 
 We are going to split these conditions into a mental and physical health dataframes.
-because GGplot gets mad when we try to arrange these all together. 
+because `ggplot()` gets mad when we try to arrange these all together. Here ou can see an example of the dataframe with the order and significance. 
 ```{r}
 phc_IM <- Ins_Mod[1:17,]
 mhc_IM <- Ins_Mod[18:23,]
-knitr::kable(phc_IM, format="html")
-knitr::kable(mhc_IM, format="html")
+knitr::kable(phc_IM) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+knitr::kable(mhc_IM) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 Now we have a data frame for physical health conditions and a data frame for mental 
-health conditions. We will repeat these steps for the other 2 models.
+health conditions. We will repeat these steps for the other 2 full models, and the 3 univariate models.
 
 ```{r, include=FALSE}
 Ins_Act <- mutate(Ins_Act, order = 0)
@@ -176,8 +181,6 @@ phc_AM <- Act_Mod[1:17,]
 mhc_AM <- Act_Mod[18:23,]
 ```
 
-
-Repeat for Univaraite analysis
 ```{r,include=FALSE}
 #### INS_MOD
 #create the variable within the dataframe
@@ -218,7 +221,6 @@ Ins_Mod_Uni[10,10] = 1
 Ins_Mod_Uni[11,10] = 1
 Ins_Mod_Uni[19,10] = 1
 Ins_Mod_Uni[21,10] = 1
-Ins_Mod_Uni
 
 phc_IM_Uni <- Ins_Mod_Uni[1:17,]
 mhc_IM_Uni <- Ins_Mod_Uni[18:23,]
@@ -267,7 +269,6 @@ Ins_Act_Uni[17,10]  = 1
 Ins_Act_Uni[19,10]  = 1
 Ins_Act_Uni[20,10]  = 1
 Ins_Act_Uni[21,10] = 1
-Ins_Act_Uni
 phc_IA_Uni <- Ins_Act_Uni[1:17,]
 mhc_IA_Uni <- Ins_Act_Uni[18:23,]
 
@@ -307,7 +308,6 @@ Act_Mod_Uni <- mutate(Act_Mod_Uni, sig = 0)
 Act_Mod_Uni[6,10]  = 1
 Act_Mod_Uni[9,10] = 1
 Act_Mod_Uni[10,10] = 1
-Act_Mod_Uni
 
 phc_AM_Uni <- Act_Mod_Uni[1:17,]
 mhc_AM_Uni <- Act_Mod_Uni[18:23,]
@@ -385,11 +385,10 @@ mhc_AM_Uni_mid <- mid_Fplot(mhc_AM_Uni)
 
 We have our plots! We can interpret this as, "Compared to veterans who were are insufficient active, veterans who were moderately active were (less/no difference/more) likely to report X health condition." For these figures the blue lines indicate which health conditions are significant after alpha corrections. 
 ```{r}
-#Physical Health Conditions
-phc_IA_mid
-#Mental Health Conditions
-mhc_IA_mid
+ggpubr::ggarrange(phc_IA_mid,mhc_IA_mid, ncol =2, nrow =1)
 ```
+
+We have physical health on the left side and mental conditions on the right. You may be asking yourself, Where is the Y axis? I removed the Y axis for both plots so I could manually add the variable names and the odds ratios in the next step. 
 
 ## Left Side: labels for the forrest plot
 
@@ -548,8 +547,7 @@ mhc_AM_Uni_left<-left_FP(mhc_AM_Uni_plot,"MHC")
 
 Now we have our labels. In our labels we have the name of our conditions and the OR + 95 CI.
 ```{r}
-# Here is an example of two of the plots. 
-phc_IA_left
+phc_IA_left 
 mhc_IA_left
 ```
 
@@ -595,8 +593,7 @@ mhc_AM_Uni_right <- right_FP(mhc_AM_Uni_plot)
 
 Example of the p value output
 ```{r}
-phc_IA_right
-mhc_IA_right
+ggpubr::ggarrange(phc_IA_right,mhc_IA_right, ncol =2, nrow =1)
 ```
 
 ## Putting It Together

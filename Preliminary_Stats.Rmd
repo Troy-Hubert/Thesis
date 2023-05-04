@@ -4,8 +4,9 @@ output: html_document
 date: "2023-03-22"
 ---
 
-### Import in data
-```{r}
+```{r,setup,message=FALSE}
+options(knitr.table.format = "html") 
+
 #data stuff
 library(tidyverse)
 library(dplyr)
@@ -20,7 +21,11 @@ library(DescTools)
 library(manipulate)
 library(psych)
 library(tableone)
+library(kableExtra)
+```
 
+### Import in data
+```{r}
 ### Import dataset 
 setwd("~/Desktop/Adams_lab/SPSS_stuff")
 NHRVS_2019 <- read_sav("~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav")
@@ -224,7 +229,9 @@ thesis_NHRVS <- thesis_NHRVS %>%
   filter(!is.na(LT_DUD)) %>%
   filter(!is.na(LT_NicotineDep)) %>%
   filter(!is.na(LT_Suicidal))
-thesis_NHRVS
+ 
+kable(thesis_NHRVS[1:10,1:8]) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 ## Export new file to CSV
@@ -236,13 +243,14 @@ haven::write_sav(thesis_NHRVS,"~/Desktop/Coding/data/thesis_SPSS.sav")
 
 
 ### Descriptives of variables
-Here are some discriptive statistics and basic plots to see an overview of the data.
+Here are some discriptive statistics and basic plots to see an overview of the data. I use `table1()` to run the descriptive statistics.
 ```{r}
 # Physical activity level value (MET minutes)
 #install.packages("table1")
 
-data.frame(table1::table1(~MET_min_W + tot_MHC + tot_phc | Ex_3cat, data=thesis_NHRVS))
-
+desc_tab<-data.frame(table1::table1(~MET_min_W + tot_MHC + tot_phc | Ex_3cat, data=thesis_NHRVS))
+ knitr::kable(desc_tab) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 And some plots of the same values
@@ -250,19 +258,19 @@ And some plots of the same values
 #Plotting Met mins and Physical activity
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = MET_min_W)) +
   geom_violin()+
-  geom_boxplot(width=0.1, color="blue", alpha=0.2)
+  geom_boxplot(width=0.1, color="blue", alpha=0.2)+
   ggtitle("Met minutes per physical activity level")
 
 # Total Mental health conditions
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_MHC)) +
   geom_violin()+
-  geom_boxplot(width=0.1, color="blue", alpha=0.2)
+  geom_boxplot(width=0.1, color="blue", alpha=0.2) +
   ggtitle("Total number of physical health conditions by PA level")
 
 # Total physical health conditions
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_phc)) +
   geom_violin()+
-  geom_boxplot(width=0.1, color="blue", alpha=0.2)
+  geom_boxplot(width=0.1, color="blue", alpha=0.2)+
   ggtitle("Total number of mental health conditions by PA level")
 ```
 These descriptive are helpful for us to see how the data looks. Also it can be helpful to see what may be or not be wrong within the data
@@ -304,7 +312,8 @@ xtable2<-data.frame(xtable2)
 xtable2$condition<- NA
 diagnose<- c("No Condition","Condition")
 xtable2$condition = diagnose
-knitr::kable(xtable2[1:10,])
+knitr::kable(xtable2[1:10,]) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 ```{r,include=FALSE}
@@ -376,7 +385,8 @@ Next I manually create a long dataset. I start by creating the variable names ne
       condition_df2$Diagnosis = xtable2$condition
       names(condition_df2) <- c("Variable","Value","Ex_3cat","Diagnosis")
       
-      knitr::kable(condition_df2[1:10,])
+      knitr::kable(condition_df2[1:10,]) %>%
+         kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 
@@ -400,12 +410,12 @@ While this figure conveys what I want it to, it doesn't really help me interpret
 knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Xtabs_thesis.png")
 ```
 
-
-
-
 ## Exploratory Data Analysis (EDA)
 
 #### Associations With Exercsie
+
+The first step in our analysis is to figure out what sociodemographic / military characteristics are associated with differences in physical activity level (i.e., our dependent variable). I use `CreateTableOne()` to run the analyses as it will put everything in super nice table for me automatically. This table till tell me which covaaraites I need to use for my analysis.
+
 ```{r,results="hide"}
 library(tableone)
 EX_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
@@ -424,16 +434,26 @@ Exercise_EDA <- CreateTableOne(vars = EX_Vars, strata = "Ex_3cat", data = thesis
 full_sample<- CreateTableOne(vars = EX_Vars, data = thesis_NHRVS, 
                factorVars = EX_catVars)
 full_sample <- print(full_sample, formatOptions = list(big.mark = ","))
-
 test_tab <- print(Exercise_EDA, formatOptions = list(big.mark = ","))
-#Demo_tab <- 
-  test_tab[,1:4]
-#View(Demo_tab)
 Demo_tab <- cbind(full_sample, test_tab[,1:4])
 ```
 
+```{r}
+ knitr::kable(Demo_tab) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+This table lets us see differences between all of the variables for the exercise 
+categories. If you look to the right of the Moderate category, you'll see the 
+p-value for the tests done. The default test used by CreateTableOne are chi-squares
+for categorical variables and a t-test for continuous variables.
+
+These variables should be used for the regressions/ancovas 
+  - Age,Some_college_or_higher, Income_60K_plus, YN_work, PCS_final or MCS_final,BMI
+
 #### Associations With Health Conditions
-```{r, include=FALSE}
+Next I am going to look at how covaaraites relate to both physical health and mental health conditions. I am going to repeat the same analysis as above with `CreateTableOne()` except I am changing `strata =` to any mental health condition (`"Any_MHC`) or any physical health condition (`Any_PHC`).
+```{r,results="hide"}
 MH_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
                  "Married_Partnered", "Income_60k_plus", "YN_work", "PCS", 
                  "MCS", "Weight_kg", "BMI", "Combat_Veteran", 
@@ -448,7 +468,6 @@ MH_EDA <- CreateTableOne(vars = MH_Vars, strata = "Any_MHC", data = thesis_NHRVS
 
 
 mh_tab <- print(MH_EDA, formatOptions = list(big.mark = ","))
-mh_tab
 Demo_tab <- cbind(Demo_tab,mh_tab[,1:3])
 
 PH_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
@@ -464,29 +483,24 @@ PH_catVars     <- c("Male_Gender", "White_Race", "College",
 PH_EDA <- CreateTableOne(vars = MH_Vars, strata = "Any_PHC", data = thesis_NHRVS, 
                factorVars = MH_catVars)
 
-PH_EDA
 ph_tab <- print(PH_EDA, formatOptions = list(big.mark = ","))
 Demo_tab <- cbind(Demo_tab,ph_tab[,1:3])
 ```
 
+Now that I have created the tables, I can combine these with the physical activity level. The resulting table `Demo_tab` will be used in the paper. 
 ```{r}
 Demo_tab<- as.data.frame(Demo_tab)
-Demo_tab
+kbl(Demo_tab[1:10,]) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 write_csv(Demo_tab, "~/Desktop/Coding/data/Demo_tab_basic.csv")
 ```
 
-This table lets us see differences between all of the variables for the exercise 
-categories. If you look to the right of the Moderate category, you'll see the 
-p-value for the tests done. The default test used by CreateTableOne are chi-squares
-for categorical variables and a t-test for continuous variables.
-
-These variables should be used for the regressions/ancovas 
-  - Age,Some_college_or_higher, Income_60K_plus, YN_work, PCS_final or MCS_final,BMI
-
 ## Test of difference
-This next section is extracting the F test score and chi square test (X) values for the analysis above. These values will be used in the final demogrpahics table
+This next section is extracting the F test score, _X^2_ test, and _t_ test values for the analysis above. These values will be used in the final demogrpahics table
 
 #### Physical activity levels 
+
+Becasue some of the covariates are discrete variables while others are binary categorical/ non-binary categorical variables, I will be using `aov()` for ANOVAs, and using `summary()` to extract _F_ test, _t_ test, _X^2_ and  scores. As there is no function to run all of these together, I manually ran the analysis on all of the covariates and combined them into one table. Example of the code used for one covaraite is below:
 ```{r}
 library(gmodels)
 #### Create test of difference values and put them into a table
@@ -496,8 +510,6 @@ Age_test_act <- aov(Age~ Ex_3cat, data = thesis_NHRVS)
 test_act_vars = c('Age')
 Activity_val = c(summary(Age_test_act)[[1]]$`F value`[[1]])
 Activity_p = c(summary(Age_test_act)[[1]]$`Pr(>F)`[[1]])
-Activity_val
-Activity_p
 ```
 
 F test and chi square will be extracted for the remaining variables:
@@ -588,14 +600,13 @@ Activity_val <- append(Activity_val,summary(tot_MHC_test_act)[[1]]$`F value`[[1]
 Activity_p <- append(Activity_p,summary(tot_MHC_test_act)[[1]]$`Pr(>F)`[[1]])
 ```
 
-
+Now that we have extracted all of the values, we can create a data frame for all of the test of difference values. We use `cbind()` to combine the test of difference values with the p values.
 ```{r}
 val_df <- data.frame(test_act_vars,Activity_val)
 val_df <- cbind(val_df,Activity_p)
-val_df
 ```
-#### Physical health Conditions
-The same analysis will be conducted for these covariates by physical health condition as well. 
+#### Physical and Mental health Conditions
+The same analysis will be conducted for these covariates by physical and mental health condition as well. 
 
 ```{r,include=FALSE}
 #### Create test of difference values and put them into a table
@@ -650,10 +661,7 @@ PHC_p <- append(PHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[3]])
 Combat_Veteran_test_PHC<- xtabs(~Any_PHC+Combat_Veteran, data=thesis_NHRVS)
 PHC_val <- append(PHC_val,summary(Combat_Veteran_test_PHC)[[3]])
 PHC_p <- append(PHC_p,summary(Combat_Veteran_test_PHC)[[6]])
-```
 
-
-```{r,include=FALSE}
 #Yr5_Military
 Yr5_Military_test_PHC<- xtabs(~Any_PHC+Yr5_Military, data=thesis_NHRVS)
 PHC_val <- append(PHC_val,summary(Yr5_Military_test_PHC)[[3]])
@@ -673,13 +681,9 @@ t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)
 PHC_val <- append(PHC_val, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- append(PHC_p, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[3]])
 
-
+# Combine into one DF
 val_df <- cbind(val_df,PHC_val,PHC_p)
-val_df
-```
-#### Mental Health Conditions
 
-```{r,include=FALSE}
 #### Create test of difference values and put them into a table
 #Age
 MHC_val <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_MHC)[[1]])
@@ -751,12 +755,16 @@ MHC_val <- append(MHC_val, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[1]
 MHC_p <- append(MHC_p, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[3]])
 ```
 
+#### Combine into one table
 
+Now that we have the test of differences for our covariates by physical activity level, and physical/ mental health conditions we can combine them into one table. 
 ```{r}
+val_df <- cbind(val_df,PHC_val,PHC_p)
 val_df <- cbind(val_df,MHC_val,MHC_p)
-val_df
-```
 
+kbl(val_df) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
 
 ### Export to CSV
 ```{r}
