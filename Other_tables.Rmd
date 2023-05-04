@@ -13,6 +13,10 @@ library(haven)
   #EDA stuff
 library(ggplot2)
   #figures
+library(kableExtra)
+  #knitted tables
+
+options(knitr.table.format = "html") 
 
 ## Prepare Data For Analysis 
 
@@ -285,7 +289,8 @@ The code below manually creates a table for the 3 blocks of the multinomial logi
   
   
 #7. View Table
-    knitr::kable(OR_Table, format="html")
+    knitr::kable(OR_Table) %>%
+          kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 
 #8 Export Table
     write_csv(OR_Table,"~/Desktop/Coding/data/Thesis_OR_Table.csv")
