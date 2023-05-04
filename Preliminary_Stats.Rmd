@@ -1,10 +1,11 @@
 ---
-title: "Preliminary_Statistics_Figures"
+title: "Preliminary_Stats"
 output: html_document
 date: "2023-03-22"
 ---
 
-```{r,include=FALSE}
+### Import in data
+```{r}
 #data stuff
 library(tidyverse)
 library(dplyr)
@@ -13,15 +14,12 @@ library(haven)
 library(tableone)
   #regression stuff
 library(aod)
-
 library(gtsummary)
-#library(emmeans)
-#library(ggeffects)
-    #used for log regression
 library(lmtest)
 library(DescTools)
 library(manipulate)
 library(psych)
+library(tableone)
 
 ### Import dataset 
 setwd("~/Desktop/Adams_lab/SPSS_stuff")
@@ -75,21 +73,10 @@ thesis_NHRVS <- rename(thesis_NHRVS,
       LT_MDD = LT_MDD_Sx_only,
       LT_PTSD = LT_PCL_33
 )
+```
 
-library(tableone)
-  #regression stuff
-library(aod)
-
-library(gtsummary)
-#library(emmeans)
-#library(ggeffects)
-    #used for log regression
-library(lmtest)
-library(DescTools)
-library(manipulate)
-# We need exercsie variables that are in MET minutes, not just HCS. 
-# We also need to create demographic and health variables
-
+### Create variables, rename stuff, and remove missing cases
+```{r}
 thesis_NHRVS<- thesis_NHRVS %>%
   # First Create all of the variables
   mutate(thesis_NHRVS, 
@@ -280,69 +267,12 @@ ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_phc)) +
 ```
 These descriptive are helpful for us to see how the data looks. Also it can be helpful to see what may be or not be wrong within the data
 
-### Barcharts of physical activity level by Health condition
+## Stacked Barcharts of Physical Activity Level by Health condition
 
-The following figure shows the number of veterans in each physical activity level based upon each health condition.
-```{r}
-#create cross tab of having condition
-  AD_xtab <- xtabs(Any_Disability~Ex_3cat,data = thesis_NHRVS)
-  xtable  <- rbind(AD_xtab,xtabs(Athsma~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Arthritis~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Cancer~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Chron_pain~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Liv_dis~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Diabetes~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Hrt_dis~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Hrt_atk~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(High_chol~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(High_bld_press~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Kid_dis~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Migrane~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(MS~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Osteoporosis~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Rhum_arth~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(Stroke~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(LT_AUD~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(LT_DUD~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(LT_MDD~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(LT_PTSD~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(LT_NicotineDep~Ex_3cat,data = thesis_NHRVS))
-  xtable  <- rbind(xtable,xtabs(~LT_Suicidal +Ex_3cat,data = thesis_NHRVS)[2,])
-  xtable  <- rbind(xtable,xtabs(No_Condition~Ex_3cat,data = thesis_NHRVS))
-xtable<-data.frame(xtable)
+I wanted to create a visualiation that depicted the number of veterans with or without health conditions within each physical activity level. The following code uses `xtabs()` to run cross tab/ chi squares. I start by extracting the number of veterans, and then convert the table into long data to plot the figure. 
 
 
-#create cross tab of not having condition
-
-  AD_xtab3 <- xtabs(~Any_Disability +Ex_3cat,data = thesis_NHRVS)[1,]
-  xtable3  <- rbind(AD_xtab3,xtabs(~Athsma+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Arthritis+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Cancer+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Chron_pain+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Liv_dis+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Diabetes+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Hrt_dis+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Hrt_atk+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~High_chol+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~High_bld_press+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Kid_dis+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Migrane+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~MS+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Osteoporosis+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Rhum_arth+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~Stroke+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~LT_AUD+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~LT_DUD+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~LT_PTSD+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~LT_NicotineDep+Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~LT_Suicidal +Ex_3cat,data = thesis_NHRVS)[1,])
-  xtable3  <- rbind(xtable3,xtabs(~No_Condition+Ex_3cat,data = thesis_NHRVS)[1,])
-xtable3<-data.frame(xtable3)
-xtable3
-```
-
-With and without health conditions
+Extracting values from chi square tables. 
 ```{r}
 #table with and without health conditions
   AD_xtab2 <- xtabs(~Any_Disability +Ex_3cat,data = thesis_NHRVS)
@@ -370,16 +300,14 @@ With and without health conditions
   xtable2  <- rbind(xtable2,xtabs(~LT_Suicidal +Ex_3cat,data = thesis_NHRVS))
   xtable2  <- rbind(xtable2,xtabs(~No_Condition+Ex_3cat,data = thesis_NHRVS))
 xtable2<-data.frame(xtable2)
-xtable2
 #create a varaible for diagnosis
 xtable2$condition<- NA
 diagnose<- c("No Condition","Condition")
 xtable2$condition = diagnose
+knitr::kable(xtable2[1:10,])
 ```
 
-
-```{r}
-#2. Varaible names for table 
+```{r,include=FALSE}
   var_names = c("Any Disability",
                 "Asthma",
                 "Arthritis",
@@ -404,8 +332,12 @@ xtable2$condition = diagnose
                 "Nicotine Dep", 
                 "Suicidality",
                 "No Condition")
+```
 
 
+Next I manually create a long dataset. I start by creating the variable names needed for the long dataset. 
+```{r}
+#2. Varaible names for table 
  var_names2 = c("Any Disability","Any Disability","Asthsma","Asthsma",
                 "Arthritis", "Arthritis",
                 "Cancer","Cancer",
@@ -431,30 +363,7 @@ xtable2$condition = diagnose
                 "No Condition", "No Condition")
 
 
-#3. make data frame
- #3.1 wide dataframe (tidy data)
-  var_num <- data.frame(cbind(var_names,
-                              Insufficient = xtable$Insufficient,
-                              Moderate = xtable$Moderate,
-                              Sufficient = xtable$Active))
-  
-  #3.2 long data (needed for plot)
-      condition_df          <- var_names
-      condition_df <- data.frame(condition_df) 
-      condition_df[1:24,1]  <- var_names              
-      condition_df[25:48,1] <- var_names
-      condition_df[49:72,1] <- var_names
-      condition_df[1:24,2]  <- xtable$Insufficient
-      condition_df[1:24,3]  =  "Insufficient"
-      condition_df[25:48,2] <- xtable$Moderate
-      condition_df[25:48,3] <- "Moderate"
-      condition_df[49:72,2] <- xtable$Active
-      condition_df[49:72,3] =  "Sufficient"
-      condition_df
-      names(condition_df) <- c("Variable","Value","Ex_3cat")
-      condition_df
-      
-      #with and without conditions
+#3. make long data frame (needed for plot)
       condition_df2          <- var_names2
       condition_df2 <- data.frame(condition_df2) 
       condition_df2[1:144,1]  <- var_names2              
@@ -466,498 +375,33 @@ xtable2$condition = diagnose
       condition_df2[97:144,3] =  "Sufficient"
       condition_df2$Diagnosis = xtable2$condition
       names(condition_df2) <- c("Variable","Value","Ex_3cat","Diagnosis")
-      condition_df2
       
-      
-      #no conditions 
-      condition_df3          <- var_names
-      condition_df3 <- data.frame(condition_df3) 
-      condition_df3[1:24,1]  <- var_names              
-      condition_df3[25:48,1] <- var_names
-      condition_df3[49:72,1] <- var_names
-      condition_df3[1:24,2]  <- xtable3$Insufficient
-      condition_df3[1:24,3]  =  "Insufficient"
-      condition_df3[25:48,2] <- xtable3$Moderate
-      condition_df3[25:48,3] <- "Moderate"
-      condition_df3[49:72,2] <- xtable3$Active
-      condition_df3[49:72,3] =  "Sufficient"
-      condition_df3
-      names(condition_df3) <- c("Variable","Value","Ex_3cat")
-      condition_df3
-      
+      knitr::kable(condition_df2[1:10,])
 ```
 
+
+Now that we have the data we can plot it! I use `ggplot()` to plot the figure. As this is a bar chart I use `geom_bar()` and use `position="stack"` to make the stacked bar chart. I used `fct_reorder()` to order the chart in order of the number of veterans reporting that condition. `facet_grid()` was used to seperate the the number of veterans with and without conditions into different figures. Lastly of note, I used `coord_flip()` to put both of the figures on the Y axis. 
 ```{r}
-library(ggplot2)
-# con
-ggplot(condition_df, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
-  geom_bar(position="stack", stat="identity")+
-  ylab('Number of Veterans') +
-  xlab('Health Condition')+
-  ggtitle("Health Condition")+
-  labs(fill='Physical Activity') +
-  ylim(0,3000)+
-  theme_classic()+
-  theme(legend.position="none",
-        axis.title.y= element_blank())+
-  coord_flip() 
-
-#no con
-ggplot(condition_df3, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, desc(Value)))) + 
-  geom_bar(position="stack", stat="identity")+
-  ylab('Number of Veterans') +
-  xlab('Health Condition')+
-  labs(fill='Physical Activity') +
-  ggtitle("No Health Condition") +
-  ylim(0,4000)+
-  theme_classic()+
-  theme(legend.position="none",
-        axis.text.y= element_blank(),
-        axis.title.y= element_blank())+
-  coord_flip()
-```
-
-chi square values
-```{r}
-
-
-  AD_chi   <-  summary(xtabs(~Any_Disability +Ex_3cat,data = thesis_NHRVS))
-  chi_tab  = cbind(AD_chi[[3]],AD_chi[[6]])
-  ATH_chi  <- summary(xtabs(~Athsma+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(ATH_chi[[3]],ATH_chi[[6]]))
-  Arth_chi <- summary(xtabs(~Arthritis+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Arth_chi[[3]],Arth_chi[[6]]))
-  can_chi  <- summary(xtabs(~Cancer+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(can_chi[[3]],can_chi[[6]]))
-  CP_chi   <- summary(xtabs(~Chron_pain+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(CP_chi[[3]],CP_chi[[6]]))
-  Liv_dis_chi   <- summary(xtabs(~Liv_dis+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Liv_dis_chi[[3]],Liv_dis_chi[[6]]))
-  Diabetes_chi   <- summary(xtabs(~Diabetes+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Diabetes_chi[[3]],Diabetes_chi[[6]]))
-  Hrt_dis_chi   <- summary(xtabs(~Hrt_dis+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Hrt_dis_chi[[3]],Hrt_dis_chi[[6]]))
-  Hrt_atk_chi   <- summary(xtabs(~Hrt_atk+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Hrt_atk_chi[[3]],Hrt_atk_chi[[6]]))
-  High_chol_chi   <- summary(xtabs(~High_chol+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(High_chol_chi[[3]],High_chol_chi[[6]])) 
-  High_bld_press_chi   <- summary(xtabs(~High_bld_press+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(High_bld_press_chi[[3]],High_bld_press_chi[[6]]))
-  Kid_dis_chi   <- summary(xtabs(~Kid_dis+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Kid_dis_chi[[3]],Kid_dis_chi[[6]]))
-  Migrane_chi   <- summary(xtabs(~Migrane+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Migrane_chi[[3]],Migrane_chi[[6]]))
-  MS_chi   <- summary(xtabs(~MS+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(MS_chi[[3]],MS_chi[[6]]))
-  Osteoporosis_chi   <- summary(xtabs(~Osteoporosis+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Osteoporosis_chi[[3]],Osteoporosis_chi[[6]]))
-  Rhum_arth_chi   <- summary(xtabs(~Rhum_arth+Ex_3cat,data = thesis_NHRVS))
-  chi_tab  <- rbind(chi_tab,cbind(Rhum_arth_chi[[3]],Rhum_arth_chi[[6]]))
-  Stroke_chi   <- summary(xtabs(~Stroke+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(Stroke_chi[[3]],Stroke_chi[[6]]))
-  LT_AUD_chi   <- summary(xtabs(~LT_AUD+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(LT_AUD_chi[[3]],LT_AUD_chi[[6]]))
-  LT_DUD_chi   <- summary(xtabs(~LT_DUD+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(LT_DUD_chi[[3]],LT_DUD_chi[[6]]))
-  LT_MDD_chi   <- summary(xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(LT_MDD_chi[[3]],LT_MDD_chi[[6]]))
-  LT_PTSD_chi   <- summary(xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(LT_MDD_chi[[3]],LT_MDD_chi[[6]]))
-  LT_NicotineDep_chi   <- summary(xtabs(~LT_NicotineDep+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(LT_NicotineDep_chi[[3]],LT_NicotineDep_chi[[6]]))
-  LT_Suicidal_chi   <- summary(xtabs(~LT_Suicidal+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(LT_Suicidal_chi[[3]],LT_Suicidal_chi[[6]]))
-  No_Condition_chi   <- summary(xtabs(~No_Condition+Ex_3cat,data = thesis_NHRVS)) 
-  chi_tab  <- rbind(chi_tab,cbind(No_Condition_chi[[3]],No_Condition_chi[[6]]))
-chi_tab<-data.frame(chi_tab)
-chi_tab <- cbind(var_names,chi_tab)
-names(chi_tab) <- c("Variable","Chi.Sq","p.value")
-chi_tab
-
-write.csv(chi_tab,"~/Desktop/Coding/data/thesis_con_chi.csv")
-# gg_chi_tab <- chi_tab |>
-#       ggplot() +
-#         geom_text(aes(x = 0, y = Variable, label = Chi.Sq), hjust = 0,
-#         fontface = ifelse(chi_tab$p.value == "p-value", "bold", "plain")) +
-#         theme_void() +
-#         coord_cartesian(ylim = c(1,18))
-
-```
-
-```{r}
-# con v no con
 ggplot(condition_df2, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
   geom_bar(position="stack", stat="identity")+
-  facet_grid(~ Diagnosis)+ #fct_reorder(as.factor(Diagnosis), desc(Diagnosis)))+
+  facet_grid(~ Diagnosis)+ 
   ylab('Number of Veterans') +
   xlab('Health Condition')+
   labs(fill='Physical Activity') +
-  ggitle("No Condition")
   theme_classic()+
   theme(legend.position="none")+
-  coord_flip() 
-```
-
-
-Below is the code to create a barchart. This code was replicated for the remaining
-health conditions. 
-```{r}
-library(scales)
-#Any Physical Health Condition
-Any_PHC_plot <-ggplot(thesis_NHRVS,aes(x=Any_PHC, fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-            stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Any PHC')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-Any_PHC_plot 
-```
-
-```{r,include=FALSE}
-#Any disability
-library(scales)
-AD_Plot<- ggplot(thesis_NHRVS,aes(x=as.factor(Any_Disability), fill = as.factor(Ex_3cat))) +
-  # geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  # geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-  #          stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  geom_bar()+
-  ylab('Percent of Veterans, %') +
-  xlab('Any Disability')+
-  labs(fill='Physical Activity') +
-#  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-AD_Plot
-#Arthritis
-ARTH_Plot<- ggplot(thesis_NHRVS, aes(x=as.factor(Arthritis), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-            stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Arthritis')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Asthma
-Aths_Plot<- ggplot(thesis_NHRVS, aes(x= as.factor(Athsma), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-            stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Asthma')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#cancer
-Cancer_plot <- ggplot(thesis_NHRVS, aes(x= as.factor(Cancer), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Cancer')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Chronic Pain
-Chron_pain_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Chron_pain), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Chronic Pain')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Liver Disease
-Liv_dis_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Liv_dis), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Liver Disease')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Diabetes
-Diabetes_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Diabetes), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Diabetes')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Hrt_dis
-Hrt_dis_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Hrt_dis), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Heart Disease')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-
-#Hrt_atk
-Hrt_atk_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Hrt_atk), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Heart Attack')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#High_chol
-High_chol_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(High_chol), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('High Cholesterol')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#High_bld_press
-HBP_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(High_bld_press), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('High Blood Pressure')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-
-#Kid_dis
-KD_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Kid_dis), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Kidney Disease')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Migrane
-Migrane_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Migrane), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Migrane')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#MS
-MS_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(MS), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('MS')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Osteoporosis
-Osteo_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Osteo), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Osteoporosis')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Rhum_arth
-Rhum_arth_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Rhum_arth), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.5) +
-  ylab('Percent of Veterans, %') +
-  xlab('Rheumatoid Arthritis')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size=8)+
-  theme(legend.position="none")+
-  coord_flip()
-
-#Stroke
-Stroke_plot <- ggplot(thesis_NHRVS, aes(x=as.factor(Stroke), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-             stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('Stroke')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
   coord_flip()
 ```
 
-### Physical Health Plots
-```{r}
-library(ggpubr)
-ggarrange(AD_Plot, ARTH_Plot, Aths_Plot, Cancer_plot, 
-                   Chron_pain_plot, Liv_dis_plot, Diabetes_plot, Hrt_dis_plot,
-                   nrow = 4, ncol = 2)
-
-ggarrange(Hrt_atk_plot, High_chol_plot, HBP_plot, KD_plot, Migrane_plot, 
-                   MS_plot, Rhum_arth_plot, Stroke_plot, 
-                   nrow = 4, ncol = 2)
-
-```
-
-```{r, include=FALSE}
-Any_MHC_plot <-ggplot(thesis_NHRVS,aes(x=as.factor(Any_MHC), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-           stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('Any MHC')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
-  coord_flip()
-
-LT_MDD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_MDD), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-      stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('MDD')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
-  coord_flip()
+While this figure conveys what I want it to, it doesn't really help me interpret anything and looks bad in my opinion. I wanted to have both stacked bar charts on opposite sides of the variable names. Also I was unable to figure out how to reverse the X axis so I went into **_Illustrator_** and made the figure as I wanted it to look. You can see the final figure below!
 
 
-LT_PTSD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_PTSD), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-         stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('PTSD')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
-  coord_flip()
-
-LT_AUD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_AUD), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('AUD')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
-  coord_flip()
-
-LT_DUD_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_DUD), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('DUD')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
-  coord_flip()
-
-LT_NicotineDep_plot <-ggplot(thesis_NHRVS,aes(x= as.factor(LT_NicotineDep), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
-  geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('Nicotine Dep')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
-  coord_flip()
-
-Suicidal_plot <-
-  ggplot(thesis_NHRVS,aes(x= as.factor(LT_Suicidal), fill = as.factor(Ex_3cat))) +
-  geom_bar(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..]), position="dodge") +
- geom_text(aes( y=..count../tapply(..count.., ..x.. ,sum)[..x..], 
-                label=scales::percent(..count../tapply(..count.., ..x.. ,sum)[..x..]) ),
-                stat="count", position=position_dodge(0.9), hjust = 1.2,size=2.75) +
-  ylab('Percent of Veterans, %') +
-  xlab('Suicidal')+
-  labs(fill='Physical Activity') +
-  scale_y_continuous(labels = scales::percent) +
-  theme_classic(base_size = 8) +
-  theme(legend.position="none")+
-  coord_flip()
-
-
-
-
+```{r, echo=FALSE, fig.align = "center"}
+knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Xtabs_thesis.png")
 ```
 
 
-### Mental Health. Plots
-```{r}
-ggarrange(LT_AUD_plot, LT_DUD_plot, LT_MDD_plot, LT_NicotineDep_plot, LT_PTSD_plot,
-                   Suicidal_plot, nrow = 3, ncol = 2)
-```
+
 
 ## Exploratory Data Analysis (EDA)
 
@@ -1037,7 +481,7 @@ p-value for the tests done. The default test used by CreateTableOne are chi-squa
 for categorical variables and a t-test for continuous variables.
 
 These variables should be used for the regressions/ancovas 
-  - Age,Some_college_or_higher, Income_60K_plus, YN_work, PCS_final or MCS_final, combat veteran (maybe), weight (maybe?)
+  - Age,Some_college_or_higher, Income_60K_plus, YN_work, PCS_final or MCS_final,BMI
 
 ## Test of difference
 This next section is extracting the F test score and chi square test (X) values for the analysis above. These values will be used in the final demogrpahics table
@@ -1156,9 +600,6 @@ The same analysis will be conducted for these covariates by physical health cond
 ```{r,include=FALSE}
 #### Create test of difference values and put them into a table
 #Age
-# Age_test_PHC <- aov(Age~ Any_PHC, data = thesis_NHRVS)
-# PHC_val = c(summary(Age_test_PHC)[[1]]$`F value`[[1]])
-# PHC_p = c(summary(Age_test_PHC)[[1]]$`Pr(>F)`[[1]])
 PHC_val <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_PHC)[[3]])
 
@@ -1194,23 +635,14 @@ PHC_val <- append(PHC_val,summary(YN_work_test_PHC)[[3]])
 PHC_p <- append(PHC_p,summary(YN_work_test_PHC)[[6]])
 
 #PCS
-#PCS_test_PHC <- xtabs(PCS~ Any_PHC, data = thesis_NHRVS)
-#PHC_val <- append(PHC_val,summary(PCS_test_PHC)[[1]]$`F value`[[1]])
-#PHC_p <- append(PHC_p,summary(PCS_test_PHC)[[1]]$`Pr(>F)`[[1]])
 PHC_val <- append(PHC_val, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- append(PHC_p, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_PHC)[[3]])
 
 #MCS
-# MCS_test_PHC <- aov(MCS~ Any_PHC, data = thesis_NHRVS)
-# PHC_val <- append(PHC_val,summary(MCS_test_PHC)[[1]]$`F value`[[1]])
-# PHC_p <- append(PHC_p,summary(MCS_test_PHC)[[1]]$`Pr(>F)`[[1]])
 PHC_val <- append(PHC_val, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- append(PHC_p, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_PHC)[[3]])
 
 #BMI
-# BMI_test_PHC <- aov(BMI~ Any_PHC, data = thesis_NHRVS)
-# PHC_val <- append(PHC_val,summary(BMI_test_PHC)[[1]]$`F value`[[1]])
-# PHC_p <- append(PHC_p,summary(BMI_test_PHC)[[1]]$`Pr(>F)`[[1]])
 PHC_val <- append(PHC_val, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- append(PHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[3]])
 
@@ -1228,25 +660,16 @@ PHC_val <- append(PHC_val,summary(Yr5_Military_test_PHC)[[3]])
 PHC_p <- append(PHC_p,summary(Yr5_Military_test_PHC)[[6]])
 
 #TOTAL TRAUMAS
-# TOTAL_TRAUMAS_test_PHC <- aov(TOTAL_TRAUMAS~ Any_PHC, data = thesis_NHRVS)
-# PHC_val <- append(PHC_val,summary(TOTAL_TRAUMAS_test_PHC)[[1]]$`F value`[[1]])
-# PHC_p <- append(PHC_p,summary(TOTAL_TRAUMAS_test_PHC)[[1]]$`Pr(>F)`[[1]])
 PHC_val <- append(PHC_val, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- append(PHC_p, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_PHC)[[3]])
 
 #TOTAL Physical Health Conditions
-# tot_PHC_test_PHC <- aov(tot_PHC~ Any_PHC, data = thesis_NHRVS)
-# PHC_val <- append(PHC_val,summary(tot_PHC_test_PHC)[[1]]$`F value`[[1]])
-# PHC_p <- append(PHC_p,summary(tot_PHC_test_PHC)[[1]]$`Pr(>F)`[[1]])
 PHC_val <- append(PHC_val, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- append(PHC_p, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)[[3]])
 
 t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)
 
 #TOTAL Mental Health Conditions
-# tot_PHC_test_PHC <- aov(tot_PHC~ Any_PHC, data = thesis_NHRVS)
-# PHC_val <- append(PHC_val,summary(tot_PHC_test_PHC)[[1]]$`F value`[[1]])
-# PHC_p <- append(PHC_p,summary(tot_PHC_test_PHC)[[1]]$`Pr(>F)`[[1]])
 PHC_val <- append(PHC_val, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[1]])
 PHC_p <- append(PHC_p, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[3]])
 
@@ -1259,9 +682,6 @@ val_df
 ```{r,include=FALSE}
 #### Create test of difference values and put them into a table
 #Age
-# Age_test_MHC <- aov(Age~ Any_MHC, data = thesis_NHRVS)
-# MHC_val = c(summary(Age_test_MHC)[[1]]$`F value`[[1]])
-# MHC_p = c(summary(Age_test_MHC)[[1]]$`Pr(>F)`[[1]])
 MHC_val <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_MHC)[[1]])
 MHC_p <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_MHC)[[3]])
 
@@ -1297,23 +717,14 @@ MHC_val <- append(MHC_val,summary(YN_work_test_MHC)[[3]])
 MHC_p <- append(MHC_p,summary(YN_work_test_MHC)[[6]])
 
 #PCS
-#PCS_test_MHC <- xtabs(PCS~ Any_MHC, data = thesis_NHRVS)
-#MHC_val <- append(MHC_val,summary(PCS_test_MHC)[[1]]$`F value`[[1]])
-#MHC_p <- append(MHC_p,summary(PCS_test_MHC)[[1]]$`Pr(>F)`[[1]])
 MHC_val <- append(MHC_val, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_MHC)[[1]])
 MHC_p <- append(MHC_p, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_MHC)[[3]])
 
 #MCS
-# MCS_test_MHC <- aov(MCS~ Any_MHC, data = thesis_NHRVS)
-# MHC_val <- append(MHC_val,summary(MCS_test_MHC)[[1]]$`F value`[[1]])
-# MHC_p <- append(MHC_p,summary(MCS_test_MHC)[[1]]$`Pr(>F)`[[1]])
 MHC_val <- append(MHC_val, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_MHC)[[1]])
 MHC_p <- append(MHC_p, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_MHC)[[3]])
 
 #BMI
-# BMI_test_MHC <- aov(BMI~ Any_MHC, data = thesis_NHRVS)
-# MHC_val <- append(MHC_val,summary(BMI_test_MHC)[[1]]$`F value`[[1]])
-# MHC_p <- append(MHC_p,summary(BMI_test_MHC)[[1]]$`Pr(>F)`[[1]])
 MHC_val <- append(MHC_val, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_MHC)[[1]])
 MHC_p <- append(MHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_MHC)[[3]])
 
@@ -1328,24 +739,14 @@ MHC_val <- append(MHC_val,summary(Yr5_Military_test_MHC)[[3]])
 MHC_p <- append(MHC_p,summary(Yr5_Military_test_MHC)[[6]])
 
 #TOTAL TRAUMAS
-# TOTAL_TRAUMAS_test_MHC <- aov(TOTAL_TRAUMAS~ Any_MHC, data = thesis_NHRVS)
-# MHC_val <- append(MHC_val,summary(TOTAL_TRAUMAS_test_MHC)[[1]]$`F value`[[1]])
-# MHC_p <- append(MHC_p,summary(TOTAL_TRAUMAS_test_MHC)[[1]]$`Pr(>F)`[[1]])
 MHC_val <- append(MHC_val, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_MHC)[[1]])
 MHC_p <- append(MHC_p, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_MHC)[[3]])
 
 #TOTAL Physical Health Conditions
-# tot_MHC_test_MHC <- aov(tot_MHC~ Any_MHC, data = thesis_NHRVS)
-# MHC_val <- append(MHC_val,summary(tot_MHC_test_MHC)[[1]]$`F value`[[1]])
-# MHC_p <- append(MHC_p,summary(tot_MHC_test_MHC)[[1]]$`Pr(>F)`[[1]])
 MHC_val <- append(MHC_val, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_MHC)[[1]])
 MHC_p <- append(MHC_p, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_MHC)[[3]])
 
-
 #TOTAL Physical Health Conditions
-# tot_MHC_test_MHC <- aov(tot_MHC~ Any_MHC, data = thesis_NHRVS)
-# MHC_val <- append(MHC_val,summary(tot_MHC_test_MHC)[[1]]$`F value`[[1]])
-# MHC_p <- append(MHC_p,summary(tot_MHC_test_MHC)[[1]]$`Pr(>F)`[[1]])
 MHC_val <- append(MHC_val, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[1]])
 MHC_p <- append(MHC_p, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[3]])
 ```
