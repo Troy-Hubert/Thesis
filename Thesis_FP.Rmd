@@ -14,25 +14,8 @@ date: "2023-02-18"
 #one day we will use this??
 ```
 
-      
-This markdown shows the steps taken to make detailed Forrest plots for several 
-multinomial regressions. This includes variable names, the Odds ratios (OR), and 
-their associated P values. Results for the current study are from the following 
-publication:
 
-Hubert T., Adams T., Pizerkt R., (In Preparation) Associations between Physical Activity Levels and Physical and Mental Health and Illness in U.S. Military Veterans: Results from the 2019/2020 National Health and Resilience in Veterans Study.
-
-## Study design
-
-The current study is examining how physical and mental health conditions are 
-associated with levels of physical activity (e.g., insufficiently active, moderately
-active, and sufficiently active). The proposed study used several 
-multinomial logistic regressions to evaluate the odds of being in each physical 
-activity level when reporting a health condition. As such, the code below creates 
-three Forrest plots displaying the odds of reporting each condition between each 
-gorup relative to another. 
-
-```{r, include=FALSE}
+```{r}
 ## load up the packages we will need: 
 library(tidyverse)
 library(dplyr)
