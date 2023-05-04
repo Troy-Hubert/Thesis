@@ -1,10 +1,19 @@
 ---
-title: "Multinomial function"
+title: "Logistic Multinomial Regression"
 output: html_document
-date: "2023-03-16"
 ---
 
+The following code will show you how I created functions to run my multinomial regressions. This page includes:
 
+1. Create function to run univariate multinomial regressions.
+2. Run block 1 of the step wise multivariate multinomial regression.
+3. Run block 2 of the step wise multivariate multinomial regression. 
+4. Create function for block 3 of step wise multivariate multinomial regression.
+5. Obtain R^2 values for each varaible in regressio model, and R^2 change between blocks of the stepwise regression
+6. Run function for block 3 of the step wise multivariate multinomial regression.
+7. Create table of output from stepwise regression model. 
+
+--- 
 ```{r setup, include=FALSE}
 # Thesis Preliminary Analyses
   #data stuff

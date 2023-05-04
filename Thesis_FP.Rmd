@@ -1,20 +1,19 @@
 ---
 title: "Thesis Forrest Plots"
 output: html_document
-date: "2023-02-18"
 ---
 
-```{r,include=FALSE}
-# knit: (function(input_file, encoding) {
-#     out_dir <- 'docs';
-#     rmarkdown::render(input_file,
-#       encoding=encoding,
-#       output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+The following code will show you how I created my forrest plots for my thesis. This page includes:
 
-#one day we will use this??
-```
+1. Load in the data, seperate data into respective data frames for univariate and multivariate analysis.
+2. Creating variables to to order the health conditions in the plot and indicate which health conditions are statistically significant. 
+3. Create Forrest plots.
+4. Create plot of health condition names and respective ORs and 95% CIs
+5. Create plot of p values for respective health conditions.
+6. Put together all of the plots
+7. Report results of regressions
 
-
+--- 
 ```{r, setup, message=FALSE}
 ## load up the packages we will need: 
 library(tidyverse)

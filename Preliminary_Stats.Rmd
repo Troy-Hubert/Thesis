@@ -1,9 +1,15 @@
 ---
-title: "Preliminary_Stats"
+title: "Preliminary Statistics"
 output: html_document
-date: "2023-03-22"
 ---
+The following code will show you the preliminary statistics ran before conducting regression analyses. This page includes:
 
+1. Read in data, create new variables, clean data, and prepare data for analysis
+2. Create visualiations depicting number of health conditions in each level of physical activity
+3. Run exploratory data analysis examining the differences in sociodemographic & military factors based upon physical activity level. 
+4. Create table displaying results of descriptive statistics (chi squaures, t tests, anovas) based upon physical activity level.
+
+---
 ```{r,setup,message=FALSE}
 options(knitr.table.format = "html") 
 
