@@ -2,7 +2,12 @@ name: "Masters-Thesis-Analyses"
 navbar:
   title: "Masters Thesis Analyses"
   left:
+<<<<<<< HEAD
     - text: "Main Page""
+=======
+    - type: inverse
+    - text: "Main Page"
+>>>>>>> 1e88bce9297732766ff9b76707cbba7a2c2afaa8
     - href: index.html
     - text: "Preliminary Statistics"
     - href: Preliminary_Stats.html
@@ -10,7 +15,4 @@ navbar:
     - href: Multinomial_Function.html
     - text: "Thesis Forrest Plots"
     - href: Thesis_FP.html
-output: 
-  html_document:
-    theme: yeti
   
