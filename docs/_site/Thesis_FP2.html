@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Thesis Forrest Plots</title>
+
+<script src="site_libs/header-attrs-2.19/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Masters Thesis Analyses</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="dropdown-header">Preliminary Statistics</li>
+<li>
+  <a href="Preliminary_Stats.html"></a>
+</li>
+<li class="dropdown-header">Logistic Multinomial Regresion</li>
+<li>
+  <a href="Multinomial_Function2.html"></a>
+</li>
+<li class="dropdown-header">Thesis Forrest Plots</li>
+<li>
+  <a href="Thesis_FP2.html"></a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Thesis Forrest Plots</h1>
+
+</div>
+
+
+<p>The following code will show you how I created my forrest plots for
+my thesis. This page includes:</p>
+<ol style="list-style-type: decimal">
+<li>Load in the data, seperate data into respective data frames for
+univariate and multivariate analysis.</li>
+<li>Creating variables to to order the health conditions in the plot and
+indicate which health conditions are statistically significant.</li>
+<li>Create Forrest plots.</li>
+<li>Create plot of health condition names and respective ORs and 95%
+CIs</li>
+<li>Create plot of p values for respective health conditions.</li>
+<li>Put together all of the plots</li>
+<li>Report results of regressions</li>
+</ol>
+<hr />
+<pre class="r"><code>## load up the packages we will need: 
+library(tidyverse)
+library(dplyr)
+library(gt)
+# for putting ggplots together
+library(patchwork)
+# for reordering facctors in ggplot
+library(forcats)
+library(kableExtra)
+
+options(knitr.table.format = &quot;html&quot;) </code></pre>
+<div id="load-data" class="section level2">
+<h2>load data</h2>
+<p>First thing to do is to load the data into R. I have already created
+tables with all of the values needed for these plots.</p>
+<pre class="r"><code>#### Univariate regressions
+Ins_Mod_Uni &lt;- read_csv(&quot;~/Desktop/Coding/data/Ins_Mod_Uni.csv&quot;)
+Ins_Act_Uni &lt;- read_csv(&quot;~/Desktop/Coding/data/Ins_Act_Uni.csv&quot;)
+Act_Mod_Uni &lt;- read_csv(&quot;~/Desktop/Coding/data/Act_Mod_Uni.csv&quot;)
+
+#### With Covariates
+Ins_Mod &lt;- read_csv(&quot;~/Desktop/Coding/data/Ins_Mod.csv&quot;)
+Ins_Act &lt;- read_csv(&quot;~/Desktop/Coding/data/Ins_Act.csv&quot;)
+Act_Mod &lt;- read_csv( &quot;~/Desktop/Coding/data/Act_Mod.csv&quot;)</code></pre>
+<p>Example of data frame</p>
+<pre class="r"><code>knitr::kable(Ins_Mod[1:5,]) %&gt;%
+   kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+conf.low
+</th>
+<th style="text-align:right;">
+conf.high
+</th>
+<th style="text-align:left;">
+ci
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+r2_change
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Any Disability
+</td>
+<td style="text-align:right;">
+0.4715806
+</td>
+<td style="text-align:right;">
+0.6240152
+</td>
+<td style="text-align:right;">
+0.4757883
+</td>
+<td style="text-align:right;">
+0.8184206
+</td>
+<td style="text-align:left;">
+0.62 ( 0.48 - 0.82 )
+</td>
+<td style="text-align:right;">
+0.0006542
+</td>
+<td style="text-align:left;">
+0.65 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Arthritis
+</td>
+<td style="text-align:right;">
+0.0253985
+</td>
+<td style="text-align:right;">
+0.9749213
+</td>
+<td style="text-align:right;">
+0.8073022
+</td>
+<td style="text-align:right;">
+1.1773430
+</td>
+<td style="text-align:left;">
+0.97 ( 0.81 - 1.18 )
+</td>
+<td style="text-align:right;">
+0.7918852
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Athsma
+</td>
+<td style="text-align:right;">
+0.3406594
+</td>
+<td style="text-align:right;">
+0.7113011
+</td>
+<td style="text-align:right;">
+0.5391411
+</td>
+<td style="text-align:right;">
+0.9384357
+</td>
+<td style="text-align:left;">
+0.71 ( 0.54 - 0.94 )
+</td>
+<td style="text-align:right;">
+0.0159802
+</td>
+<td style="text-align:left;">
+0.16 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cancer
+</td>
+<td style="text-align:right;">
+0.0207705
+</td>
+<td style="text-align:right;">
+0.9794437
+</td>
+<td style="text-align:right;">
+0.7767423
+</td>
+<td style="text-align:right;">
+1.2350427
+</td>
+<td style="text-align:left;">
+0.98 ( 0.78 - 1.24 )
+</td>
+<td style="text-align:right;">
+0.8606351
+</td>
+<td style="text-align:left;">
+0.04 %
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chronic Pain
+</td>
+<td style="text-align:right;">
+0.3167564
+</td>
+<td style="text-align:right;">
+0.7285082
+</td>
+<td style="text-align:right;">
+0.5875666
+</td>
+<td style="text-align:right;">
+0.9032579
+</td>
+<td style="text-align:left;">
+0.73 ( 0.59 - 0.9 )
+</td>
+<td style="text-align:right;">
+0.0038836
+</td>
+<td style="text-align:left;">
+0.25 %
+</td>
+</tr>
+</tbody>
+</table>
+<p>Because <code>ggplot()</code> likes to sort things based upon its own
+“standards” we need to create a variable (i.e., order) and manually
+assign the order that we want the plot and values to be in.
+Additionally, I wanted to assign a variable that indicates which ORs
+were significant after alpha corrections, so I created a variable (i.e.,
+sig) that we can use to color the significaant values later on. I used
+<code>mutate()</code> to create new variables and then manually assign
+the vlaues for each condition.</p>
+<pre class="r"><code>#create the variable within the dataframe
+Ins_Mod &lt;- mutate(Ins_Mod, order = 0)
+#update the values of the dataset to reflect the order we want
+Ins_Mod[1,9]  = 2
+Ins_Mod[2,9]  = 3
+Ins_Mod[3,9]  = 4
+Ins_Mod[4,9]  = 5
+Ins_Mod[5,9]  = 6
+Ins_Mod[6,9]  = 7
+Ins_Mod[7,9]  = 8
+Ins_Mod[8,9]  = 9
+Ins_Mod[9,9]  = 10
+Ins_Mod[10,9] = 11
+Ins_Mod[11,9] = 12
+Ins_Mod[12,9] = 13
+Ins_Mod[13,9] = 14
+Ins_Mod[14,9] = 15
+Ins_Mod[15,9] = 16
+Ins_Mod[16,9] = 17
+Ins_Mod[17,9] = 18
+Ins_Mod[18,9] = 19
+Ins_Mod[19,9] = 20
+Ins_Mod[20,9] = 21
+Ins_Mod[21,9] = 22
+Ins_Mod[22,9] = 23
+Ins_Mod[23,9] = 24
+
+# create a varaible for significance 
+Ins_Mod &lt;- mutate(Ins_Mod, sig = 0)</code></pre>
+<pre class="r"><code># assign values to the significant models post alpha corrections.
+Ins_Mod[1,10] = 1
+Ins_Mod[3,10] = 1
+Ins_Mod[5,10] = 1
+Ins_Mod[21,10] = 1</code></pre>
+<p>We are going to split these conditions into a mental and physical
+health dataframes. because <code>ggplot()</code> gets mad when we try to
+arrange these all together. Here ou can see an example of the dataframe
+with the order and significance.</p>
+<pre class="r"><code>phc_IM &lt;- Ins_Mod[1:17,]
+mhc_IM &lt;- Ins_Mod[18:23,]
+knitr::kable(phc_IM) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+conf.low
+</th>
+<th style="text-align:right;">
+conf.high
+</th>
+<th style="text-align:left;">
+ci
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+r2_change
+</th>
+<th style="text-align:right;">
+order
+</th>
+<th style="text-align:right;">
+sig
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Any Disability
+</td>
+<td style="text-align:right;">
+0.4715806
+</td>
+<td style="text-align:right;">
+0.6240152
+</td>
+<td style="text-align:right;">
+0.4757883
+</td>
+<td style="text-align:right;">
+0.8184206
+</td>
+<td style="text-align:left;">
+0.62 ( 0.48 - 0.82 )
+</td>
+<td style="text-align:right;">
+0.0006542
+</td>
+<td style="text-align:left;">
+0.65 %
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Arthritis
+</td>
+<td style="text-align:right;">
+0.0253985
+</td>
+<td style="text-align:right;">
+0.9749213
+</td>
+<td style="text-align:right;">
+0.8073022
+</td>
+<td style="text-align:right;">
+1.1773430
+</td>
+<td style="text-align:left;">
+0.97 ( 0.81 - 1.18 )
+</td>
+<td style="text-align:right;">
+0.7918852
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Athsma
+</td>
+<td style="text-align:right;">
+0.3406594
+</td>
+<td style="text-align:right;">
+0.7113011
+</td>
+<td style="text-align:right;">
+0.5391411
+</td>
+<td style="text-align:right;">
+0.9384357
+</td>
+<td style="text-align:left;">
+0.71 ( 0.54 - 0.94 )
+</td>
+<td style="text-align:right;">
+0.0159802
+</td>
+<td style="text-align:left;">
+0.16 %
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cancer
+</td>
+<td style="text-align:right;">
+0.0207705
+</td>
+<td style="text-align:right;">
+0.9794437
+</td>
+<td style="text-align:right;">
+0.7767423
+</td>
+<td style="text-align:right;">
+1.2350427
+</td>
+<td style="text-align:left;">
+0.98 ( 0.78 - 1.24 )
+</td>
+<td style="text-align:right;">
+0.8606351
+</td>
+<td style="text-align:left;">
+0.04 %
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chronic Pain
+</td>
+<td style="text-align:right;">
+0.3167564
+</td>
+<td style="text-align:right;">
+0.7285082
+</td>
+<td style="text-align:right;">
+0.5875666
+</td>
+<td style="text-align:right;">
+0.9032579
+</td>
+<td style="text-align:left;">
+0.73 ( 0.59 - 0.9 )
+</td>
+<td style="text-align:right;">
+0.0038836
+</td>
+<td style="text-align:left;">
+0.25 %
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Diabetes
+</td>
+<td style="text-align:right;">
+0.0758985
+</td>
+<td style="text-align:right;">
+0.9269103
+</td>
+<td style="text-align:right;">
+0.7434850
+</td>
+<td style="text-align:right;">
+1.1555885
+</td>
+<td style="text-align:left;">
+0.93 ( 0.74 - 1.16 )
+</td>
+<td style="text-align:right;">
+0.4999199
+</td>
+<td style="text-align:left;">
+0.14 %
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Heart Attack
+</td>
+<td style="text-align:right;">
+0.1713558
+</td>
+<td style="text-align:right;">
+0.8425218
+</td>
+<td style="text-align:right;">
+0.6067336
+</td>
+<td style="text-align:right;">
+1.1699417
+</td>
+<td style="text-align:left;">
+0.84 ( 0.61 - 1.17 )
+</td>
+<td style="text-align:right;">
+0.3063218
+</td>
+<td style="text-align:left;">
+0.09 %
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Heart Disease
+</td>
+<td style="text-align:right;">
+0.0079574
+</td>
+<td style="text-align:right;">
+1.0079891
+</td>
+<td style="text-align:right;">
+0.7860838
+</td>
+<td style="text-align:right;">
+1.2925366
+</td>
+<td style="text-align:left;">
+1.01 ( 0.79 - 1.29 )
+</td>
+<td style="text-align:right;">
+0.9499866
+</td>
+<td style="text-align:left;">
+0.03 %
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+High Cholesterol
+</td>
+<td style="text-align:right;">
+0.0467392
+</td>
+<td style="text-align:right;">
+0.9543363
+</td>
+<td style="text-align:right;">
+0.7934450
+</td>
+<td style="text-align:right;">
+1.1478523
+</td>
+<td style="text-align:left;">
+0.95 ( 0.79 - 1.15 )
+</td>
+<td style="text-align:right;">
+0.6197807
+</td>
+<td style="text-align:left;">
+0.11 %
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hypertension
+</td>
+<td style="text-align:right;">
+0.1922118
+</td>
+<td style="text-align:right;">
+0.8251321
+</td>
+<td style="text-align:right;">
+0.6813035
+</td>
+<td style="text-align:right;">
+0.9993241
+</td>
+<td style="text-align:left;">
+0.83 ( 0.68 - 1 )
+</td>
+<td style="text-align:right;">
+0.0491967
+</td>
+<td style="text-align:left;">
+0.09 %
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kidney Disease
+</td>
+<td style="text-align:right;">
+0.3995473
+</td>
+<td style="text-align:right;">
+0.6706236
+</td>
+<td style="text-align:right;">
+0.4459288
+</td>
+<td style="text-align:right;">
+1.0085376
+</td>
+<td style="text-align:left;">
+0.67 ( 0.45 - 1.01 )
+</td>
+<td style="text-align:right;">
+0.0549679
+</td>
+<td style="text-align:left;">
+0.06 %
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Liver Disease
+</td>
+<td style="text-align:right;">
+0.2313079
+</td>
+<td style="text-align:right;">
+1.2602472
+</td>
+<td style="text-align:right;">
+0.6753648
+</td>
+<td style="text-align:right;">
+2.3516519
+</td>
+<td style="text-align:left;">
+1.26 ( 0.68 - 2.35 )
+</td>
+<td style="text-align:right;">
+0.4673781
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Migrane
+</td>
+<td style="text-align:right;">
+0.0915372
+</td>
+<td style="text-align:right;">
+1.0958575
+</td>
+<td style="text-align:right;">
+0.7780282
+</td>
+<td style="text-align:right;">
+1.5435221
+</td>
+<td style="text-align:left;">
+1.1 ( 0.78 - 1.54 )
+</td>
+<td style="text-align:right;">
+0.6004328
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MS
+</td>
+<td style="text-align:right;">
+0.2222351
+</td>
+<td style="text-align:right;">
+1.2488650
+</td>
+<td style="text-align:right;">
+0.2942241
+</td>
+<td style="text-align:right;">
+5.3009391
+</td>
+<td style="text-align:left;">
+1.25 ( 0.29 - 5.3 )
+</td>
+<td style="text-align:right;">
+0.7631863
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Osteoporosis
+</td>
+<td style="text-align:right;">
+0.1113439
+</td>
+<td style="text-align:right;">
+0.8946311
+</td>
+<td style="text-align:right;">
+0.6168497
+</td>
+<td style="text-align:right;">
+1.2975036
+</td>
+<td style="text-align:left;">
+0.89 ( 0.62 - 1.3 )
+</td>
+<td style="text-align:right;">
+0.5572189
+</td>
+<td style="text-align:left;">
+0.08 %
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RA
+</td>
+<td style="text-align:right;">
+0.1372672
+</td>
+<td style="text-align:right;">
+1.1471346
+</td>
+<td style="text-align:right;">
+0.7931358
+</td>
+<td style="text-align:right;">
+1.6591330
+</td>
+<td style="text-align:left;">
+1.15 ( 0.79 - 1.66 )
+</td>
+<td style="text-align:right;">
+0.4659729
+</td>
+<td style="text-align:left;">
+&lt; 0.01 %
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Stroke
+</td>
+<td style="text-align:right;">
+0.1829380
+</td>
+<td style="text-align:right;">
+0.8328198
+</td>
+<td style="text-align:right;">
+0.5325163
+</td>
+<td style="text-align:right;">
+1.3024742
+</td>
+<td style="text-align:left;">
+0.83 ( 0.53 - 1.3 )
+</td>
+<td style="text-align:right;">
+0.4226894
+</td>
+<td style="text-align:left;">
+0.12 %
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(mhc_IM) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+conf.low
+</th>
+<th style="text-align:right;">
+conf.high
+</th>
+<th style="text-align:left;">
+ci
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+r2_change
+</th>
+<th style="text-align:right;">
+order
+</th>
+<th style="text-align:right;">
+sig
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+AUD
+</td>
+<td style="text-align:right;">
+0.0972906
+</td>
+<td style="text-align:right;">
+1.1021807
+</td>
+<td style="text-align:right;">
+0.9144631
+</td>
+<td style="text-align:right;">
+1.3284322
+</td>
+<td style="text-align:left;">
+1.1 ( 0.91 - 1.33 )
+</td>
+<td style="text-align:right;">
+0.3071112
+</td>
+<td style="text-align:left;">
+0.05 %
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DUD
+</td>
+<td style="text-align:right;">
+0.1903044
+</td>
+<td style="text-align:right;">
+0.8267075
+</td>
+<td style="text-align:right;">
+0.6174507
+</td>
+<td style="text-align:right;">
+1.1068822
+</td>
+<td style="text-align:left;">
+0.83 ( 0.62 - 1.11 )
+</td>
+<td style="text-align:right;">
+0.2012454
+</td>
+<td style="text-align:left;">
+0.11 %
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MDD
+</td>
+<td style="text-align:right;">
+0.0624167
+</td>
+<td style="text-align:right;">
+1.0644058
+</td>
+<td style="text-align:right;">
+0.8420967
+</td>
+<td style="text-align:right;">
+1.3454034
+</td>
+<td style="text-align:left;">
+1.06 ( 0.84 - 1.35 )
+</td>
+<td style="text-align:right;">
+0.6015461
+</td>
+<td style="text-align:left;">
+0.12 %
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nicotine Dep
+</td>
+<td style="text-align:right;">
+0.3460477
+</td>
+<td style="text-align:right;">
+0.7074787
+</td>
+<td style="text-align:right;">
+0.5502732
+</td>
+<td style="text-align:right;">
+0.9095958
+</td>
+<td style="text-align:left;">
+0.71 ( 0.55 - 0.91 )
+</td>
+<td style="text-align:right;">
+0.0069547
+</td>
+<td style="text-align:left;">
+0.21 %
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PTSD
+</td>
+<td style="text-align:right;">
+0.0827565
+</td>
+<td style="text-align:right;">
+1.0862773
+</td>
+<td style="text-align:right;">
+0.7906727
+</td>
+<td style="text-align:right;">
+1.4923979
+</td>
+<td style="text-align:left;">
+1.09 ( 0.79 - 1.49 )
+</td>
+<td style="text-align:right;">
+0.6095891
+</td>
+<td style="text-align:left;">
+0.02 %
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Suicidality
+</td>
+<td style="text-align:right;">
+0.0394350
+</td>
+<td style="text-align:right;">
+1.0402229
+</td>
+<td style="text-align:right;">
+0.7574763
+</td>
+<td style="text-align:right;">
+1.4285116
+</td>
+<td style="text-align:left;">
+1.04 ( 0.76 - 1.43 )
+</td>
+<td style="text-align:right;">
+0.8074875
+</td>
+<td style="text-align:left;">
+0.07 %
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<p>Now we have a data frame for physical health conditions and a data
+frame for mental health conditions. We will repeat these steps for the
+other 2 full models, and the 3 univariate models.</p>
+</div>
+<div id="middle-create-the-plot" class="section level2">
+<h2>Middle: Create The Plot</h2>
+<p>Now that we have the data all ready, we can create the plot. I am
+creating a function below called <code>mid_Fplot()</code> that will
+allow me to make the 6 forrest plots by calling the function instead of
+manually making every one. We create Forrest plots using
+<code>ggplot()</code> and using
+<code>geom_point() + geom_linerange()</code>. I waanted to signify which
+values were statistically significant after alpha corrections, so I used
+<code>color =</code> &amp; <code>scale_color_manual()</code> to make the
+significant ones blue. For the forrest plot I am going to save the
+output of the plot into “phc_IA_mid”.</p>
+<div id="forrest-plot-function" class="section level4">
+<h4>Forrest Plot Function</h4>
+<pre class="r"><code>mid_Fplot &lt;-function(data){
+output &lt;- data |&gt;
+  #Plot the value variable (in descending order) assigning significance to the 
+  #values significant after Bon foroni alpha corrections
+  ggplot(aes(y = reorder(variable, -order),color = as.factor(sig))) +
+  #take away background
+  theme_classic() +
+  #make the forrest plot
+  geom_point(aes(x=estimate), shape=15, size=3,show.legend = FALSE) +
+  geom_linerange(aes(xmin=conf.low, xmax=conf.high),show.legend = FALSE) +
+  #add color 
+  scale_color_manual(values = c(&quot;#A6A6A6&quot;,&quot;blue&quot;))+
+  #change Cordinates
+  labs(x=&quot;Odds Ratio&quot;) +
+  #adjust the dimentions. 
+  coord_cartesian(ylim = c(1,18), xlim=c(.25, 1.75)) +
+  #add a line at 0 for reference 
+  geom_vline(xintercept = 1, linetype=&quot;dashed&quot;) +
+  #add anotations to help suggests what each side means.
+  annotate(&quot;text&quot;, x = .5, y = 18, label = &quot;Less Likely&quot;) +
+  annotate(&quot;text&quot;, x = 1.5, y = 18, label = &quot;More Likely&quot;) +
+  #Git rid of the Y - Axis
+  theme(axis.line.y = element_blank(),
+        axis.ticks.y= element_blank(),
+        axis.text.y= element_blank(),
+        axis.title.y= element_blank())
+return (output)
+}</code></pre>
+</div>
+<div id="applying-the-function" class="section level4">
+<h4>Applying the function</h4>
+<p>As we separated the datasets into mental health and physical health
+data frames, we can just call one function to do both parts of the
+plots.</p>
+<pre class="r"><code>#Physical Health Conditions Insufficient vs active
+phc_IA_mid&lt;-mid_Fplot(phc_IA)
+#Mental Health Conditions Insffucient vs active
+mhc_IA_mid&lt;- mid_Fplot(mhc_IA)</code></pre>
+<p>No repeat this for the other 10 plots.</p>
+<pre class="r"><code># Insufficient vs Moderate Multi
+phc_IM_mid &lt;- mid_Fplot(phc_IM)
+mhc_IM_mid &lt;- mid_Fplot(mhc_IM)
+# Active vs Moderate Muli
+phc_AM_mid &lt;- mid_Fplot(phc_AM)
+mhc_AM_mid &lt;- mid_Fplot(mhc_AM)
+
+##### Univariate 
+
+phc_IA_Uni_mid&lt;-mid_Fplot(phc_IA_Uni)
+mhc_IA_Uni_mid&lt;- mid_Fplot(mhc_IA_Uni)
+phc_IM_Uni_mid &lt;- mid_Fplot(phc_IM_Uni)
+mhc_IM_Uni_mid &lt;- mid_Fplot(mhc_IM_Uni)
+phc_AM_Uni_mid &lt;- mid_Fplot(phc_AM_Uni)
+mhc_AM_Uni_mid &lt;- mid_Fplot(mhc_AM_Uni)</code></pre>
+<p>We have our plots! We can interpret this as, “Compared to veterans
+who were are insufficient active, veterans who were moderately active
+were (less/no difference/more) likely to report X health condition.” For
+these figures the blue lines indicate which health conditions are
+significant after alpha corrections.</p>
+<pre class="r"><code>ggpubr::ggarrange(phc_IA_mid,mhc_IA_mid, ncol =2, nrow =1)</code></pre>
+<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>We have physical health on the left side and mental conditions on the
+right. You may be asking yourself, Where is the Y axis? I removed the Y
+axis for both plots so I could manually add the variable names and the
+odds ratios in the next step.</p>
+</div>
+</div>
+<div id="left-side-labels-for-the-forrest-plot" class="section level2">
+<h2>Left Side: labels for the forrest plot</h2>
+<p>We took away the standard y axis of GGplot because it is simplistic.
+Now we are now going to add a Y axis that includes the variable names
+(i.e., Health Conditions) and their respective ORs.</p>
+<div id="update-data-frame" class="section level4">
+<h4>Update data frame</h4>
+<p>The output from the statistical models (e.g., p values) is not
+rounded to clean numbers. The code below tidy’s up our data and creates
+new values. Additionally our table has seperate values for OR, and 95%
+CI. The code below creates a function called <code>DF_update()</code>
+that combines these values into one variable so we can call it for the
+table.</p>
+<pre class="r"><code>DF_update &lt;- function(data){
+#assign the input and output of the data
+output &lt;-data |&gt;
+  # round estimates and 95% CIs to 2 decimal places for journal specifications
+  mutate(across(
+    c(estimate, conf.low, conf.high),
+    ~ str_pad(
+      round(.x, 2),
+      width = 4,
+      pad = &quot;0&quot;,
+      side = &quot;right&quot;
+    )
+  ),
+  # add an &quot;-&quot; between HR estimate confidence intervals
+  estimate_lab = paste0(estimate, &quot; (&quot;, conf.low, &quot;-&quot;, conf.high, &quot;)&quot;)) |&gt;
+  # round p-values to two decimal places, except in cases where p &lt; .001
+  mutate(p.value = case_when(
+    p.value &lt; .001 ~ &quot;&lt;0.001&quot;,
+    round(p.value, 2) == .05 ~ as.character(round(p.value,3)),
+    p.value &lt; .01 ~ str_pad( # if less than .01, go one more decimal place
+      as.character(round(p.value, 3)),
+      width = 4,
+      pad = &quot;0&quot;,
+      side = &quot;right&quot;
+    ),
+    TRUE ~ str_pad( # otherwise just round to 2 decimal places and pad string so that .2 reads as 0.20
+      as.character(round(p.value, 2)),
+      width = 4,
+      pad = &quot;0&quot;,
+      side = &quot;right&quot;
+    )
+  )) |&gt;
+  # add a row of data that are actually column names which will be shown on the plot in the next step
+  bind_rows(
+    data.frame(
+      variable = &quot;Condition&quot;,
+      estimate_lab = &quot;Odd Ratio (95% CI)&quot;,
+      conf.low = &quot;&quot;,
+      conf.high = &quot;&quot;,
+      p.value = &quot;p-value&quot;
+    )
+  ) |&gt;
+  mutate(model = fct_rev(fct_relevel(variable, &quot;Condition&quot;)))
+# have the funciton spit out the new data
+return(output)
+}</code></pre>
+<p>Now that we have made a function, lets see what it does.</p>
+<pre class="r"><code># Insufficient vs Active
+phc_IA_plot &lt;- DF_update(phc_IA)
+  #double check to make sure it worked.
+glimpse(phc_IA_plot$estimate_lab)</code></pre>
+<pre><code>##  chr [1:18] &quot;0.53 (0.42-0.67)&quot; &quot;1.14 (0.97-1.34)&quot; &quot;0.75 (0.59-0.94)&quot; ...</code></pre>
+<p>Now we can use <code>DF_update()</code> to update the rest of the
+data frames.</p>
+<pre class="r"><code>mhc_IA_plot &lt;- DF_update(mhc_IA)
+
+# Insufficient vs moderate
+phc_IM_plot &lt;- DF_update(phc_IM)
+mhc_IM_plot &lt;- DF_update(mhc_IM)
+
+# active vs moderate
+phc_AM_plot &lt;- DF_update(phc_AM)
+mhc_AM_plot &lt;- DF_update(mhc_AM)
+
+### Univaraite 
+phc_IA_Uni_plot &lt;- DF_update(phc_IA_Uni)
+mhc_IA_Uni_plot &lt;- DF_update(mhc_IA_Uni)
+phc_IM_Uni_plot &lt;- DF_update(phc_IM_Uni)
+mhc_IM_Uni_plot &lt;- DF_update(mhc_IM_Uni)
+phc_AM_Uni_plot &lt;- DF_update(phc_AM_Uni)
+mhc_AM_Uni_plot &lt;- DF_update(mhc_AM_Uni)</code></pre>
+</div>
+<div id="plotting-the-left-side" class="section level3">
+<h3>Plotting the left side</h3>
+<p>Now that we have the variables int he format for the plot, we can
+plot them! I create the function <code>left_FP()</code> that plots all
+of the variables on the same axis as the forrest plot above. This allows
+us to add the varaibles and the respective Odds Ratios / Confideince
+intervals.</p>
+<pre class="r"><code>left_FP &lt;- function(plot_data,type){
+  # For Physical health condition plots
+  if(type == &quot;PHC&quot;) {
+    # add the top row
+    plot_data&lt;-mutate(plot_data, top_row = 0)
+    plot_data[18,9] = 1
+    plot_data &lt;- arrange(plot_data,order)
+
+    # plot the left side of the plot 
+    output &lt;- plot_data %&gt;% 
+      ggplot(aes(y = model)) +
+      geom_text(aes(x = 0, label = variable), hjust = 0, fontface = &quot;bold&quot;)+
+      geom_text(
+      aes(x = 1, label = estimate_lab),
+      hjust = 0,
+      fontface = ifelse(phc_IA_plot$estimate_lab == &quot;Odds Ratio (95% CI)&quot;, &quot;bold&quot;,&quot;plain&quot;)) +
+      theme_void() +
+      coord_cartesian(ylim = c(1,18), xlim = c(0, 4))
+  }
+  # For Mental health condition plots
+  if(type == &quot;MHC&quot;){
+    #arange the labels on top
+      plot_data&lt;-mutate(plot_data, top_row = 0)
+      plot_data[7,9] = 1
+      plot_data &lt;- arrange(plot_data,order)
+
+    # plot the left side of the plot 
+      output &lt;- plot_data %&gt;% 
+        ggplot(aes(y = model)) +
+        geom_text(aes(x = 0, label = variable), hjust = 0, fontface = &quot;bold&quot;)+
+        geom_text(aes(x = 1, label = estimate_lab),
+        hjust = 0,
+        fontface = ifelse(mhc_IA_plot$estimate_lab == &quot;Odds Ratio (95% CI)&quot;, &quot;bold&quot;,&quot;plain&quot;)) +
+        theme_void() +
+        coord_cartesian(ylim = c(1,18), xlim = c(0, 4))
+  }
+  return(output)
+}</code></pre>
+<p>Run <code>left_FP</code> for multivariate and univariate plots.</p>
+<pre class="r"><code># Multivariate
+phc_IA_left&lt;-left_FP(phc_IA_plot,&quot;PHC&quot;)
+mhc_IA_left&lt;-left_FP(mhc_IA_plot,&quot;MHC&quot;)
+phc_IM_left&lt;-left_FP(phc_IM_plot,&quot;PHC&quot;)
+mhc_IM_left&lt;-left_FP(mhc_IM_plot,&quot;MHC&quot;)
+phc_AM_left&lt;-left_FP(phc_AM_plot,&quot;PHC&quot;)
+mhc_AM_left&lt;-left_FP(mhc_AM_plot,&quot;MHC&quot;)
+
+# Univariate 
+phc_IA_Uni_left&lt;-left_FP(phc_IA_Uni_plot,&quot;PHC&quot;)
+mhc_IA_Uni_left&lt;-left_FP(mhc_IA_Uni_plot,&quot;MHC&quot;)
+phc_IM_Uni_left&lt;-left_FP(phc_IM_Uni_plot,&quot;PHC&quot;)
+mhc_IM_Uni_left&lt;-left_FP(mhc_IM_Uni_plot,&quot;MHC&quot;)
+phc_AM_Uni_left&lt;-left_FP(phc_AM_Uni_plot,&quot;PHC&quot;)
+mhc_AM_Uni_left&lt;-left_FP(mhc_AM_Uni_plot,&quot;MHC&quot;)</code></pre>
+<p>Now we have our labels. In our labels we have the name of our
+conditions and the OR + 95 CI.</p>
+<pre class="r"><code>phc_IA_left </code></pre>
+<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>mhc_IA_left</code></pre>
+<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-18-2.png" width="672" /></p>
+</div>
+</div>
+<div id="right-p-values" class="section level2">
+<h2>Right: P values</h2>
+<p>We now have the left side and the middle of the plot. The last thing
+we need is to show the P values on the right side of the table. We have
+already updated our data frame (above) so now we can just put them in
+the figure like how we did for the left side. I create the function
+<code>right_FP()</code> that plots all of the p values on the same y
+axis as the two plot types above.</p>
+<pre class="r"><code>right_FP&lt;-function(plot_data){
+    output &lt;- plot_data |&gt;
+      ggplot() +
+        geom_text(aes(x = 0, y = model, label = p.value), hjust = 0,
+        fontface = ifelse(plot_data$p.value == &quot;p-value&quot;, &quot;bold&quot;, &quot;plain&quot;)) +
+        theme_void() +
+        coord_cartesian(ylim = c(1,18))
+return(output)
+}</code></pre>
+<p>run <code>left_FP()</code></p>
+<pre class="r"><code>#. Multivaraite
+phc_IA_right &lt;- right_FP(phc_IA_plot)
+mhc_IA_right &lt;- right_FP(mhc_IA_plot)
+phc_IM_right &lt;- right_FP(phc_IM_plot)
+mhc_IM_right &lt;- right_FP(mhc_IM_plot)
+phc_AM_right &lt;- right_FP(phc_AM_plot)
+mhc_AM_right &lt;- right_FP(mhc_AM_plot)
+
+# Univaraite 
+phc_IA_Uni_right &lt;- right_FP(phc_IA_Uni_plot)
+mhc_IA_Uni_right &lt;- right_FP(mhc_IA_Uni_plot)
+phc_IM_Uni_right &lt;- right_FP(phc_IM_Uni_plot)
+mhc_IM_Uni_right &lt;- right_FP(mhc_IM_Uni_plot)
+phc_AM_Uni_right &lt;- right_FP(phc_AM_Uni_plot)
+mhc_AM_Uni_right &lt;- right_FP(mhc_AM_Uni_plot)</code></pre>
+<p>Example of the p value output</p>
+<pre class="r"><code>ggpubr::ggarrange(phc_IA_right,mhc_IA_right, ncol =2, nrow =1)</code></pre>
+<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+</div>
+<div id="putting-it-together" class="section level2">
+<h2>Putting It Together</h2>
+<p>We now have all of the pieces of the puzzle. Now we need to specify
+how much area all of these individual parts will take up in the final
+output. Below we specify where each of the individual plots starts and
+finishes. t = top, l = left, b = bottom, r = right. We assign these to a
+a vector (e.g.layout) for the plot. We are creating a data frame of
+coordinates for the 3 different plot types to be plotted at using
+<code>patchwork::area()</code>.</p>
+<pre class="r"><code>layout &lt;- c(
+  patchwork::area(t = 0, l = 0, b = 30, r = 25),
+  patchwork::area(t = 0, l = 14, b = 30, r = 25),
+  patchwork::area(t = 0, l = 23, b = 30, r = 30) 
+  )</code></pre>
+<div id="final-plot-arrangement" class="section level3">
+<h3>final plot arrangement</h3>
+<p>Combine all of the parts together to get the final product! We used
+<code>plot_layout()</code> to combine all of the plots together using
+the area cordinates specified using <code>patchwork::area()</code></p>
+<p>Here is an example of what the physical health and mental health
+plots look like ## Likelihood of reporting health conditions for
+veterans with sufficient physical activity compared to insufficient
+activity.</p>
+<pre class="r"><code># physical health conditions. - Ins vs Mod
+one &lt;- phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
+two &lt;- mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)</code></pre>
+<p>Repeat for the remaining plots</p>
+<p>I struggled to figure out how to combine these two figures together
+without <code>ggplot()</code> getting angery. So I used the forbidden
+<strong><em>Illustrator</em></strong> to tidy up everything and combine
+the univariate and multivariate plots. The final plots are below with
+explinations of their results.</p>
+<pre class="r"><code>knitr::include_graphics(&quot;~/Desktop/Coding/R working directory/plots/Ins_Act_FP.png&quot;)</code></pre>
+<p><img src="../../plots/Ins_Act_FP.png" width="796" style="display: block; margin: auto;" /></p>
+<p><em>Univariate.</em> Those with several health conditions are less
+likely to report sufficiently active physical activity compared to
+insfucciently physical activity.</p>
+<p><em>Multivariate.</em> For less health conditions are there
+differences between physical activity level. Compared to veterans who
+are insufficiently active, those who are sufficiently active are less
+likely to report any disability, asthma, chronic pain, diabetes, and
+hypertension. No other differences were observed between the odds of
+reporting other conditions between insufficient and moderate
+activity.</p>
+<p>Compared to veterans who are insufficiently active, those who are
+sufficiently active are more likely to report PTSD.</p>
+<pre class="r"><code>knitr::include_graphics(&quot;~/Desktop/Coding/R working directory/plots/Ins_Mod_FP.png&quot;)</code></pre>
+<p><img src="../../plots/Ins_Mod_FP.png" width="798" style="display: block; margin: auto;" /></p>
+<p><em>Univariate.</em> Similarily to sufficiently active, veterans tend
+who have health conditions are less likely to report moderate physical
+activity compared to those who are insuficiently active.</p>
+<p><em>Multivariate.</em> Compared to veterans who are insufficiently
+active, those who are moderately active are less likely to report any
+disability, asthma, chronic pain, diabetes, high cholesterol, and
+stroke. No other differences were observed between the odds of reporting
+other conditions between insufficient and moderate activity.</p>
+<p>Compared to veterans who are insufficiently active, those who are
+moderately active are less likely to report nicotine dependence. No
+other differences were observed between the odds of reporting other
+conditions between insufficient and moderate activity.</p>
+<pre class="r"><code>knitr::include_graphics(&quot;~/Desktop/Coding/R working directory/plots/Mod_Act_FP.png&quot;)</code></pre>
+<p><img src="../../plots/Mod_Act_FP.png" width="796" style="display: block; margin: auto;" />
+<em>Univariate.</em> For a few health coditions, veterans with those
+conditions were more likely to report moderate activity compared to
+sufficiently active. <em>Multivariate.</em> No other differences were
+observed between the odds of reporting physical health conditions
+between insufficient and moderate activity.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

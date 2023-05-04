@@ -1,0 +1,780 @@
+---
+title: "Preliminary Statistics"
+output: html_document
+---
+The following code will show you the preliminary statistics ran before conducting regression analyses. This page includes:
+
+1. Read in data, create new variables, clean data, and prepare data for analysis
+2. Create visualiations depicting number of health conditions in each level of physical activity
+3. Run exploratory data analysis examining the differences in sociodemographic & military factors based upon physical activity level. 
+4. Create table displaying results of descriptive statistics (chi squaures, t tests, anovas) based upon physical activity level.
+
+---
+```{r,setup,message=FALSE}
+options(knitr.table.format = "html") 
+
+#data stuff
+library(tidyverse)
+library(dplyr)
+  #CSV/CAV files
+library(haven)
+library(tableone)
+  #regression stuff
+library(aod)
+library(gtsummary)
+library(lmtest)
+library(DescTools)
+library(manipulate)
+library(psych)
+library(tableone)
+library(kableExtra)
+```
+
+### Import in data
+```{r}
+### Import dataset 
+setwd("~/Desktop/Adams_lab/SPSS_stuff")
+NHRVS_2019 <- read_sav("~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav")
+
+### Select and rename Variables
+thesis_NHRVS <- dplyr::select(NHRVS_2019,
+    #Background Variables __________
+      caseid,weight,Age,Male_Gender,White_Race,SomeCollege_or_Higher,
+      Married_Partnered,Income_60k_plus,YN_work,
+      PCS_FINAL,MCS_FINAL,Weight_kg,BMI,
+    #Military variables__________
+      Combat_Veteran,Years_in_Military,Branch_5cat,Enlistment_status_3cat,
+      MilitaryRank_3cat,
+    #Mental Health Variables___________
+      TOTAL_TRAUMAS,LT_PCL_33,LT_MDD_Sx_only,LT_Suicide_4cat,Suicide_Attempt_LT,
+      LT_Suicide_Plan,LT_AUD,LT_NicotineDep,LT_DUD,tot_MHC,Any_MHC,
+    #Physical health Variables_________
+      ANY_ADL_DISABILITY,ANY_IADL_DISABILITY,Any_Disability,tot_phc,Any_PHC,Q22A_1,Q22A_2,
+      Q22A_3,Q22A_4,Q22A_5,Q22A_6,Q22A_7,Q22A_8,Q22A_9,Q22A_10,Q22A_11,Q22B_1,
+      Q22B_2,Q22B_3,Q22B_4,Q22B_5,
+    #Exercise variables ___________
+      godin_mild_winsor,godin_Mod_winsor,godin_Stren_winsor,HCS,HCS_Cats,
+      godin_total_ac,god3cat,god2cat,GODIN_outliers)
+    
+#Rename variabes
+thesis_NHRVS <- rename(thesis_NHRVS,
+      MET_total = godin_total_ac,
+      God_mild = godin_mild_winsor,
+      God_mod = godin_Mod_winsor,
+      God_stren = godin_Stren_winsor,
+      College = SomeCollege_or_Higher,
+      MCS = MCS_FINAL,
+      PCS = PCS_FINAL,
+      Arthritis = Q22A_1,
+      Athsma =  Q22A_2,
+      Cancer = Q22A_3,
+      Chron_pain = Q22A_4,
+      Liv_dis = Q22A_5,
+      Diabetes = Q22A_6,
+      Hrt_dis = Q22A_7,
+      Hrt_atk = Q22A_8,
+      High_chol = Q22A_9,
+      High_bld_press = Q22A_10,
+      Kid_dis = Q22A_11,
+      Migrane = Q22B_1,
+      MS = Q22B_2,
+      Osteoporosis = Q22B_3,
+      Rhum_arth = Q22B_4,
+      Stroke = Q22B_5,
+      LT_MDD = LT_MDD_Sx_only,
+      LT_PTSD = LT_PCL_33
+)
+```
+
+### Create variables, rename stuff, and remove missing cases
+```{r}
+thesis_NHRVS<- thesis_NHRVS %>%
+  # First Create all of the variables
+  mutate(thesis_NHRVS, 
+    # Exercise variables
+         Ex_time = (God_mild + God_mod + God_stren)*15,
+            # Tells us how long people exercised for.
+         MET_min = MET_total* 15,
+         MET_min_W = ifelse(MET_min > 2000, 2000, MET_min),
+            # Total METs per week times the duration of exercise
+         Ex_rec = as.factor(ifelse(MET_min >= 500, "Sufficient", "Insufficient")),
+            # Meeting activity levels (i.e., sufficient vs insufficient)
+         Ex_3cat = as.factor(ifelse(MET_min < 290, 1,
+                              ifelse(MET_min < 500 & MET_min >= 290, 2,3))),
+         Ex_4cats = as.factor(ifelse(MET_min < 290, "Sed",
+                              ifelse(MET_min < 500 & MET_min >= 290, "Mod",
+                              ifelse(MET_min < 1000 & MET_min >= 500, "Active", 
+                              ifelse(MET_min < 2000 & MET_min >= 1000, "Super", NA))))),
+# 3 godin (HCS) categories converted to MET_min 
+    # Other Variables 
+         HCS_win = (God_mod*5) + (God_stren*9),
+         HCS3cat = as.factor(ifelse(HCS_win < 14, "Insufficient",
+                              ifelse(HCS_win < 24 & HCS_win >= 290, "Moderate", "Active"))),
+         Yr5_Military = as.factor(ifelse(Years_in_Military >= 5, "5+", "<5")),
+         Active_PA = as.factor(ifelse(Ex_3cat == 3,1,0)),
+         Moderate_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
+         Insuf_PA = as.factor(ifelse(Ex_3cat == 2,1,0)),
+         Total_HC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke +
+                    LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+         Total_PHC = Any_Disability + Arthritis + Cancer + Chron_pain + Liv_dis +
+                    Diabetes + Hrt_dis + Hrt_atk + High_chol + High_bld_press +
+                    Kid_dis + Migrane + MS + Osteoporosis + Rhum_arth + Stroke,
+         Total_MHC = LT_MDD + LT_PTSD + LT_AUD + LT_DUD + LT_NicotineDep,
+         No_Condition = ifelse(Any_MHC == 1 | Any_PHC ==1, 0,1)
+    
+    ) %>%
+
+mutate(thesis_NHRVS,
+      #Physical health variables
+           Any_Disability = as.factor(Any_Disability),
+           Arthritis = as.factor(Arthritis),
+           Athsma = as.factor(Athsma),
+           Cancer = as.factor(Cancer),
+           Chron_pain = as.factor(Chron_pain),
+           Liv_dis = as.factor(Liv_dis),
+           Diabetes = as.factor(Diabetes),
+           Hrt_dis = as.factor(Hrt_dis),
+           Hrt_atk = as.factor(Hrt_atk),
+           High_chol = as.factor(High_chol),
+           High_bld_press = as.factor(High_bld_press),
+           Kid_dis = as.factor(Kid_dis),
+           Migrane = as.factor(Migrane),
+           MS = as.factor(MS),
+           Osteoporosis = as.factor(Osteoporosis),
+           Rhum_arth = as.factor(Rhum_arth),
+           Stroke = as.factor(Stroke),
+           Ex_3cat = as.factor(Ex_3cat),  
+           Male_Gender = as.factor(Male_Gender), 
+           Married_Partnered = as.factor(Married_Partnered),
+           White_Race = as.factor(White_Race),
+           College = as.factor(College),
+           Income_60k_plus = as.factor(Income_60k_plus),
+           YN_work = as.factor(YN_work),
+           Combat_Veteran = as.factor(Combat_Veteran),
+           Any_MHC = as.factor(Any_MHC),
+           Any_PHC = as.factor(Any_PHC),
+           god2cat = as.factor(god2cat),
+      #Mental health variables
+          LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+          LT_MDD = as.factor(LT_MDD),
+          LT_PTSD = as.factor(LT_PTSD),
+          LT_AUD = as.factor(LT_AUD),
+          LT_DUD = as.factor(LT_DUD),
+          LT_NicotineDep = as.factor(LT_NicotineDep)
+      #Create a non health condition variable 
+)%>%
+mutate(thesis_NHRVS, 
+        Ex_3cat = recode(Ex_3cat,
+                         "1" = "Insufficient",
+                         "2" = "Moderate",
+                         "3" = "Active"),
+        Married_Partnered = recode(Married_Partnered,
+                         "0" = "Married_Partnered",
+                         "1" = "Single"),
+        Male_Gender = as.factor(Male_Gender),
+        Male_Gender = recode(Male_Gender,
+                         "0" = "Female",
+                         "1" = "Male"),
+        White_Race = recode(White_Race,
+                         "0" = "Not_White",
+                         "1" = "White"),
+        College = recode(College,
+                         "0" = "No_Colege",
+                         "1" = "Some_Colege"),
+        Income_60k_plus = recode(Income_60k_plus,
+                         "0" = "Under_60k",
+                         "1" = "OVer_60k"),
+        YN_work = recode(YN_work,
+                         "1" = "No_Work",
+                         "2" = "Working"),
+        Combat_Veteran = as.factor(Combat_Veteran),
+        Combat_Veteran = recode(Combat_Veteran,
+                         "0" = "No_Combat",
+                         "1" = "Combat"),
+        Any_MHC = recode(Any_MHC,
+                         "0" = "No_con",
+                         "1" = "MHC"),
+        Any_PHC = recode(Any_PHC,
+                         "0" = "No_con",
+                         "1" = "PHC"),
+        LT_Suicide_4cat = as.factor(LT_Suicide_4cat),
+        LT_Suicidal = recode(LT_Suicide_4cat,
+                         "0" = "0",
+                         "1" = "0",
+                         "2" = "1",
+                         "3" = "1"
+                             ))
+#Filter out NA values
+thesis_NHRVS <- thesis_NHRVS %>%
+  filter(!is.na(Ex_rec)) %>%
+  filter(!is.na(Ex_3cat)) %>%
+  filter(!is.na(MCS)) %>%
+  filter(!is.na(PCS)) %>%
+  filter(!is.na(BMI)) %>%
+  filter(!is.na(Any_Disability)) %>%
+  filter(!is.na(Arthritis)) %>%
+  filter(!is.na(Cancer)) %>%
+  filter(!is.na(Chron_pain)) %>%
+  filter(!is.na(Liv_dis)) %>%
+  filter(!is.na(Diabetes)) %>%
+  filter(!is.na(Hrt_dis)) %>%
+  filter(!is.na(Hrt_atk)) %>%
+  filter(!is.na(High_chol)) %>%
+  filter(!is.na(High_bld_press)) %>%
+  filter(!is.na(Kid_dis)) %>%
+  filter(!is.na(Migrane)) %>%
+  filter(!is.na(MS)) %>%
+  filter(!is.na(Osteoporosis)) %>%
+  filter(!is.na(Rhum_arth)) %>%
+  filter(!is.na(Stroke)) %>%
+  filter(!is.na(LT_MDD)) %>%
+  filter(!is.na(LT_PTSD)) %>%
+  filter(!is.na(LT_AUD)) %>%
+  filter(!is.na(LT_DUD)) %>%
+  filter(!is.na(LT_NicotineDep)) %>%
+  filter(!is.na(LT_Suicidal))
+ 
+kable(thesis_NHRVS[1:10,1:8]) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+## Export new file to CSV
+Now that we have a clean and prepped data file to analyze lets create a CSV of that for future reference.
+```{r}
+write_csv(thesis_NHRVS, "~/Desktop/Coding/data/thesis_dataset.csv" )
+haven::write_sav(thesis_NHRVS,"~/Desktop/Coding/data/thesis_SPSS.sav")
+```
+
+
+### Descriptives of variables
+Here are some discriptive statistics and basic plots to see an overview of the data. I use `table1()` to run the descriptive statistics.
+```{r}
+# Physical activity level value (MET minutes)
+#install.packages("table1")
+
+desc_tab<-data.frame(table1::table1(~MET_min_W + tot_MHC + tot_phc | Ex_3cat, data=thesis_NHRVS))
+ knitr::kable(desc_tab) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+And some plots of the same values
+```{r}
+#Plotting Met mins and Physical activity
+ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = MET_min_W)) +
+  geom_violin()+
+  geom_boxplot(width=0.1, color="blue", alpha=0.2)+
+  ggtitle("Met minutes per physical activity level")
+
+# Total Mental health conditions
+ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_MHC)) +
+  geom_violin()+
+  geom_boxplot(width=0.1, color="blue", alpha=0.2) +
+  ggtitle("Total number of physical health conditions by PA level")
+
+# Total physical health conditions
+ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_phc)) +
+  geom_violin()+
+  geom_boxplot(width=0.1, color="blue", alpha=0.2)+
+  ggtitle("Total number of mental health conditions by PA level")
+```
+These descriptive are helpful for us to see how the data looks. Also it can be helpful to see what may be or not be wrong within the data
+
+## Stacked Barcharts of Physical Activity Level by Health condition
+
+I wanted to create a visualiation that depicted the number of veterans with or without health conditions within each physical activity level. The following code uses `xtabs()` to run cross tab/ chi squares. I start by extracting the number of veterans, and then convert the table into long data to plot the figure. 
+
+
+Extracting values from chi square tables. 
+```{r}
+#table with and without health conditions
+  AD_xtab2 <- xtabs(~Any_Disability +Ex_3cat,data = thesis_NHRVS)
+  xtable2  <- rbind(AD_xtab2,xtabs(~Athsma+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Arthritis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Cancer+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Chron_pain+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Liv_dis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Diabetes+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Hrt_dis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Hrt_atk+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~High_chol+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~High_bld_press+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Kid_dis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Migrane+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~MS+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Osteoporosis+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Rhum_arth+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~Stroke+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_AUD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_DUD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_MDD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_PTSD+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_NicotineDep+Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~LT_Suicidal +Ex_3cat,data = thesis_NHRVS))
+  xtable2  <- rbind(xtable2,xtabs(~No_Condition+Ex_3cat,data = thesis_NHRVS))
+xtable2<-data.frame(xtable2)
+#create a varaible for diagnosis
+xtable2$condition<- NA
+diagnose<- c("No Condition","Condition")
+xtable2$condition = diagnose
+knitr::kable(xtable2[1:10,]) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+```{r,include=FALSE}
+  var_names = c("Any Disability",
+                "Asthma",
+                "Arthritis",
+                "Cancer",
+                "Chron pain",
+                "Liver Disease",
+                "Diabetes",
+                "Heart Disease", 
+                "Heart Attack", 
+                "High Cholesterol", 
+                "Hypertension", 
+                "Kidney Disease", 
+                "Migraine", 
+                "MS", 
+                "Osteoporosis", 
+                "Rheumatoid Arthritis", 
+                "Stroke",
+                "AUD", 
+                "DUD",
+                "MDD", 
+                "PTSD", 
+                "Nicotine Dep", 
+                "Suicidality",
+                "No Condition")
+```
+
+
+Next I manually create a long dataset. I start by creating the variable names needed for the long dataset. 
+```{r}
+#2. Varaible names for table 
+ var_names2 = c("Any Disability","Any Disability","Asthsma","Asthsma",
+                "Arthritis", "Arthritis",
+                "Cancer","Cancer",
+                "Chron pain","Chron pain",
+                "Liver Disease","Liver Disease",
+                "Diabetes","Diabetes",
+                "Heart Disease", "Heart Disease",
+                "Heart Attack", "Heart Attack",
+                "High Cholesterol", "High Cholesterol",
+                "Hypertension", "Hypertension", 
+                "Kidney Disease", "Kidney Disease",
+                "Migraine",  "Migraine", 
+                "MS", "MS", 
+                "Osteoporosis", "Osteoporosis",
+                "Rheumatoid Arthritis", "Rheumatoid Arthritis",
+                "Stroke","Stroke",
+                "AUD", "AUD", 
+                "DUD","DUD",
+                "MDD", "MDD", 
+                "PTSD", "PTSD",
+                "Nicotine Dep", "Nicotine Dep",
+                "Suicidality","Suicidality",
+                "No Condition", "No Condition")
+
+
+#3. make long data frame (needed for plot)
+      condition_df2          <- var_names2
+      condition_df2 <- data.frame(condition_df2) 
+      condition_df2[1:144,1]  <- var_names2              
+      condition_df2[1:48,2]  <- xtable2$Insufficient
+      condition_df2[1:48,3]  =  "Insufficient"
+      condition_df2[49:96,2] <- xtable2$Moderate
+      condition_df2[49:96,3] <- "Moderate"
+      condition_df2[97:144,2] <- xtable2$Active
+      condition_df2[97:144,3] =  "Sufficient"
+      condition_df2$Diagnosis = xtable2$condition
+      names(condition_df2) <- c("Variable","Value","Ex_3cat","Diagnosis")
+      
+      knitr::kable(condition_df2[1:10,]) %>%
+         kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+
+Now that we have the data we can plot it! I use `ggplot()` to plot the figure. As this is a bar chart I use `geom_bar()` and use `position="stack"` to make the stacked bar chart. I used `fct_reorder()` to order the chart in order of the number of veterans reporting that condition. `facet_grid()` was used to seperate the the number of veterans with and without conditions into different figures. Lastly of note, I used `coord_flip()` to put both of the figures on the Y axis. 
+```{r}
+ggplot(condition_df2, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value))) + 
+  geom_bar(position="stack", stat="identity")+
+  facet_grid(~ Diagnosis)+ 
+  ylab('Number of Veterans') +
+  xlab('Health Condition')+
+  labs(fill='Physical Activity') +
+  theme_classic()+
+  theme(legend.position="none")+
+  coord_flip()
+```
+
+While this figure conveys what I want it to, it doesn't really help me interpret anything and looks bad in my opinion. I wanted to have both stacked bar charts on opposite sides of the variable names. Also I was unable to figure out how to reverse the X axis so I went into **_Illustrator_** and made the figure as I wanted it to look. You can see the final figure below!
+
+
+```{r, echo=FALSE, fig.align = "center"}
+knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Xtabs_thesis.png")
+```
+
+## Exploratory Data Analysis (EDA)
+
+#### Associations With Exercsie
+
+The first step in our analysis is to figure out what sociodemographic / military characteristics are associated with differences in physical activity level (i.e., our dependent variable). I use `CreateTableOne()` to run the analyses as it will put everything in super nice table for me automatically. This table till tell me which covaaraites I need to use for my analysis.
+
+```{r,results="hide"}
+library(tableone)
+EX_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "PCS", 
+                 "MCS", "Weight_kg", "BMI", "Combat_Veteran", 
+                 "Yr5_Military", "TOTAL_TRAUMAS", "tot_phc", 
+                 "tot_MHC")
+
+EX_catVars     <- c("Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "Combat_Veteran", 
+                 "Yr5_Military","Ex_3cat")
+Exercise_EDA <- CreateTableOne(vars = EX_Vars, strata = "Ex_3cat", data = thesis_NHRVS, 
+               factorVars = EX_catVars)
+
+
+full_sample<- CreateTableOne(vars = EX_Vars, data = thesis_NHRVS, 
+               factorVars = EX_catVars)
+full_sample <- print(full_sample, formatOptions = list(big.mark = ","))
+test_tab <- print(Exercise_EDA, formatOptions = list(big.mark = ","))
+Demo_tab <- cbind(full_sample, test_tab[,1:4])
+```
+
+```{r}
+ knitr::kable(Demo_tab) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+This table lets us see differences between all of the variables for the exercise 
+categories. If you look to the right of the Moderate category, you'll see the 
+p-value for the tests done. The default test used by CreateTableOne are chi-squares
+for categorical variables and a t-test for continuous variables.
+
+These variables should be used for the regressions/ancovas 
+  - Age,Some_college_or_higher, Income_60K_plus, YN_work, PCS_final or MCS_final,BMI
+
+#### Associations With Health Conditions
+Next I am going to look at how covaaraites relate to both physical health and mental health conditions. I am going to repeat the same analysis as above with `CreateTableOne()` except I am changing `strata =` to any mental health condition (`"Any_MHC`) or any physical health condition (`Any_PHC`).
+```{r,results="hide"}
+MH_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "PCS", 
+                 "MCS", "Weight_kg", "BMI", "Combat_Veteran", 
+                 "Yr5_Military", "TOTAL_TRAUMAS", "tot_phc", 
+                 "tot_MHC")
+
+MH_catVars     <- c("Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work",   "Combat_Veteran", 
+                 "Yr5_Military","Any_MHC")
+MH_EDA <- CreateTableOne(vars = MH_Vars, strata = "Any_MHC", data = thesis_NHRVS, 
+               factorVars = MH_catVars)
+
+
+mh_tab <- print(MH_EDA, formatOptions = list(big.mark = ","))
+Demo_tab <- cbind(Demo_tab,mh_tab[,1:3])
+
+PH_Vars <- c("Age", "Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "PCS", 
+                 "MCS", "Weight_kg", "BMI", "Combat_Veteran", 
+                 "Yr5_Military", "TOTAL_TRAUMAS", "tot_phc", 
+                 "tot_MHC")
+
+PH_catVars     <- c("Male_Gender", "White_Race", "College",     
+                 "Married_Partnered", "Income_60k_plus", "YN_work", "Combat_Veteran", 
+                 "Yr5_Military","Any_PHC")
+
+PH_EDA <- CreateTableOne(vars = MH_Vars, strata = "Any_PHC", data = thesis_NHRVS, 
+               factorVars = MH_catVars)
+
+ph_tab <- print(PH_EDA, formatOptions = list(big.mark = ","))
+Demo_tab <- cbind(Demo_tab,ph_tab[,1:3])
+```
+
+Now that I have created the tables, I can combine these with the physical activity level. The resulting table `Demo_tab` will be used in the paper. 
+```{r}
+Demo_tab<- as.data.frame(Demo_tab)
+kbl(Demo_tab[1:10,]) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+write_csv(Demo_tab, "~/Desktop/Coding/data/Demo_tab_basic.csv")
+```
+
+## Test of difference
+This next section is extracting the F test score, _X^2_ test, and _t_ test values for the analysis above. These values will be used in the final demogrpahics table
+
+#### Physical activity levels 
+
+Becasue some of the covariates are discrete variables while others are binary categorical/ non-binary categorical variables, I will be using `aov()` for ANOVAs, and using `summary()` to extract _F_ test, _t_ test, _X^2_ and  scores. As there is no function to run all of these together, I manually ran the analysis on all of the covariates and combined them into one table. Example of the code used for one covaraite is below:
+```{r}
+library(gmodels)
+#### Create test of difference values and put them into a table
+
+#Age
+Age_test_act <- aov(Age~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars = c('Age')
+Activity_val = c(summary(Age_test_act)[[1]]$`F value`[[1]])
+Activity_p = c(summary(Age_test_act)[[1]]$`Pr(>F)`[[1]])
+```
+
+F test and chi square will be extracted for the remaining variables:
+- Gender, White, some college, Married_partnered, Income 60k +, Working status, physical composite score, mental composite score, BMI, 5 years + in the military, total traumas, total physical health conditions, total mental health conditions.
+```{r,include=FALSE}
+#Gender
+Male_test_act<- xtabs(~Ex_3cat+Male_Gender, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Male')
+Activity_val <- append(Activity_val,summary(Male_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Male_test_act)[[6]])
+
+#White
+White_test_act<- xtabs(~Ex_3cat+White_Race, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'White')
+Activity_val <- append(Activity_val,summary(White_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(White_test_act)[[6]])
+
+#some College
+College_test_act<- xtabs(~Ex_3cat+College, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'College')
+Activity_val <- append(Activity_val,summary(College_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(College_test_act)[[6]])
+
+#Married_Partnered
+Married_Partnered_test_act<- xtabs(~Ex_3cat+Married_Partnered, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Married_Partnered')
+Activity_val <- append(Activity_val,summary(Married_Partnered_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Married_Partnered_test_act)[[6]])
+
+#Income_60k_plus
+Income_60k_plus_test_act<- xtabs(~Ex_3cat+Income_60k_plus, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Income_60k_plus')
+Activity_val <- append(Activity_val,summary(Income_60k_plus_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Income_60k_plus_test_act)[[6]])
+
+#YN_work
+YN_work_test_act<- xtabs(~Ex_3cat+YN_work, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'YN_work')
+Activity_val <- append(Activity_val,summary(YN_work_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(YN_work_test_act)[[6]])
+
+#PCS
+PCS_test_act <- aov(PCS~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'PCS')
+Activity_val <- append(Activity_val,summary(PCS_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(PCS_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#MCS
+MCS_test_act <- aov(MCS~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'MCS')
+Activity_val <- append(Activity_val,summary(MCS_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(MCS_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#BMI
+BMI_test_act <- aov(BMI~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'BMI')
+Activity_val <- append(Activity_val,summary(BMI_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(BMI_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#Combat_Veteran
+Combat_Veteran_test_act<- xtabs(~Ex_3cat+Combat_Veteran, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Combat Veteran')
+Activity_val <- append(Activity_val,summary(Combat_Veteran_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Combat_Veteran_test_act)[[6]])
+
+#Yr5_Military
+Yr5_Military_test_act<- xtabs(~Ex_3cat+Yr5_Military, data=thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'5+ Years in Military')
+Activity_val <- append(Activity_val,summary(Yr5_Military_test_act)[[3]])
+Activity_p <- append(Activity_p,summary(Yr5_Military_test_act)[[6]])
+
+#TOTAL TRAUMAS
+TOTAL_TRAUMAS_test_act <- aov(TOTAL_TRAUMAS~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'TOTAL TRAUMAS')
+Activity_val <- append(Activity_val,summary(TOTAL_TRAUMAS_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(TOTAL_TRAUMAS_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#TOTAL Physical Health Conditions
+tot_phc_test_act <- aov(tot_phc~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Total_PHC')
+Activity_val <- append(Activity_val,summary(tot_phc_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(tot_phc_test_act)[[1]]$`Pr(>F)`[[1]])
+
+#TOTAL Physical Health Conditions
+tot_MHC_test_act <- aov(tot_MHC~ Ex_3cat, data = thesis_NHRVS)
+test_act_vars <- append(test_act_vars,'Total MHC')
+Activity_val <- append(Activity_val,summary(tot_MHC_test_act)[[1]]$`F value`[[1]])
+Activity_p <- append(Activity_p,summary(tot_MHC_test_act)[[1]]$`Pr(>F)`[[1]])
+```
+
+Now that we have extracted all of the values, we can create a data frame for all of the test of difference values. We use `cbind()` to combine the test of difference values with the p values.
+```{r}
+val_df <- data.frame(test_act_vars,Activity_val)
+val_df <- cbind(val_df,Activity_p)
+```
+#### Physical and Mental health Conditions
+The same analysis will be conducted for these covariates by physical and mental health condition as well. 
+
+```{r,include=FALSE}
+#### Create test of difference values and put them into a table
+#Age
+PHC_val <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_PHC)[[3]])
+
+#Gender
+Male_test_PHC<- xtabs(~Any_PHC+Male_Gender, data=thesis_NHRVS)
+summary(Male_test_PHC)
+PHC_val <- append(PHC_val,Male_test_PHC[[3]])
+PHC_p <- append(PHC_p,summary(Male_test_PHC)[[6]])
+
+#White
+White_test_PHC<- xtabs(~Any_PHC+White_Race, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(White_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(White_test_PHC)[[6]])
+
+#some College
+College_test_PHC<- xtabs(~Any_PHC+College, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(College_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(College_test_PHC)[[6]])
+
+#Married_Partnered
+Married_Partnered_test_PHC<- xtabs(~Any_PHC+Married_Partnered, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Married_Partnered_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Married_Partnered_test_PHC)[[6]])
+
+#Income_60k_plus
+Income_60k_plus_test_PHC<- xtabs(~Any_PHC+Income_60k_plus, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Income_60k_plus_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Income_60k_plus_test_PHC)[[6]])
+
+#YN_work
+YN_work_test_PHC<- xtabs(~Any_PHC+YN_work, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(YN_work_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(YN_work_test_PHC)[[6]])
+
+#PCS
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_PHC)[[3]])
+
+#MCS
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_PHC)[[3]])
+
+#BMI
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_PHC)[[3]])
+
+#Combat_Veteran
+Combat_Veteran_test_PHC<- xtabs(~Any_PHC+Combat_Veteran, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Combat_Veteran_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Combat_Veteran_test_PHC)[[6]])
+
+#Yr5_Military
+Yr5_Military_test_PHC<- xtabs(~Any_PHC+Yr5_Military, data=thesis_NHRVS)
+PHC_val <- append(PHC_val,summary(Yr5_Military_test_PHC)[[3]])
+PHC_p <- append(PHC_p,summary(Yr5_Military_test_PHC)[[6]])
+
+#TOTAL TRAUMAS
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_PHC)[[3]])
+
+#TOTAL Physical Health Conditions
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)[[3]])
+
+t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_PHC)
+
+#TOTAL Mental Health Conditions
+PHC_val <- append(PHC_val, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[1]])
+PHC_p <- append(PHC_p, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_PHC)[[3]])
+
+# Combine into one DF
+val_df <- cbind(val_df,PHC_val,PHC_p)
+
+#### Create test of difference values and put them into a table
+#Age
+MHC_val <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- c(t.test(thesis_NHRVS$Age~thesis_NHRVS$Any_MHC)[[3]])
+
+#Gender
+Male_test_MHC<- xtabs(~Any_MHC+Male_Gender, data=thesis_NHRVS)
+summary(Male_test_MHC)
+MHC_val <- append(MHC_val,Male_test_MHC[[3]])
+MHC_p <- append(MHC_p,summary(Male_test_MHC)[[6]])
+
+#White
+White_test_MHC<- xtabs(~Any_MHC+White_Race, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(White_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(White_test_MHC)[[6]])
+
+#some College
+College_test_MHC<- xtabs(~Any_MHC+College, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(College_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(College_test_MHC)[[6]])
+
+#Married_Partnered
+Married_Partnered_test_MHC<- xtabs(~Any_MHC+Married_Partnered, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Married_Partnered_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Married_Partnered_test_MHC)[[6]])
+
+#Income_60k_plus
+Income_60k_plus_test_MHC<- xtabs(~Any_MHC+Income_60k_plus, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Income_60k_plus_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Income_60k_plus_test_MHC)[[6]])
+
+#YN_work
+YN_work_test_MHC<- xtabs(~Any_MHC+YN_work, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(YN_work_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(YN_work_test_MHC)[[6]])
+
+#PCS
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$PCS~thesis_NHRVS$Any_MHC)[[3]])
+
+#MCS
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$MCS~thesis_NHRVS$Any_MHC)[[3]])
+
+#BMI
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$BMI~thesis_NHRVS$Any_MHC)[[3]])
+
+#Combat_Veteran
+Combat_Veteran_test_MHC<- xtabs(~Any_MHC+Combat_Veteran, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Combat_Veteran_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Combat_Veteran_test_MHC)[[6]])
+
+#Yr5_Military
+Yr5_Military_test_MHC<- xtabs(~Any_MHC+Yr5_Military, data=thesis_NHRVS)
+MHC_val <- append(MHC_val,summary(Yr5_Military_test_MHC)[[3]])
+MHC_p <- append(MHC_p,summary(Yr5_Military_test_MHC)[[6]])
+
+#TOTAL TRAUMAS
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$TOTAL_TRAUMAS~thesis_NHRVS$Any_MHC)[[3]])
+
+#TOTAL Physical Health Conditions
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$tot_MHC~thesis_NHRVS$Any_MHC)[[3]])
+
+#TOTAL Physical Health Conditions
+MHC_val <- append(MHC_val, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[1]])
+MHC_p <- append(MHC_p, t.test(thesis_NHRVS$tot_phc~thesis_NHRVS$Any_MHC)[[3]])
+```
+
+#### Combine into one table
+
+Now that we have the test of differences for our covariates by physical activity level, and physical/ mental health conditions we can combine them into one table. 
+```{r}
+val_df <- cbind(val_df,PHC_val,PHC_p)
+val_df <- cbind(val_df,MHC_val,MHC_p)
+
+kbl(val_df) %>%
+   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+### Export to CSV
+```{r}
+write_csv(val_df, "~/Desktop/Coding/data/thesis_test_dif.csv" )
+```
+
+

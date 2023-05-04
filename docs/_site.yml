@@ -1,0 +1,14 @@
+name: "Masters-Thesis-Analyses"
+navbar:
+  title: "Masters Thesis Analyses"
+  left:
+    - text: "Preliminary Statistics"
+    - href: Preliminary_Stats.html
+    - text: "Logistic Multinomial Regresion"
+    - href: Multinomial_Function2.html
+    - text: "Thesis Forrest Plots"
+    - href: Thesis_FP2.html
+output: 
+    html_document:
+      theme: yeti
+    
