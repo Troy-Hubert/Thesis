@@ -10,6 +10,8 @@ output:
     #code_folding: hide
 ---
 
+
+
 The following code will show you how I created my forrest plots for my thesis. This page includes:
 
 1. Load in the data, seperate data into respective data frames for univariate and multivariate analysis.
@@ -648,8 +650,10 @@ I struggled to figure out how to combine these two figures together without `ggp
 
 # Explination of Results
 
+![](images/Ins_Act_FP.png)
+
 ```{r,fig.align='center'}
-knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Ins_Act_FP.png")
+knitr::include_graphics("images/Ins_Act_FP.png")
 ```
 
 _Univariate._ 
@@ -665,10 +669,8 @@ reporting other conditions between insufficient and moderate activity.
 Compared to veterans who are insufficiently active, those who are sufficiently
 active are more likely to report PTSD.
 
+![Note. Blue bars signify values that are significant following Bonferroni alpha correction. Grey bars signify values that are not statistically significant. MS = Multiple Sclerosis, RA = Rheumatoid Arthritis, AUD = Alcohol Use Disorder, DUD = Drug Use Disorder, MDD = Major Depressive Disorder, Nicotine Dep = Nicotine Dependence, PTSD = Posttraumatic Stress Disorder. Univariate analysis only included health conditions as predictors of exercise level. Binary covariates used in multivariate analysis include age, some college education, an income ≥ 60k, currently working, body mass index, and mental composite score or physical composite score for physical health conditions and mental health conditions, respectively.](images/Ins_Mod_FP.png)
 
-```{r,fig.align='center'}
-knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Ins_Mod_FP.png")
-```
 
 _Univariate._ 
 Similarily to sufficiently active, veterans tend who have health conditions are less likely to report moderate physical activity compared to those who are insuficiently active.
@@ -680,14 +682,13 @@ high cholesterol, and stroke. No other differences were observed between the odd
 reporting other conditions between insufficient and moderate activity.
 
 Compared to veterans who are insufficiently active, those who are moderately
-active are less likely to report nicotine dependence. No other differences were observed between the odds of
-reporting other conditions between insufficient and moderate activity.
+active are less likely to report nicotine dependence. No other differences were observed between the odds of reporting other conditions between insufficient and moderate activity.
 
-```{r,fig.align='center'}
-knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Mod_Act_FP.png")
-```
+![Note. Blue bars signify values that are significant following Bonferroni alpha correction. Grey bars signify values that are not statistically significant. MS = Multiple Sclerosis, RA = Rheumatoid Arthritis, AUD = Alcohol Use Disorder, DUD = Drug Use Disorder, MDD = Major Depressive Disorder, Nicotine Dep = Nicotine Dependence, PTSD = Posttraumatic Stress Disorder. Univariate analysis only included health conditions as predictors of exercise level. Binary covariates used in multivariate analysis include age, some college education, an income ≥ 60k, currently working, body mass index, and mental composite score or physical composite score for physical health conditions and mental health conditions, respectively.](images/Mod_Act_FP.png) 
+
 _Univariate._
 For a few health coditions, veterans with those conditions were more likely to report moderate activity compared to sufficiently active.
+
 _Multivariate._
 No other differences were observed between the odds of
 reporting physical health conditions between insufficient and moderate activity.

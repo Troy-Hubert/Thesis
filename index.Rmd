@@ -3,13 +3,13 @@ title: "Masters Thesis Analyses"
 output: html_document
 ---
 
-##### Hubert, T., Adams, T., Pietrzak. R. ( *in preperation* ) Associations between Physical Activity Levels and Physical and Mental Health and Illness in U.S. Military Veterans: Results from the 2019/2020 National Health and Resilience in Veterans Study.
+##### Hubert, T., Adams, T., Pietrzak. R. ( *in preperation* ) Associations between Physical and Mental Health Conditions and Physical Activity Levels in U.S. Military Veterans: Results from the 2019/2020 National Health and Resilience in Veterans Study.
 
 ---
 
 ### Explination of code
 
-The following markdowns display the code used for my masters thesis. The code is broke up into 4 sections:
+The following markdowns display the code used for my masters thesis. The code is broke up into 3 sections:
 
 1. Preliminary Stats
     + Read in data, clean data, and prepare data for analysis

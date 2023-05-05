@@ -424,12 +424,9 @@ ggplot(condition_df2, aes(fill=Ex_3cat, y=Value, x= fct_reorder(Variable, Value)
   coord_flip()
 ```
 
-While this figure conveys what I want it to, it doesn't really help me interpret anything and looks bad in my opinion. I wanted to have both stacked bar charts on opposite sides of the variable names. Also I was unable to figure out how to reverse the X axis so I went into **_Illustrator_** and made the figure as I wanted it to look. You can see the final figure below!
+While this figure conveys what I want it to, it doesn't really help me interpret anything and looks bad in my opinion. I wanted to have both stacked bar charts on opposite sides of the variable names. Also I was unable to figure out how to reverse the X axis so I went into **_Illustrator_** and made the figure as I wanted it to look. Here is the final figure!
 
-
-```{r, fig.align = "center"}
-knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Xtabs_thesis.png")
-```
+![Note. Stacked bar chart of the Number of veterans within each physical activity level between all health conditions. Total sample is observed between the left side of the figure (i.e., veterans who did not report health condition), and the right (i.e, veterans who did report a health condition) RA = Rheumatoid Arthritis, MS = Multiple Sclerosis, AUD = Alcohol Use Disorder, DUD = Drug Use Disorder, MDD = Major Depressive Disorder, Nicotine Dep = Nicotine Dependence, PTSD = Posttraumatic Stress Disorder. No Condition is reverse coded on the no condition figure (i.e., having a health condition).](images/Xtabs_thesis.png)
 
 # Exploratory Data Analysis (EDA) {.tabset}
 
