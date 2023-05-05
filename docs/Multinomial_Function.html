@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.19/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -29,6 +29,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -221,6 +224,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -228,6 +294,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -244,17 +320,21 @@ $(document).ready(function () {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="dropdown-header">Preliminary Statistics</li>
+        <li class="dropdown-header">Home</li>
+<li>
+  <a href="index.html"></a>
+</li>
+<li class="dropdown-header">Preliminary Statistics</li>
 <li>
   <a href="Preliminary_Stats.html"></a>
 </li>
-<li class="dropdown-header">Logistic Multinomial Regresion</li>
+<li class="dropdown-header">Logistic Multinomial Regression</li>
 <li>
-  <a href="Multinomial_Function2.html"></a>
+  <a href="Multinomial_Function.html"></a>
 </li>
 <li class="dropdown-header">Thesis Forrest Plots</li>
 <li>
-  <a href="Thesis_FP2.html"></a>
+  <a href="Thesis_FP.html"></a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -290,8 +370,8 @@ regression.</li>
 <li>Create table of output from stepwise regression model.</li>
 </ol>
 <hr />
-<div id="create-data-frames" class="section level2">
-<h2>Create Data frames</h2>
+<div id="create-data-frames" class="section level1">
+<h1>Create Data frames</h1>
 <p>This first set of code is used to create the dataframes needed for
 our analysis. Once the data frame is made, then we can use the function
 below to add values to the data frames.</p>
@@ -328,8 +408,8 @@ below to add values to the data frames.</p>
   Act_Mod  &lt;- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]</code></pre>
 </div>
 <div id="preliminary-regression-univariate-regression-function"
-class="section level2">
-<h2>Preliminary Regression: Univariate Regression function</h2>
+class="section level1">
+<h1>Preliminary Regression: Univariate Regression function</h1>
 <p>The first step in my analysis was to run the multinomial regressions
 without covariates so I can see how the health conditions are associated
 with physical activity level independent of covariates. The following
@@ -343,6 +423,10 @@ sufficiently active vs moderatly active)</li>
 <li>Returns respective values as a row in a dataframe which can be
 compiled into a larger data fram per comparison</li>
 </ol>
+<div id="regression-code" class="section level2 tabset">
+<h2 class="tabset">Regression Code</h2>
+<div id="create-unithesis-function" class="section level3">
+<h3>Create <code>UniThesis()</code> Function</h3>
 <pre class="r"><code># Univariate Logistic Multinomial Regression function
 
 UniThesis&lt;-function(Data,condition,string,contrast){
@@ -410,13 +494,16 @@ UniThesis&lt;-function(Data,condition,string,contrast){
   }
   return(output)
 }</code></pre>
+</div>
+<div id="running-unithesis" class="section level3">
+<h3>Running <code>UniThesis()</code></h3>
 <p>Now that we have a function, we need to run it. The
 <code>UniThesis()</code> function is for each health condition and
 compiles it into one larger data frame <code>Ins_Mod_Uni</code>. The
 code below is used to extract values for the Insufficient vs
 Sufficiently active comparisons.</p>
-<div id="ins_mod" class="section level4">
-<h4>Ins_Mod</h4>
+<div id="insufficient-vs-moderate" class="section level4">
+<h4>Insufficient vs moderate</h4>
 <pre class="r"><code>### Physical Health Conditions 
 #1. Any Disability
 Ins_Mod_Uni&lt;-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$Any_Disability,&quot;Any Disability&quot;, &quot;Ins_Mod&quot;))
@@ -595,16 +682,18 @@ Athsma
 analysis in this markdown are repeated I will only be showing the first
 one, and not the 2 other comparisons to save space.</p>
 </div>
-<div id="export-as-csv" class="section level4">
-<h4>Export as CSV</h4>
+</div>
+<div id="export-as-csv" class="section level3">
+<h3>Export as CSV</h3>
 <pre class="r"><code>write.csv(Ins_Act_Uni, &quot;~/Desktop/Coding/data/Ins_Act_Uni.csv&quot;)
 write.csv(Ins_Mod_Uni, &quot;~/Desktop/Coding/data/Ins_Mod_Uni.csv&quot;)
 write.csv(Act_Mod_Uni, &quot;~/Desktop/Coding/data/Act_Mod_Uni.csv&quot;)</code></pre>
 </div>
 </div>
+</div>
 <div id="step-wise-multivariate-logistic-multinomial-regression"
-class="section level2">
-<h2>Step Wise Multivariate Logistic Multinomial Regression</h2>
+class="section level1">
+<h1>Step Wise Multivariate Logistic Multinomial Regression</h1>
 <p>That’s a mouthful! For the following section we will be running code
 for the full regression model, extracting values like we did for the
 univariate function, and putting these values into tables for the 3
@@ -617,8 +706,10 @@ PCS</li>
 <li>Health Conditions: Each health condition will be ran as a seperate
 regression and compiled into one dataframe</li>
 </ol>
-<div id="block-1-covariates" class="section level4">
-<h4>Block 1: Covariates</h4>
+<div id="regession-code" class="section level2 tabset">
+<h2 class="tabset">Regession Code</h2>
+<div id="block-1-covariates" class="section level3">
+<h3>Block 1: Covariates</h3>
 <p>This first block of the stepwise regression will do the same thing as
 we did for the univariate analysis, being that this was not replicated
 we did not make a function for it.</p>
@@ -847,8 +938,8 @@ BMI
 </tbody>
 </table>
 </div>
-<div id="block-2-covariates-with-sf8" class="section level4">
-<h4>Block 2: Covariates with SF8</h4>
+<div id="block-2-covariates-with-sf8" class="section level3">
+<h3>Block 2: Covariates with SF8</h3>
 <p>Block to is idential to block one with the addition of the MCS and
 PCS to the regression model. We are running two different regession
 models (i.e., one with the MCS and one with the PCS) so you can see that
@@ -1233,9 +1324,8 @@ PCS
 </tbody>
 </table>
 </div>
-<div id="block-3-the-multivaraite-multinomial-function"
-class="section level4">
-<h4>Block 3: The Multivaraite Multinomial Function</h4>
+<div id="full-model-function" class="section level3">
+<h3>Full Model Function</h3>
 <p>The final step in my analysis was to run the full multinomial model
 so I can see how the health conditions are associated with physical
 activity level after controling for covariates. The following
@@ -1328,8 +1418,8 @@ MultiThesis&lt;-function(Data,condition,string,type,contrast){
 
 #Its done!</code></pre>
 </div>
-<div id="r2-change" class="section level4">
-<h4>R^2 Change</h4>
+<div id="r2-change" class="section level3">
+<h3>R^2 Change</h3>
 <p>Before we can create the dataframes with the multinomial regession
 output, I need to find the R^2 change for all of the variables. The
 following function allows us to look at the <a
@@ -1708,15 +1798,17 @@ r2(multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ LT_NicotineDep + 
 <pre><code>## # R2 for Generalized Linear Regression
 ##   McFadden&#39;s R2: 0.053</code></pre>
 </div>
-</div>
-<div id="run-the-multithesis-function" class="section level2">
-<h2>Run the <code>MultiThesis()</code> function</h2>
+<div id="block-3-the-multivaraite-multinomial" class="section level3">
+<h3>Block 3: The Multivaraite Multinomial</h3>
+<div id="run-the-multithesis-function" class="section level4">
+<h4>Run the <code>MultiThesis()</code> function</h4>
 <p>Now that we have created our function, we can use it to make our data
 frames for each contrast. Being that the function just creates the
 values needed for each condition, we still need to add it to the
 exsisting data frame (i.e.,rbind())</p>
-<div id="insufficient-vs-moderate-dataframe" class="section level3">
-<h3>Insufficient vs Moderate Dataframe</h3>
+<ol style="list-style-type: decimal">
+<li>Insufficient vs Moderate Dataframe</li>
+</ol>
 <pre class="r"><code>### Physical Health Conditions 
 Ins_Mod = 0
 #1. Any Disability
@@ -1901,14 +1993,17 @@ Athsma
 <p>Now repeate that step for the other 2 comparisons!</p>
 </div>
 </div>
-<div id="export-tables-to-csv" class="section level2">
-<h2>Export Tables to CSV</h2>
+<div id="export-tables-to-csv" class="section level3">
+<h3>Export Tables to CSV</h3>
 <pre class="r"><code>write_csv(Ins_Mod, &quot;~/Desktop/Coding/data/Ins_Mod.csv&quot;)
 write_csv(Ins_Act, &quot;~/Desktop/Coding/data/Ins_Act.csv&quot;)
 write_csv(Act_Mod, &quot;~/Desktop/Coding/data/Act_Mod.csv&quot;)</code></pre>
+</div>
+</div>
+</div>
 <div id="create-tables-for-multinomial-logistic-regression-output"
-class="section level3">
-<h3>Create Tables for Multinomial Logistic Regression Output</h3>
+class="section level1">
+<h1>Create Tables for Multinomial Logistic Regression Output</h1>
 <p>We have everything we need for our final table output!</p>
 <pre class="r"><code>#1. Import tables
    r2_change &lt;- read_csv(&quot;~/Desktop/Coding/data/R2change.csv&quot;)
@@ -2564,10 +2659,11 @@ Suicidality
 <pre class="r"><code>#8 Export Table
     write_csv(OR_Table,&quot;~/Desktop/Coding/data/Thesis_OR_Table.csv&quot;)</code></pre>
 </div>
+
+
+
 </div>
-
-
-
+</div>
 
 </div>
 
@@ -2600,6 +2696,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

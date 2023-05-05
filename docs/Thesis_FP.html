@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.19/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -29,6 +29,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -221,6 +224,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -228,6 +294,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -244,17 +320,21 @@ $(document).ready(function () {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="dropdown-header">Preliminary Statistics</li>
+        <li class="dropdown-header">Home</li>
+<li>
+  <a href="index.html"></a>
+</li>
+<li class="dropdown-header">Preliminary Statistics</li>
 <li>
   <a href="Preliminary_Stats.html"></a>
 </li>
-<li class="dropdown-header">Logistic Multinomial Regresion</li>
+<li class="dropdown-header">Logistic Multinomial Regression</li>
 <li>
-  <a href="Multinomial_Function2.html"></a>
+  <a href="Multinomial_Function.html"></a>
 </li>
 <li class="dropdown-header">Thesis Forrest Plots</li>
 <li>
-  <a href="Thesis_FP2.html"></a>
+  <a href="Thesis_FP.html"></a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -299,8 +379,8 @@ library(forcats)
 library(kableExtra)
 
 options(knitr.table.format = &quot;html&quot;) </code></pre>
-<div id="load-data" class="section level2">
-<h2>load data</h2>
+<div id="import-and-prep-data" class="section level1">
+<h1>Import and Prep Data</h1>
 <p>First thing to do is to load the data into R. I have already created
 tables with all of the values needed for these plots.</p>
 <pre class="r"><code>#### Univariate regressions
@@ -1345,8 +1425,8 @@ Suicidality
 frame for mental health conditions. We will repeat these steps for the
 other 2 full models, and the 3 univariate models.</p>
 </div>
-<div id="middle-create-the-plot" class="section level2">
-<h2>Middle: Create The Plot</h2>
+<div id="middle-create-the-plot" class="section level1">
+<h1>Middle: Create The Plot</h1>
 <p>Now that we have the data all ready, we can create the plot. I am
 creating a function below called <code>mid_Fplot()</code> that will
 allow me to make the 6 forrest plots by calling the function instead of
@@ -1357,8 +1437,8 @@ values were statistically significant after alpha corrections, so I used
 <code>color =</code> &amp; <code>scale_color_manual()</code> to make the
 significant ones blue. For the forrest plot I am going to save the
 output of the plot into “phc_IA_mid”.</p>
-<div id="forrest-plot-function" class="section level4">
-<h4>Forrest Plot Function</h4>
+<div id="forrest-plot-function" class="section level3">
+<h3>Forrest Plot Function</h3>
 <pre class="r"><code>mid_Fplot &lt;-function(data){
 output &lt;- data |&gt;
   #Plot the value variable (in descending order) assigning significance to the 
@@ -1388,8 +1468,8 @@ output &lt;- data |&gt;
 return (output)
 }</code></pre>
 </div>
-<div id="applying-the-function" class="section level4">
-<h4>Applying the function</h4>
+<div id="applying-the-function" class="section level3">
+<h3>Applying the function</h3>
 <p>As we separated the datasets into mental health and physical health
 data frames, we can just call one function to do both parts of the
 plots.</p>
@@ -1419,20 +1499,20 @@ were (less/no difference/more) likely to report X health condition.” For
 these figures the blue lines indicate which health conditions are
 significant after alpha corrections.</p>
 <pre class="r"><code>ggpubr::ggarrange(phc_IA_mid,mhc_IA_mid, ncol =2, nrow =1)</code></pre>
-<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="Thesis_FP_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>We have physical health on the left side and mental conditions on the
 right. You may be asking yourself, Where is the Y axis? I removed the Y
 axis for both plots so I could manually add the variable names and the
 odds ratios in the next step.</p>
 </div>
 </div>
-<div id="left-side-labels-for-the-forrest-plot" class="section level2">
-<h2>Left Side: labels for the forrest plot</h2>
+<div id="left-side-labels-and-ors" class="section level1">
+<h1>Left Side: labels and ORs</h1>
 <p>We took away the standard y axis of GGplot because it is simplistic.
 Now we are now going to add a Y axis that includes the variable names
 (i.e., Health Conditions) and their respective ORs.</p>
-<div id="update-data-frame" class="section level4">
-<h4>Update data frame</h4>
+<div id="update-data-frame" class="section level3">
+<h3>Update data frame</h3>
 <p>The output from the statistical models (e.g., p values) is not
 rounded to clean numbers. The code below tidy’s up our data and creates
 new values. Additionally our table has seperate values for OR, and 95%
@@ -1575,13 +1655,13 @@ mhc_AM_Uni_left&lt;-left_FP(mhc_AM_Uni_plot,&quot;MHC&quot;)</code></pre>
 <p>Now we have our labels. In our labels we have the name of our
 conditions and the OR + 95 CI.</p>
 <pre class="r"><code>phc_IA_left </code></pre>
-<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p><img src="Thesis_FP_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <pre class="r"><code>mhc_IA_left</code></pre>
-<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-18-2.png" width="672" /></p>
+<p><img src="Thesis_FP_files/figure-html/unnamed-chunk-18-2.png" width="672" /></p>
 </div>
 </div>
-<div id="right-p-values" class="section level2">
-<h2>Right: P values</h2>
+<div id="right-p-values" class="section level1">
+<h1>Right: P values</h1>
 <p>We now have the left side and the middle of the plot. The last thing
 we need is to show the P values on the right side of the table. We have
 already updated our data frame (above) so now we can just put them in
@@ -1615,8 +1695,7 @@ phc_AM_Uni_right &lt;- right_FP(phc_AM_Uni_plot)
 mhc_AM_Uni_right &lt;- right_FP(mhc_AM_Uni_plot)</code></pre>
 <p>Example of the p value output</p>
 <pre class="r"><code>ggpubr::ggarrange(phc_IA_right,mhc_IA_right, ncol =2, nrow =1)</code></pre>
-<p><img src="Thesis_FP2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
-</div>
+<p><img src="Thesis_FP_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 <div id="putting-it-together" class="section level2">
 <h2>Putting It Together</h2>
 <p>We now have all of the pieces of the puzzle. Now we need to specify
@@ -1631,8 +1710,10 @@ coordinates for the 3 different plot types to be plotted at using
   patchwork::area(t = 0, l = 14, b = 30, r = 25),
   patchwork::area(t = 0, l = 23, b = 30, r = 30) 
   )</code></pre>
-<div id="final-plot-arrangement" class="section level3">
-<h3>final plot arrangement</h3>
+</div>
+</div>
+<div id="final-plot-arrangement" class="section level1">
+<h1>Final Plot Arrangement</h1>
 <p>Combine all of the parts together to get the final product! We used
 <code>plot_layout()</code> to combine all of the plots together using
 the area cordinates specified using <code>patchwork::area()</code></p>
@@ -1649,8 +1730,11 @@ without <code>ggplot()</code> getting angery. So I used the forbidden
 <strong><em>Illustrator</em></strong> to tidy up everything and combine
 the univariate and multivariate plots. The final plots are below with
 explinations of their results.</p>
+</div>
+<div id="explination-of-results" class="section level1">
+<h1>Explination of Results</h1>
 <pre class="r"><code>knitr::include_graphics(&quot;~/Desktop/Coding/R working directory/plots/Ins_Act_FP.png&quot;)</code></pre>
-<p><img src="../../plots/Ins_Act_FP.png" width="796" style="display: block; margin: auto;" /></p>
+<p><img src="../plots/Ins_Act_FP.png" width="796" style="display: block; margin: auto;" /></p>
 <p><em>Univariate.</em> Those with several health conditions are less
 likely to report sufficiently active physical activity compared to
 insfucciently physical activity.</p>
@@ -1664,7 +1748,7 @@ activity.</p>
 <p>Compared to veterans who are insufficiently active, those who are
 sufficiently active are more likely to report PTSD.</p>
 <pre class="r"><code>knitr::include_graphics(&quot;~/Desktop/Coding/R working directory/plots/Ins_Mod_FP.png&quot;)</code></pre>
-<p><img src="../../plots/Ins_Mod_FP.png" width="798" style="display: block; margin: auto;" /></p>
+<p><img src="../plots/Ins_Mod_FP.png" width="798" style="display: block; margin: auto;" /></p>
 <p><em>Univariate.</em> Similarily to sufficiently active, veterans tend
 who have health conditions are less likely to report moderate physical
 activity compared to those who are insuficiently active.</p>
@@ -1678,17 +1762,18 @@ moderately active are less likely to report nicotine dependence. No
 other differences were observed between the odds of reporting other
 conditions between insufficient and moderate activity.</p>
 <pre class="r"><code>knitr::include_graphics(&quot;~/Desktop/Coding/R working directory/plots/Mod_Act_FP.png&quot;)</code></pre>
-<p><img src="../../plots/Mod_Act_FP.png" width="796" style="display: block; margin: auto;" />
+<p><img src="../plots/Mod_Act_FP.png" width="796" style="display: block; margin: auto;" />
 <em>Univariate.</em> For a few health coditions, veterans with those
 conditions were more likely to report moderate activity compared to
 sufficiently active. <em>Multivariate.</em> No other differences were
 observed between the odds of reporting physical health conditions
 between insufficient and moderate activity.</p>
 </div>
+
+
+
 </div>
-
-
-
+</div>
 
 </div>
 
@@ -1721,6 +1806,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

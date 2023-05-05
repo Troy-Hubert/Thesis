@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.19/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -29,6 +29,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -221,6 +224,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -228,6 +294,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -244,17 +320,21 @@ $(document).ready(function () {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="dropdown-header">Preliminary Statistics</li>
+        <li class="dropdown-header">Home</li>
+<li>
+  <a href="index.html"></a>
+</li>
+<li class="dropdown-header">Preliminary Statistics</li>
 <li>
   <a href="Preliminary_Stats.html"></a>
 </li>
-<li class="dropdown-header">Logistic Multinomial Regresion</li>
+<li class="dropdown-header">Logistic Multinomial Regression</li>
 <li>
-  <a href="Multinomial_Function2.html"></a>
+  <a href="Multinomial_Function.html"></a>
 </li>
 <li class="dropdown-header">Thesis Forrest Plots</li>
 <li>
-  <a href="Thesis_FP2.html"></a>
+  <a href="Thesis_FP.html"></a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -304,10 +384,11 @@ library(manipulate)
 library(psych)
 library(tableone)
 library(kableExtra)</code></pre>
+<div id="prep-data-for-analyses" class="section level1 tabset">
+<h1 class="tabset">Prep Data For Analyses</h1>
 <div id="import-in-data" class="section level3">
 <h3>Import in data</h3>
 <pre class="r"><code>### Import dataset 
-setwd(&quot;~/Desktop/Adams_lab/SPSS_stuff&quot;)
 NHRVS_2019 &lt;- read_sav(&quot;~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav&quot;)
 
 ### Select and rename Variables
@@ -805,14 +886,18 @@ OVer_60k
 </tbody>
 </table>
 </div>
-<div id="export-new-file-to-csv" class="section level2">
-<h2>Export new file to CSV</h2>
+<div id="export-new-file-to-csv" class="section level3">
+<h3>Export new file to CSV</h3>
 <p>Now that we have a clean and prepped data file to analyze lets create
 a CSV of that for future reference.</p>
 <pre class="r"><code>write_csv(thesis_NHRVS, &quot;~/Desktop/Coding/data/thesis_dataset.csv&quot; )
 haven::write_sav(thesis_NHRVS,&quot;~/Desktop/Coding/data/thesis_SPSS.sav&quot;)</code></pre>
-<div id="descriptives-of-variables" class="section level3">
-<h3>Descriptives of variables</h3>
+</div>
+</div>
+<div id="descriptives-of-variables" class="section level1 tabset">
+<h1 class="tabset">Descriptives of Variables</h1>
+<div id="discriptive-table" class="section level3">
+<h3>Discriptive Table</h3>
 <p>Here are some discriptive statistics and basic plots to see an
 overview of the data. I use <code>table1()</code> to run the descriptive
 statistics.</p>
@@ -1002,7 +1087,9 @@ Median [Min, Max]
 </tr>
 </tbody>
 </table>
-<p>And some plots of the same values</p>
+</div>
+<div id="violin-plots" class="section level3">
+<h3>Violin Plots</h3>
 <pre class="r"><code>#Plotting Met mins and Physical activity
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = MET_min_W)) +
   geom_violin()+
@@ -1025,11 +1112,11 @@ These descriptive are helpful for us to see how the data looks. Also it
 can be helpful to see what may be or not be wrong within the data</p>
 </div>
 </div>
-<div
-id="stacked-barcharts-of-physical-activity-level-by-health-condition"
-class="section level2">
-<h2>Stacked Barcharts of Physical Activity Level by Health
-condition</h2>
+<div id="stacked-barcharts-of-health-conditions"
+class="section level1 tabset">
+<h1 class="tabset">Stacked Barcharts of health conditions</h1>
+<div id="cross-tabs" class="section level3">
+<h3>Cross tabs</h3>
 <p>I wanted to create a visualiation that depicted the number of
 veterans with or without health conditions within each physical activity
 level. The following code uses <code>xtabs()</code> to run cross tab/
@@ -1260,6 +1347,9 @@ Condition
 </tr>
 </tbody>
 </table>
+</div>
+<div id="create-long-dataset" class="section level3">
+<h3>Create long dataset</h3>
 <p>Next I manually create a long dataset. I start by creating the
 variable names needed for the long dataset.</p>
 <pre class="r"><code>#2. Varaible names for table 
@@ -1463,6 +1553,9 @@ Condition
 </tr>
 </tbody>
 </table>
+</div>
+<div id="stacked-barchart" class="section level3">
+<h3>Stacked Barchart</h3>
 <p>Now that we have the data we can plot it! I use <code>ggplot()</code>
 to plot the figure. As this is a bar chart I use <code>geom_bar()</code>
 and use <code>position="stack"</code> to make the stacked bar chart. I
@@ -1487,12 +1580,14 @@ stacked bar charts on opposite sides of the variable names. Also I was
 unable to figure out how to reverse the X axis so I went into
 <strong><em>Illustrator</em></strong> and made the figure as I wanted it
 to look. You can see the final figure below!</p>
-<p><img src="../../plots/Xtabs_thesis.png" width="656" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::include_graphics(&quot;~/Desktop/Coding/R working directory/plots/Xtabs_thesis.png&quot;)</code></pre>
+<p><img src="../plots/Xtabs_thesis.png" width="656" style="display: block; margin: auto;" /></p>
 </div>
-<div id="exploratory-data-analysis-eda" class="section level2">
-<h2>Exploratory Data Analysis (EDA)</h2>
-<div id="associations-with-exercsie" class="section level4">
-<h4>Associations With Exercsie</h4>
+</div>
+<div id="exploratory-data-analysis-eda" class="section level1 tabset">
+<h1 class="tabset">Exploratory Data Analysis (EDA)</h1>
+<div id="associations-with-exercsie" class="section level3">
+<h3>Associations With Exercsie</h3>
 <p>The first step in our analysis is to figure out what sociodemographic
 / military characteristics are associated with differences in physical
 activity level (i.e., our dependent variable). I use
@@ -1893,8 +1988,8 @@ t-test for continuous variables.</p>
 Age,Some_college_or_higher, Income_60K_plus, YN_work, PCS_final or
 MCS_final,BMI</p>
 </div>
-<div id="associations-with-health-conditions" class="section level4">
-<h4>Associations With Health Conditions</h4>
+<div id="associations-with-health-conditions" class="section level3">
+<h3>Associations With Health Conditions</h3>
 <p>Next I am going to look at how covaaraites relate to both physical
 health and mental health conditions. I am going to repeat the same
 analysis as above with <code>CreateTableOne()</code> except I am
@@ -2361,13 +2456,13 @@ MCS (mean (SD))
 <pre class="r"><code>write_csv(Demo_tab, &quot;~/Desktop/Coding/data/Demo_tab_basic.csv&quot;)</code></pre>
 </div>
 </div>
-<div id="test-of-difference" class="section level2">
-<h2>Test of difference</h2>
+<div id="tests-of-difference" class="section level1">
+<h1>Tests of difference</h1>
 <p>This next section is extracting the F test score, <em>X^2</em> test,
 and <em>t</em> test values for the analysis above. These values will be
 used in the final demogrpahics table</p>
-<div id="physical-activity-levels" class="section level4">
-<h4>Physical activity levels</h4>
+<div id="physical-activity-levels" class="section level3">
+<h3>Physical activity levels</h3>
 <p>Becasue some of the covariates are discrete variables while others
 are binary categorical/ non-binary categorical variables, I will be
 using <code>aov()</code> for ANOVAs, and using <code>summary()</code> to
@@ -2397,7 +2492,6 @@ frame for all of the test of difference values. We use
 values.</p>
 <pre class="r"><code>val_df &lt;- data.frame(test_act_vars,Activity_val)
 val_df &lt;- cbind(val_df,Activity_p)</code></pre>
-</div>
 <div id="physical-and-mental-health-conditions" class="section level4">
 <h4>Physical and Mental health Conditions</h4>
 <p>The same analysis will be conducted for these covariates by physical
@@ -2884,6 +2978,7 @@ Total MHC
 </tbody>
 </table>
 </div>
+</div>
 <div id="export-to-csv" class="section level3">
 <h3>Export to CSV</h3>
 <pre class="r"><code>write_csv(val_df, &quot;~/Desktop/Coding/data/thesis_test_dif.csv&quot; )</code></pre>
@@ -2892,6 +2987,8 @@ Total MHC
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -2924,6 +3021,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
