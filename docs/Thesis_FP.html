@@ -1731,23 +1731,37 @@ without <code>ggplot()</code> getting angery. So I used the forbidden
 the univariate and multivariate plots. The final plots are below with
 explinations of their results.</p>
 </div>
-<div id="explination-of-results" class="section level1">
-<h1>Explination of Results</h1>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<div
+id="comparing-the-likelihood-of-reporting-physical-activity-level-based-upon-also-reporting-a-health-condition."
+class="section level2 tabset">
+<h2 class="tabset">Comparing the likelihood of reporting physical
+activity level based upon also reporting a health condition.</h2>
+<p>The following forrest plots depict univariate (without covariates)
+and multivariate (ater controling for covariates) relations between
+health conditions and activity level. For all figures the left side is
+univariate analysis and the right is multivariate. Note how multivaraite
+plots have less significant health conditions compared to univariate
+plots.</p>
+<div id="insufficient-vs-sufficiently-activity" class="section level3">
+<h3>Insufficient vs Sufficiently Activity</h3>
 <p><img src="images/Ins_Act_FP.png" /></p>
-<pre class="r"><code>knitr::include_graphics(&quot;images/Ins_Act_FP.png&quot;)</code></pre>
-<p><img src="images/Ins_Act_FP.png" width="796" style="display: block; margin: auto;" /></p>
-<p><em>Univariate.</em> Those with several health conditions are less
-likely to report sufficiently active physical activity compared to
-insfucciently physical activity.</p>
-<p><em>Multivariate.</em> For less health conditions are there
-differences between physical activity level. Compared to veterans who
-are insufficiently active, those who are sufficiently active are less
-likely to report any disability, asthma, chronic pain, diabetes, and
-hypertension. No other differences were observed between the odds of
-reporting other conditions between insufficient and moderate
-activity.</p>
+<p><em><strong>2A:</strong> Univariate.</em> Those with several health
+conditions are less likely to report sufficiently active physical
+activity compared to insfucciently physical activity.</p>
+<p><em><strong>2B:</strong> Multivariate.</em> For less health
+conditions are there differences between physical activity level.
+Compared to veterans who are insufficiently active, those who are
+sufficiently active are less likely to report any disability, asthma,
+chronic pain, diabetes, and hypertension. No other differences were
+observed between the odds of reporting other conditions between
+insufficient and moderate activity.</p>
 <p>Compared to veterans who are insufficiently active, those who are
 sufficiently active are more likely to report PTSD.</p>
+</div>
+<div id="insufficient-vs-moderate-activity" class="section level3">
+<h3>Insufficient vs Moderate Activity</h3>
 <div class="figure">
 <img src="images/Ins_Mod_FP.png" alt="" />
 <p class="caption">Note. Blue bars signify values that are significant
@@ -1762,18 +1776,24 @@ multivariate analysis include age, some college education, an income ≥
 physical composite score for physical health conditions and mental
 health conditions, respectively.</p>
 </div>
-<p><em>Univariate.</em> Similarily to sufficiently active, veterans tend
-who have health conditions are less likely to report moderate physical
-activity compared to those who are insuficiently active.</p>
-<p><em>Multivariate.</em> Compared to veterans who are insufficiently
-active, those who are moderately active are less likely to report any
-disability, asthma, chronic pain, diabetes, high cholesterol, and
-stroke. No other differences were observed between the odds of reporting
-other conditions between insufficient and moderate activity.</p>
+<p><em><strong>2C:</strong> Univariate.</em> Compared to insufficiently
+active veterans, those who are moderately active are less likely to
+report certain health condtions. However, there is not as many
+conditions that this is statistically significant for compared to
+sufficiently active indiviudals.</p>
+<p><em><strong>2D:</strong> Multivariate.</em> Compared to veterans who
+are insufficiently active, those who are moderately active are less
+likely to report any disability, asthma, chronic pain, diabetes, high
+cholesterol, and stroke. No other differences were observed between the
+odds of reporting other conditions between insufficient and moderate
+activity.</p>
 <p>Compared to veterans who are insufficiently active, those who are
 moderately active are less likely to report nicotine dependence. No
 other differences were observed between the odds of reporting other
 conditions between insufficient and moderate activity.</p>
+</div>
+<div id="sufficient-vs-moderate-activity" class="section level3">
+<h3>Sufficient vs Moderate Activity</h3>
 <div class="figure">
 <img src="images/Mod_Act_FP.png" alt="" />
 <p class="caption">Note. Blue bars signify values that are significant
@@ -1788,12 +1808,14 @@ multivariate analysis include age, some college education, an income ≥
 physical composite score for physical health conditions and mental
 health conditions, respectively.</p>
 </div>
-<p><em>Univariate.</em> For a few health coditions, veterans with those
-conditions were more likely to report moderate activity compared to
-sufficiently active.</p>
-<p><em>Multivariate.</em> No other differences were observed between the
-odds of reporting physical health conditions between insufficient and
-moderate activity.</p>
+<p><em><strong>2E:</strong> Univariate.</em> For a few health coditions,
+veterans with those conditions were more likely to report moderate
+activity compared to sufficiently active.</p>
+<p><em><strong>2F:</strong> Multivariate.</em> No other differences were
+observed between the odds of reporting physical health conditions
+between insufficient and moderate activity.</p>
+</div>
+</div>
 </div>
 
 

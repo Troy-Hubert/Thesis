@@ -37,9 +37,11 @@ library(tableone)
 library(kableExtra)
 ```
 
-# Prep Data For Analyses {.tabset}
+# Prep Data For Analyses
 
-### Import in data
+## {.tabset}
+
+### Read and Select data
 
 ```{r}
 ### Import dataset 
@@ -257,7 +259,9 @@ haven::write_sav(thesis_NHRVS,"~/Desktop/Coding/data/thesis_SPSS.sav")
 ```
 
 
-# Descriptives of Variables {.tabset}
+# Descriptives of Variables 
+
+## {.tabset}
 
 ### Discriptive Table
 Here are some discriptive statistics and basic plots to see an overview of the data. I use `table1()` to run the descriptive statistics.
@@ -282,17 +286,20 @@ ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = MET_min_W)) +
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_MHC)) +
   geom_violin()+
   geom_boxplot(width=0.1, color="blue", alpha=0.2) +
-  ggtitle("Total number of physical health conditions by PA level")
+  ggtitle("Total number of mental health conditions by PA level")
 
 # Total physical health conditions
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_phc)) +
   geom_violin()+
   geom_boxplot(width=0.1, color="blue", alpha=0.2)+
-  ggtitle("Total number of mental health conditions by PA level")
+  ggtitle("Total number of physical health conditions by PA level")
 ```
 These descriptive are helpful for us to see how the data looks. Also it can be helpful to see what may be or not be wrong within the data
 
-# Stacked Barcharts of health conditions {.tabset}
+
+# Stacked Barcharts of health conditions 
+
+## {.tabset}
 
 ### Cross tabs
 
@@ -428,8 +435,8 @@ While this figure conveys what I want it to, it doesn't really help me interpret
 
 ![Note. Stacked bar chart of the Number of veterans within each physical activity level between all health conditions. Total sample is observed between the left side of the figure (i.e., veterans who did not report health condition), and the right (i.e, veterans who did report a health condition) RA = Rheumatoid Arthritis, MS = Multiple Sclerosis, AUD = Alcohol Use Disorder, DUD = Drug Use Disorder, MDD = Major Depressive Disorder, Nicotine Dep = Nicotine Dependence, PTSD = Posttraumatic Stress Disorder. No Condition is reverse coded on the no condition figure (i.e., having a health condition).](images/Xtabs_thesis.png)
 
-# Exploratory Data Analysis (EDA) {.tabset}
-
+# Exploratory Data Analysis (EDA)
+## {.tabset}
 ### Associations With Exercsie
 
 The first step in our analysis is to figure out what sociodemographic / military characteristics are associated with differences in physical activity level (i.e., our dependent variable). I use `CreateTableOne()` to run the analyses as it will put everything in super nice table for me automatically. This table till tell me which covaaraites I need to use for my analysis.

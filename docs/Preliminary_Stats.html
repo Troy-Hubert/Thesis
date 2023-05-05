@@ -384,10 +384,12 @@ library(manipulate)
 library(psych)
 library(tableone)
 library(kableExtra)</code></pre>
-<div id="prep-data-for-analyses" class="section level1 tabset">
-<h1 class="tabset">Prep Data For Analyses</h1>
-<div id="import-in-data" class="section level3">
-<h3>Import in data</h3>
+<div id="prep-data-for-analyses" class="section level1">
+<h1>Prep Data For Analyses</h1>
+<div id="section" class="section level2 tabset">
+<h2 class="tabset"></h2>
+<div id="read-and-select-data" class="section level3">
+<h3>Read and Select data</h3>
 <pre class="r"><code>### Import dataset 
 NHRVS_2019 &lt;- read_sav(&quot;~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav&quot;)
 
@@ -894,8 +896,11 @@ a CSV of that for future reference.</p>
 haven::write_sav(thesis_NHRVS,&quot;~/Desktop/Coding/data/thesis_SPSS.sav&quot;)</code></pre>
 </div>
 </div>
-<div id="descriptives-of-variables" class="section level1 tabset">
-<h1 class="tabset">Descriptives of Variables</h1>
+</div>
+<div id="descriptives-of-variables" class="section level1">
+<h1>Descriptives of Variables</h1>
+<div id="section-1" class="section level2 tabset">
+<h2 class="tabset"></h2>
 <div id="discriptive-table" class="section level3">
 <h3>Discriptive Table</h3>
 <p>Here are some discriptive statistics and basic plots to see an
@@ -1100,21 +1105,23 @@ ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = MET_min_W)) +
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_MHC)) +
   geom_violin()+
   geom_boxplot(width=0.1, color=&quot;blue&quot;, alpha=0.2) +
-  ggtitle(&quot;Total number of physical health conditions by PA level&quot;)</code></pre>
+  ggtitle(&quot;Total number of mental health conditions by PA level&quot;)</code></pre>
 <p><img src="Preliminary_Stats_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
 <pre class="r"><code># Total physical health conditions
 ggplot(thesis_NHRVS, aes(x = Ex_3cat, y = tot_phc)) +
   geom_violin()+
   geom_boxplot(width=0.1, color=&quot;blue&quot;, alpha=0.2)+
-  ggtitle(&quot;Total number of mental health conditions by PA level&quot;)</code></pre>
+  ggtitle(&quot;Total number of physical health conditions by PA level&quot;)</code></pre>
 <p><img src="Preliminary_Stats_files/figure-html/unnamed-chunk-5-3.png" width="672" />
 These descriptive are helpful for us to see how the data looks. Also it
 can be helpful to see what may be or not be wrong within the data</p>
 </div>
 </div>
-<div id="stacked-barcharts-of-health-conditions"
-class="section level1 tabset">
-<h1 class="tabset">Stacked Barcharts of health conditions</h1>
+</div>
+<div id="stacked-barcharts-of-health-conditions" class="section level1">
+<h1>Stacked Barcharts of health conditions</h1>
+<div id="section-2" class="section level2 tabset">
+<h2 class="tabset"></h2>
 <div id="cross-tabs" class="section level3">
 <h3>Cross tabs</h3>
 <p>I wanted to create a visualiation that depicted the number of
@@ -1594,8 +1601,11 @@ condition figure (i.e., having a health condition).</p>
 </div>
 </div>
 </div>
-<div id="exploratory-data-analysis-eda" class="section level1 tabset">
-<h1 class="tabset">Exploratory Data Analysis (EDA)</h1>
+</div>
+<div id="exploratory-data-analysis-eda" class="section level1">
+<h1>Exploratory Data Analysis (EDA)</h1>
+<div id="section-3" class="section level2 tabset">
+<h2 class="tabset"></h2>
 <div id="associations-with-exercsie" class="section level3">
 <h3>Associations With Exercsie</h3>
 <p>The first step in our analysis is to figure out what sociodemographic
@@ -2464,6 +2474,7 @@ MCS (mean (SD))
 </tbody>
 </table>
 <pre class="r"><code>write_csv(Demo_tab, &quot;~/Desktop/Coding/data/Demo_tab_basic.csv&quot;)</code></pre>
+</div>
 </div>
 </div>
 <div id="tests-of-difference" class="section level1">
