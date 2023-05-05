@@ -3,12 +3,6 @@ title: "Masters Thesis Analyses"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-This website hosts the code used to run analyses for my masters thesis associated with the following publicaiton:
-
 ##### Hubert, T., Adams, T., Pietrzak. R. ( *in preperation* ) Associations between Physical Activity Levels and Physical and Mental Health and Illness in U.S. Military Veterans: Results from the 2019/2020 National Health and Resilience in Veterans Study.
 
 ---

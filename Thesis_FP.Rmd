@@ -1,6 +1,13 @@
 ---
 title: "Thesis Forrest Plots"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: false
+    number_sections: false
+    toc_depth: 1
+    #code_folding: hide
 ---
 
 The following code will show you how I created my forrest plots for my thesis. This page includes:
@@ -28,7 +35,7 @@ library(kableExtra)
 options(knitr.table.format = "html") 
 ```
 
-## load data
+# Import and Prep Data 
 First thing to do is to load the data into R. I have already created tables 
 with all of the values needed for these plots. 
 ```{r,message=FALSE}
@@ -54,6 +61,7 @@ a variable (i.e., order) and manually assign the order that we want the plot and
 values to be in. Additionally, I wanted to assign a variable that indicates which 
 ORs were significant after alpha corrections, so I created a variable (i.e., sig) 
 that we can use to color the significaant values later on. I used `mutate()` to create new variables and then manually assign the vlaues for each condition.
+
 ```{r}
 #create the variable within the dataframe
 Ins_Mod <- mutate(Ins_Mod, order = 0)
@@ -85,7 +93,6 @@ Ins_Mod[23,9] = 24
 # create a varaible for significance 
 Ins_Mod <- mutate(Ins_Mod, sig = 0)
 ```
-
 
 ```{r}
 # assign values to the significant models post alpha corrections.
@@ -313,14 +320,13 @@ mhc_AM_Uni <- Act_Mod_Uni[18:23,]
 ```
 
 
-
-## Middle: Create The Plot
+# Middle: Create The Plot
 
 Now that we have the data all ready, we can create the plot. I am creating a function below called `mid_Fplot()` that will allow me to make the 6 forrest plots by calling the function instead of manually making every one. We create Forrest plots 
 using `ggplot()` and using `geom_point() + geom_linerange()`. I waanted to signify 
 which values were statistically significant after alpha corrections, so I used `color =` & `scale_color_manual()` to make the significant ones blue. For the forrest plot I am going to save the output of the plot into "phc_IA_mid". 
 
-#### Forrest Plot Function
+### Forrest Plot Function
 
 ```{r}
 mid_Fplot <-function(data){
@@ -354,7 +360,7 @@ return (output)
 ```
 
 
-#### Applying the function
+### Applying the function
 As we separated the datasets into mental health and physical health data frames, we can just call one function to do both parts of the plots.
 ```{r}
 #Physical Health Conditions Insufficient vs active
@@ -383,19 +389,19 @@ mhc_AM_Uni_mid <- mid_Fplot(mhc_AM_Uni)
 ```
 
 We have our plots! We can interpret this as, "Compared to veterans who were are insufficient active, veterans who were moderately active were (less/no difference/more) likely to report X health condition." For these figures the blue lines indicate which health conditions are significant after alpha corrections. 
+
 ```{r}
 ggpubr::ggarrange(phc_IA_mid,mhc_IA_mid, ncol =2, nrow =1)
 ```
 
 We have physical health on the left side and mental conditions on the right. You may be asking yourself, Where is the Y axis? I removed the Y axis for both plots so I could manually add the variable names and the odds ratios in the next step. 
 
-## Left Side: labels for the forrest plot
+# Left Side: labels and ORs
 
 We took away the standard y axis of GGplot because it is simplistic. Now we are 
-now going to add a Y axis that includes the variable names (i.e., Health Conditions) 
-and their respective ORs.
+now going to add a Y axis that includes the variable names (i.e., Health Conditions) and their respective ORs.
 
-#### Update data frame
+### Update data frame
 The output from the statistical models (e.g., p values) is not rounded to clean 
 numbers. The code below tidy's up our data and creates new values. Additionally
 our table has seperate values for OR, and 95% CI. The code below creates a function called `DF_update()`
@@ -550,7 +556,7 @@ phc_IA_left
 mhc_IA_left
 ```
 
-## Right: P values 
+# Right: P values 
 
 We now have the left side and the middle of the plot. The last thing we need is 
 to show the P values on the right side of the table. We have already updated our 
@@ -611,7 +617,7 @@ layout <- c(
 
 ```
 
-### final plot arrangement
+# Final Plot Arrangement
 Combine all of the parts together to get the final product! We used `plot_layout()` to combine all of the plots together using the area cordinates specified using `patchwork::area()`
 
 Here is an example of what the physical health and mental health plots look like
@@ -640,6 +646,7 @@ mhc_AM_Uni_left + mhc_AM_Uni_mid + mhc_AM_Uni_right + plot_layout(design = layou
 
 I struggled to figure out how to combine these two figures together without `ggplot()` getting angery. So I used the forbidden **_Illustrator_** to tidy up everything and combine the univariate and multivariate plots. The final plots are below with explinations of their results.
 
+# Explination of Results
 
 ```{r,fig.align='center'}
 knitr::include_graphics("~/Desktop/Coding/R working directory/plots/Ins_Act_FP.png")
@@ -687,35 +694,35 @@ reporting physical health conditions between insufficient and moderate activity.
 
 
 ```{r,include=FALSE}
-png(file="IvA_phc.png",
-width=700, height=450)
-phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
-dev.off()
-
-png(file="IvA_mhc.png",
-width=700, height=450)
-mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
-dev.off()
-
-png(file="IvM_phc.png",
-width=700, height=450)
-phc_IM_left + phc_IM_mid + phc_IM_right + plot_layout(design = layout)
-dev.off()
-
-png(file="IvM_mhc.png",
-width=700, height=450)
-mhc_IM_left + mhc_IM_mid + mhc_IM_right + plot_layout(design = layout)
-dev.off()
-
-png(file="AvM_phc.png",
-width=700, height=450)
-phc_AM_left + phc_AM_mid + phc_AM_right + plot_layout(design = layout)
-dev.off()
-
-png(file="AvM_mhc.png",
-width=700, height=450)
-mhc_AM_left + mhc_AM_mid + mhc_AM_right + plot_layout(design = layout)
-dev.off()
+# png(file="IvA_phc.png",
+# width=700, height=450)
+# phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
+# dev.off()
+# 
+# png(file="IvA_mhc.png",
+# width=700, height=450)
+# mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
+# dev.off()
+# 
+# png(file="IvM_phc.png",
+# width=700, height=450)
+# phc_IM_left + phc_IM_mid + phc_IM_right + plot_layout(design = layout)
+# dev.off()
+# 
+# png(file="IvM_mhc.png",
+# width=700, height=450)
+# mhc_IM_left + mhc_IM_mid + mhc_IM_right + plot_layout(design = layout)
+# dev.off()
+# 
+# png(file="AvM_phc.png",
+# width=700, height=450)
+# phc_AM_left + phc_AM_mid + phc_AM_right + plot_layout(design = layout)
+# dev.off()
+# 
+# png(file="AvM_mhc.png",
+# width=700, height=450)
+# mhc_AM_left + mhc_AM_mid + mhc_AM_right + plot_layout(design = layout)
+# dev.off()
 ```
 
 

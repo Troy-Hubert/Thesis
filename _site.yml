@@ -1,8 +1,8 @@
-name: "Masters-Thesis-Analyses"
+name: "Masters Thesis Analyses"
 navbar:
   title: "Masters Thesis Analyses"
   left:
-    - text: "Main Page""
+    - text: "Home"
     - href: index.html
     - text: "Preliminary Statistics"
     - href: Preliminary_Stats.html
@@ -10,4 +10,4 @@ navbar:
     - href: Multinomial_Function.html
     - text: "Thesis Forrest Plots"
     - href: Thesis_FP.html
-output: 
+output_dir: "docs"

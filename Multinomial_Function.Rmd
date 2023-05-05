@@ -1,6 +1,13 @@
 ---
-title: "Logistic Multinomial Regression"
-output: html_document
+title: "Logistic Multinomial Regresion"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: false
+    number_sections: false
+    toc_depth: 1
+    #code_folding: hide
 ---
 
 The following code will show you how I created functions to run my multinomial regressions. This page includes:
@@ -30,7 +37,6 @@ options(knitr.table.format = "html")
 #### Import & Select data
 
 ### Import dataset 
-setwd("~/Desktop/Adams_lab/SPSS_stuff")
 NHRVS_2019 <- read_sav("~/Desktop/Adams_lab/SPSS_stuff/NHRVS_2019_2020_FINAL_weighted.sav")
 
 ### Select and rename Variables
@@ -242,7 +248,7 @@ library(nnet)
 library(performance)
 ```
 
-## Create Data frames
+# Create Data frames
 This first set of code is used to create the dataframes needed for our analysis. 
 Once the data frame is made, then we can use the function below to add values to 
 the data frames.
@@ -280,7 +286,7 @@ variable    = 0
   Act_Mod  <- data.frame(cbind(variable,statistic,estimate,conf.low,conf.high,ci,p.value,r2_change))[1,]
 ```
 
-## Preliminary Regression: Univariate Regression function
+# Preliminary Regression: Univariate Regression function
 
 The first step in my analysis was to run the multinomial regressions without covariates so I can see how the health conditions are associated with physical activity level independent of covariates. The following `UniThesis()` function does the following:
 
@@ -289,6 +295,9 @@ The first step in my analysis was to run the multinomial regressions without cov
 3. Extracts respective values for each type of comparison (e.g., sufficiently active vs moderatly active)
 4. Returns respective values as a row in a dataframe which can be compiled into a larger data fram per comparison
 
+## Regression Code {.tabset}
+
+### Create `UniThesis()` Function
 ```{r}
 # Univariate Logistic Multinomial Regression function
 
@@ -359,9 +368,11 @@ UniThesis<-function(Data,condition,string,contrast){
 }
 ```
 
+### Running `UniThesis()` 
+
 Now that we have a function, we need to run it. The `UniThesis()` function is for each health condition and compiles it into one larger data frame `Ins_Mod_Uni`. The code below is used to extract values for the Insufficient vs Sufficiently active comparisons. 
 
-#### Ins_Mod
+#### Insufficient vs moderate
 ```{r,results='hide'}
 ### Physical Health Conditions 
 #1. Any Disability
@@ -422,7 +433,8 @@ knitr::kable(Ins_Mod_Uni[1:3,]) %>%
 ```
 
 We will repeat this step for the Insufficient vs active comparison (Ins_Act) and Active vs Moderate Comparison (Act_Mod). As most of the analysis in this markdown are repeated I will only be showing the first one, and not the 2 other comparisons to save space.
-```{r,include=FALSE}
+
+```{r,include =FALSE}
 ##### INS_ACT
 ### Physical Health Conditions 
 #1. Any Disability
@@ -474,8 +486,6 @@ Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD
 Ins_Act_Uni<-rbind(Ins_Act_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "Ins_Act"))
 Ins_Act_Uni <- Ins_Act_Uni[-(1),]
 Ins_Act_Uni
-
-
 ##### ACT_MOD
 
 ### Physical Health Conditions 
@@ -529,21 +539,23 @@ Act_Mod_Uni<-rbind(Act_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"
 Act_Mod_Uni <- Act_Mod_Uni[-(1),]
 Act_Mod_Uni
 ```
-#### Export as CSV
+### Export as CSV
 ```{r}
 write.csv(Ins_Act_Uni, "~/Desktop/Coding/data/Ins_Act_Uni.csv")
 write.csv(Ins_Mod_Uni, "~/Desktop/Coding/data/Ins_Mod_Uni.csv")
 write.csv(Act_Mod_Uni, "~/Desktop/Coding/data/Act_Mod_Uni.csv")
 ```
 
-## Step Wise Multivariate Logistic Multinomial Regression
+# Step Wise Multivariate Logistic Multinomial Regression
 That's a mouthful! For the following section we will be running code for the full regression model, extracting values like we did for the univariate function, and putting these values into tables for the 3 comparisons at each of the 3 blocks. The blocks of this regession are as follows:
 
 1. Covariates: Sociodemograpahic and health variables
 2. Physical and Mental Health Functioning: The short form 8 - MCS and PCS 
 3. Health Conditions: Each health condition will be ran as a seperate regression and compiled into one dataframe
 
-#### Block 1: Covariates
+## Regession Code {.tabset}
+
+### Block 1: Covariates
 This first block of the stepwise regression will do the same thing as we did for the univariate analysis, being that this was not replicated we did not make a function for it. 
 ```{r,warning=FALSE,message=FALSE,results='hide'}
 ### Part 1 Create values for table
@@ -607,7 +619,7 @@ cov_OR_tab <-  data.frame(cbind(
     kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-#### Block 2: Covariates with SF8
+### Block 2: Covariates with SF8
 Block to is idential to block one with the addition of the MCS and PCS to the regression model. We are running two different regession models (i.e., one with the MCS and one with the PCS) so you can see that below. 
 ```{r,warning=FALSE,message=FALSE,results='hide'}
 ### Part 1 SF8 values for table
@@ -702,7 +714,7 @@ SF8_OR_tab <-  data.frame(cbind(
     kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-#### Block 3: The Multivaraite Multinomial Function
+### Full Model Function
 
 The final step in my analysis was to run the full multinomial model so I can see how the health conditions are associated with physical activity level after controling for covariates. The following `MultiThesis()` function does the following 
 1. Runs the 2 different multinomial models using [multinom()](https://www.rdocumentation.org/packages/nnet/versions/7.3-18/topics/multinom)
@@ -793,12 +805,11 @@ MultiThesis<-function(Data,condition,string,type,contrast){
 #Its done!
 ```
 
-#### R^2 Change
+### R^2 Change
 Before we can create the dataframes with the multinomial regession output, I need to find the R^2 change for all of the variables. The following function allows us to look at the [R^2 change](https://easystats.github.io/performance/reference/r2.html) between the covariates and the IV within the multinomial model. As this is a multinomial model, the R^2 change is only observed for the model as a whole. I created the `r2_chan()` function to do the following:
 1. Run a multinomial model without the predictor (i.e., just covariates) and with the predictor (i.e., the full model)
 2. Calculate the R^2 for both models, and find the difference between the covariates and full model.
 3. turn this R^2 change into a percentage, and save it as a string with the % sign. 
-
 
 ```{r,results='hide'}
 #assign the variable to 0
@@ -880,13 +891,15 @@ r2(multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ LT_NicotineDep + Age + Coll
 ```
 
 
-## Run the `MultiThesis()` function
+### Block 3: The Multivaraite Multinomial 
+
+#### Run the `MultiThesis()` function
 
 Now that we have created our function, we can use it to make our data frames for 
 each contrast. Being that the function just creates the values needed for each
 condition, we still need to add it to the exsisting data frame (i.e.,rbind())
 
-### Insufficient vs Moderate Dataframe
+1. Insufficient vs Moderate Dataframe
 ```{r,results="hide"}
 ### Physical Health Conditions 
 Ins_Mod = 0
@@ -1062,7 +1075,7 @@ Act_Mod <- Act_Mod[-(1),]
 Act_Mod$r2_change <- R2_Conditions
 ```
 
-## Export Tables to CSV
+### Export Tables to CSV
 ```{r}
 write_csv(Ins_Mod, "~/Desktop/Coding/data/Ins_Mod.csv")
 write_csv(Ins_Act, "~/Desktop/Coding/data/Ins_Act.csv")
@@ -1070,7 +1083,7 @@ write_csv(Act_Mod, "~/Desktop/Coding/data/Act_Mod.csv")
 ```
 
 
-### Create Tables for Multinomial Logistic Regression Output
+# Create Tables for Multinomial Logistic Regression Output 
 
 We have everything we need for our final table output!
 ```{r,message=FALSE}
