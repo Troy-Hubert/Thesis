@@ -153,6 +153,7 @@ mutate(thesis_NHRVS,
           LT_DUD = as.factor(LT_DUD),
           LT_NicotineDep = as.factor(LT_NicotineDep)
     )
+
 thesis_NHRVS <- mutate(thesis_NHRVS, 
         Ex_3cat = recode(Ex_3cat,
                          "1" = "Insufficient",
@@ -244,21 +245,30 @@ before_Adj<-  thesis_NHRVS %>%
   
 before_Adj  
 
-round(mean(thesis_NHRVS$DIRECT_TRAUMA_EXPS)+(2*sd(thesis_NHRVS$DIRECT_TRAUMA_EXPS)),0)
-
-
-
 #windsorize 
 thesis_test <- thesis_NHRVS %>%
   mutate(
     DIRECT_TRAUMA_EXPS = ifelse(DIRECT_TRAUMA_EXPS >= (mean(DIRECT_TRAUMA_EXPS) + (2*sd(DIRECT_TRAUMA_EXPS))), round(mean(DIRECT_TRAUMA_EXPS)+(2*sd(DIRECT_TRAUMA_EXPS)),0), DIRECT_TRAUMA_EXPS),
-    TOTAL_TRAUMAS = ifelse(TOTAL_TRAUMAS >= (mean(TOTAL_TRAUMAS) + (2*sd(TOTAL_TRAUMAS))), round(mean(TOTAL_TRAUMAS)+(2*sd(TOTAL_TRAUMAS)),0), TOTAL_TRAUMAS)                           
-    )
+    TOTAL_TRAUMAS_W = ifelse(TOTAL_TRAUMAS >= (mean(TOTAL_TRAUMAS) + (2*sd(TOTAL_TRAUMAS))), round(mean(TOTAL_TRAUMAS)+(2*sd(TOTAL_TRAUMAS)),0), TOTAL_TRAUMAS),                          
+    TOTAL_TRAUMAS_OUT = 
+      ifelse(TOTAL_TRAUMAS >= (mean(TOTAL_TRAUMAS) + (3*sd(TOTAL_TRAUMAS))), NA,TOTAL_TRAUMAS),
+    Trauma_out_inv = 1/TOTAL_TRAUMAS_OUT,
+    Trauma_out_sqrt = (TOTAL_TRAUMAS_OUT)^(1/2)
+  )
+    
   
+hist(thesis_test$TOTAL_TRAUMAS_OUT)
+hist(thesis_test$Trauma_out_inv)
+hist(thesis_test$Trauma_out_sqrt)
+
+```
+
+
+```{r}
 thesis_test%>%
             group_by(Ex_3cat) %>%  
-            summarise(mean_Dtrauma = mean(DIRECT_TRAUMA_EXPS),
-            sd_Dtrauma = sd(DIRECT_TRAUMA_EXPS),
+            summarise(mean_Dtrauma = mean(TOTAL_TRAUMAS_OUT),
+            sd_Dtrauma = sd(TOTAL_TRAUMAS_OUT),
             mean_Ttrauma = mean(TOTAL_TRAUMAS),
             sd_Ttrauma = sd(TOTAL_TRAUMAS))
 
@@ -282,6 +292,16 @@ xlab = "ex_cat",ylab = "# of traumas",
 col = "blue",border = "black")
 ```
 
+assumptions
+```{r}
+ggline(thesis_test, x = "Ex_3cat", y = "TOTAL_TRAUMAS_W", 
+       add = c("mean_se"))
+
+
+```
+
+
+
 running ancoova
 
 ```{r}
@@ -290,13 +310,126 @@ library(tidyverse)
 library(ggpubr)
 library(rstatix)
 library(broom)
-  
-model <- aov(TOTAL_TRAUMAS ~ Ex_3cat, data = thesis_test)
-summary(model)
-leveneTest(TOTAL_TRAUMAS ~ Ex_3cat, data = thesis_test)
+#library(car)
 
-ancova_model <- aov(TOTAL_TRAUMAS ~ Ex_3cat + Age + College + Income_60k_plus + YN_work + BMI, data = thesis_test)
+
+
+thesis_test$Trauma_out_sqrt
+  
+summary(thesis_NHRVS$TOTAL_TRAUMAS_OUT)
+
+model <- aov(TOTAL_TRAUMAS_OUT ~ Ex_3cat, data = thesis_test)
+summary(model)
+levene_test(TOTAL_TRAUMAS ~ Ex_3cat, data = thesis_test)
+
+ancova_model <- aov(thesis_test$Trauma_out_sqrt ~ Ex_3cat + Age + College + Income_60k_plus + YN_work + BMI, data = thesis_test)
 Anova(ancova_model, type="III")
+
+
+
+```
+
+plotting them
+```{r}
+# if (!require(remotes)) {
+#     install.packages("remotes")
+# }
+# remotes::install_github('jorvlan/raincloudplots')
+
+library(raincloudplots)
+
+
+dim(thesis_test)
+thesis_test %>%
+  group_by(Ex_3cat)
+  
+
+df_1x1 <- data_1x1(
+  array_1 = ,
+  array_2 = iris$Sepal.Length[51:100],
+  jit_distance = .09,
+  jit_seed = 321)
+
+head(df_1x1)
+
+tail(df_1x1)
+
+
+raincloud_1_v <- raincloud_1x1(
+  data = df_1x1, 
+  colors = (c('dodgerblue','darkorange')), 
+  fills = (c('dodgerblue','darkorange')), 
+  size = 1, 
+  alpha = .6, 
+  ort = 'v') +
+
+scale_x_continuous(breaks=c(1,2), labels=c("Group1", "Group2"), limits=c(0, 3)) +
+  xlab("Groups") + 
+  ylab("Score") +
+  theme_classic()
+
+raincloud_1_v
+```
+
+
+```{r}
+#install.packages("tidyquant")
+library(tidyquant)
+library(ggdist)
+library(ggthemes)
+
+
+hist(thesis_test$TOTAL_TRAUMAS_OUT)
+
+sum(is.na(thesis_test$TOTAL_TRAUMAS_OUT))
+
+
+```
+
+
+```{r}
+thesis_test %>% 
+  # filter() %>% 
+  ggplot(aes(x = factor(Ex_3cat), y = TOTAL_TRAUMAS_W, fill = factor(Ex_3cat), colour = factor(Ex_3cat))) +
+  
+  # add half-violin from {ggdist} package
+  stat_halfeye(
+    # adjust bandwidth
+    adjust = 0.5,
+    # move to the right
+    justification = -0.2,
+    # remove the slub interval
+    .width = 0,
+    width = .6,
+    point_colour = NA,
+    size = .01
+  ) +
+  geom_boxplot(
+    width = 0.15,
+    color = "black",
+    # removing outliers
+    alpha = 1,
+    position= position_nudge(x=.1)
+  ) +
+  geom_jitter(
+    size = .5,
+    alpha = .3,
+     width = .08,
+  )+
+  # Themes and Labels
+  #scale_fill_tableau("Tableau 20", name = NULL) +
+  labs(
+    title = "Total Number of Traumas by Physical Activity Level",
+    x = "Physical Activity Level",
+    y = "Total Number of Traumas ",
+    fill = "Activity level"
+  ) +
+  coord_flip() +
+  theme_classic() +
+  scale_fill_manual(values=c("#156064","#00c49a","#00a9a5")) +
+  scale_color_manual(values=c("#156064","#00c49a","#00a9a5")) +
+  theme(legend.position = "none")
+
 ```
 
 
