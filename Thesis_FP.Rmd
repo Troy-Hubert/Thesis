@@ -90,16 +90,11 @@ Ins_Mod[21,9] = 22
 Ins_Mod[22,9] = 23
 Ins_Mod[23,9] = 24
 
-# create a varaible for significance 
-Ins_Mod <- mutate(Ins_Mod, sig = 0)
-```
+Ins_Mod
 
-```{r}
-# assign values to the significant models post alpha corrections.
-Ins_Mod[1,10] = 1
-Ins_Mod[3,10] = 1
-Ins_Mod[5,10] = 1
-Ins_Mod[21,10] = 1
+# create a varaible for significance using alpha correction threshold 
+Ins_Mod <- mutate(Ins_Mod, 
+                  sig = ifelse(p.value <= 0.016, 1, 0))
 ```
 
 We are going to split these conditions into a mental and physical health dataframes.
@@ -142,14 +137,9 @@ Ins_Act[22,9] = 6
 Ins_Act[23,9] = 7
 Ins_Act
 
-Ins_Act <- mutate(Ins_Act, sig = 0)
-Ins_Act[1,10] = 1
-Ins_Act[3,10] = 1
-Ins_Act[5,10] = 1
-Ins_Act[6,10] = 1
-Ins_Act[9,10] = 1
-Ins_Act[17,10] = 1
-Ins_Act[22,10] = 1
+Ins_Act <- mutate(Ins_Act, 
+                  sig = ifelse(p.value <= 0.016, 1, 0))
+Ins_Act
 
 phc_IA <- Ins_Act[1:17,]
 mhc_IA <- Ins_Act[18:23,]
@@ -181,7 +171,8 @@ Act_Mod[21,9] = 5
 Act_Mod[22,9] = 6
 Act_Mod[23,9] = 7
 
-Act_Mod <- mutate(Act_Mod, sig = 0)
+Act_Mod <- mutate(Act_Mod, 
+                  sig = ifelse(p.value <= 0.016, 1, 0))
 
 phc_AM <- Act_Mod[1:17,]
 mhc_AM <- Act_Mod[18:23,]
@@ -218,15 +209,8 @@ Ins_Mod_Uni[21,9] = 22
 Ins_Mod_Uni[22,9] = 23
 Ins_Mod_Uni[23,9] = 24
 # create a varaible for significance 
-Ins_Mod_Uni <- mutate(Ins_Mod_Uni, sig = 0)
-Ins_Mod_Uni[1,10]  = 1
-Ins_Mod_Uni[3,10]  = 1
-Ins_Mod_Uni[5,10]  = 1
-Ins_Mod_Uni[6,10]  = 1
-Ins_Mod_Uni[10,10] = 1
-Ins_Mod_Uni[11,10] = 1
-Ins_Mod_Uni[19,10] = 1
-Ins_Mod_Uni[21,10] = 1
+Ins_Mod_Uni <- mutate(Ins_Mod_Uni, 
+                  sig = ifelse(p.value <= 0.016, 1, 0))
 
 phc_IM_Uni <- Ins_Mod_Uni[1:17,]
 mhc_IM_Uni <- Ins_Mod_Uni[18:23,]
@@ -261,23 +245,10 @@ Ins_Act_Uni[21,9] = 22
 Ins_Act_Uni[22,9] = 23
 Ins_Act_Uni[23,9] = 24
 # create a varaible for significance 
-Ins_Act_Uni <- mutate(Ins_Act_Uni, sig = 0)
-Ins_Act_Uni[1,10]  = 1
-Ins_Act_Uni[3,10]  = 1
-Ins_Act_Uni[5,10]  = 1
-Ins_Act_Uni[6,10]  = 1
-Ins_Act_Uni[7,10]  = 1
-Ins_Act_Uni[8,10]  = 1
-Ins_Act_Uni[9,10]  = 1
-Ins_Act_Uni[10,10]  = 1
-Ins_Act_Uni[15,10] = 1
-Ins_Act_Uni[17,10]  = 1
-Ins_Act_Uni[19,10]  = 1
-Ins_Act_Uni[20,10]  = 1
-Ins_Act_Uni[21,10] = 1
+Ins_Act_Uni <- mutate(Ins_Act_Uni, 
+                  sig = ifelse(p.value <= 0.016, 1, 0))
 phc_IA_Uni <- Ins_Act_Uni[1:17,]
 mhc_IA_Uni <- Ins_Act_Uni[18:23,]
-
 
 #### Act_Mod
 #create the variable within the dataframe
@@ -310,10 +281,8 @@ Act_Mod_Uni[21,9] = 22
 Act_Mod_Uni[22,9] = 23
 Act_Mod_Uni[23,9] = 24
 # create a varaible for significance 
-Act_Mod_Uni <- mutate(Act_Mod_Uni, sig = 0)
-Act_Mod_Uni[6,10]  = 1
-Act_Mod_Uni[9,10] = 1
-Act_Mod_Uni[10,10] = 1
+Act_Mod_Uni <- mutate(Act_Mod_Uni, 
+                  sig = ifelse(p.value <= 0.016, 1, 0))
 
 phc_AM_Uni <- Act_Mod_Uni[1:17,]
 mhc_AM_Uni <- Act_Mod_Uni[18:23,]
@@ -624,8 +593,8 @@ Here is an example of what the physical health and mental health plots look like
 ## Likelihood of reporting health conditions for veterans with sufficient physical activity compared to insufficient activity.
 ```{r,message=FALSE,results='hide'}
 # physical health conditions. - Ins vs Mod
-one <- phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
-two <- mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
+phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
+mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
 ```
 
 Repeat for the remaining plots
@@ -643,8 +612,7 @@ phc_AM_Uni_left + phc_AM_Uni_mid + phc_AM_Uni_right + plot_layout(design = layou
 mhc_AM_Uni_left + mhc_AM_Uni_mid + mhc_AM_Uni_right + plot_layout(design = layout)
 ```
 
-
-I struggled to figure out how to combine these two figures together without `ggplot()` getting angery. So I used the forbidden **_Illustrator_** to tidy up everything and combine the univariate and multivariate plots. The final plots are below with explinations of their results.
+I struggled to figure out how to combine these two figures together without `ggplot()` getting angery. So I used the forbidden **_Illustrator_** to tidy up everything and combine the univariate and multivariate plots. The final plots are below with explanations of their results.
 
 # Results
 
@@ -701,35 +669,35 @@ reporting physical health conditions between insufficient and moderate activity.
 
 
 ```{r,include=FALSE}
-# png(file="IvA_phc.png",
-# width=700, height=450)
-# phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
-# dev.off()
-# 
-# png(file="IvA_mhc.png",
-# width=700, height=450)
-# mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
-# dev.off()
-# 
-# png(file="IvM_phc.png",
-# width=700, height=450)
-# phc_IM_left + phc_IM_mid + phc_IM_right + plot_layout(design = layout)
-# dev.off()
-# 
-# png(file="IvM_mhc.png",
-# width=700, height=450)
-# mhc_IM_left + mhc_IM_mid + mhc_IM_right + plot_layout(design = layout)
-# dev.off()
-# 
-# png(file="AvM_phc.png",
-# width=700, height=450)
-# phc_AM_left + phc_AM_mid + phc_AM_right + plot_layout(design = layout)
-# dev.off()
-# 
-# png(file="AvM_mhc.png",
-# width=700, height=450)
-# mhc_AM_left + mhc_AM_mid + mhc_AM_right + plot_layout(design = layout)
-# dev.off()
+png(file="IvA_phc.png",
+width=700, height=450)
+phc_IA_left + phc_IA_mid + phc_IA_right + plot_layout(design = layout)
+dev.off()
+
+png(file="IvA_mhc.png",
+width=700, height=450)
+mhc_IA_left + mhc_IA_mid + mhc_IA_right + plot_layout(design = layout)
+dev.off()
+
+png(file="IvM_phc.png",
+width=700, height=450)
+phc_IM_left + phc_IM_mid + phc_IM_right + plot_layout(design = layout)
+dev.off()
+
+png(file="IvM_mhc.png",
+width=700, height=450)
+mhc_IM_left + mhc_IM_mid + mhc_IM_right + plot_layout(design = layout)
+dev.off()
+
+png(file="AvM_phc.png",
+width=700, height=450)
+phc_AM_left + phc_AM_mid + phc_AM_right + plot_layout(design = layout)
+dev.off()
+
+png(file="AvM_mhc.png",
+width=700, height=450)
+mhc_AM_left + mhc_AM_mid + mhc_AM_right + plot_layout(design = layout)
+dev.off()
 ```
 
 

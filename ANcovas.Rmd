@@ -297,7 +297,19 @@ assumptions
 ggline(thesis_test, x = "Ex_3cat", y = "TOTAL_TRAUMAS_W", 
        add = c("mean_se"))
 
+library(emmeans)
+library(rstatix)
+pwc <- thesis_test %>% 
+  emmeans_test(
+    TOTAL_TRAUMAS_W ~ Ex_3cat, covariate = Age + thesis_test$College + thesis_test$Income_60k_plus + thesis_test$YN_work + thesis_test$BMI,
+    p.adjust.method = "bonferroni"
+    )
+pwc
 
+
+?emmeans_test()
+
+https://www.carlosivanrodriguez.com/guides/anova/ancova/
 ```
 
 
