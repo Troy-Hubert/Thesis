@@ -307,7 +307,7 @@ UniThesis<-function(Data,condition,string,contrast){
   df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition, data = Data)
 
 #2. run model 2
-  df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition, data = Data)
+  df2 <- multinom(relevel(Ex_3cat,ref = "Moderate") ~ condition, data = Data)
 
 #4 Coefficients 
   coefs_df <- abs(coef(df))
@@ -736,13 +736,13 @@ MultiThesis<-function(Data,condition,string,type,contrast){
   if(type == "MHC"){ df <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
   }
 #2 Specify the reference group2
-  Data$Ex_3cat_act <- relevel(Data$Ex_3cat, ref = "Active")
+  Data$Ex_3cat_act <- relevel(Data$Ex_3cat, ref = "Moderate")
 #3. run model 2
   if(type == "PHC"){
-   df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
+   df2 <- multinom(relevel(Ex_3cat,ref = "Moderate") ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
   }
   if(type == "MHC"){ 
-    df2 <- multinom(relevel(Ex_3cat,ref = "Active") ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
+    df2 <- multinom(relevel(Ex_3cat,ref = "Moderate") ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
   }
 #4 Coefficients 
   coefs_df <- abs(coef(df))

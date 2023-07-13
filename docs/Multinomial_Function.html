@@ -435,7 +435,7 @@ UniThesis&lt;-function(Data,condition,string,contrast){
   df &lt;- multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ condition, data = Data)
 
 #2. run model 2
-  df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Active&quot;) ~ condition, data = Data)
+  df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Moderate&quot;) ~ condition, data = Data)
 
 #4 Coefficients 
   coefs_df &lt;- abs(coef(df))
@@ -1350,13 +1350,13 @@ MultiThesis&lt;-function(Data,condition,string,type,contrast){
   if(type == &quot;MHC&quot;){ df &lt;- multinom(relevel(Ex_3cat,ref = &quot;Insufficient&quot;)  ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
   }
 #2 Specify the reference group2
-  Data$Ex_3cat_act &lt;- relevel(Data$Ex_3cat, ref = &quot;Active&quot;)
+  Data$Ex_3cat_act &lt;- relevel(Data$Ex_3cat, ref = &quot;Moderate&quot;)
 #3. run model 2
   if(type == &quot;PHC&quot;){
-   df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Active&quot;) ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
+   df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Moderate&quot;) ~ condition + Age + College + Income_60k_plus + YN_work + BMI + MCS, data = Data)
   }
   if(type == &quot;MHC&quot;){ 
-    df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Active&quot;) ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
+    df2 &lt;- multinom(relevel(Ex_3cat,ref = &quot;Moderate&quot;) ~ condition + Age + College + Income_60k_plus + YN_work + BMI + PCS, data = Data)
   }
 #4 Coefficients 
   coefs_df &lt;- abs(coef(df))
@@ -2274,7 +2274,7 @@ Any Disability
 0.62 ( 0.48 - 0.82 )
 </td>
 <td style="text-align:left;">
-1.17 ( 0.87 - 1.58 )
+0.85 ( 0.63 - 1.15 )
 </td>
 <td style="text-align:left;">
 0.65 %
@@ -2291,7 +2291,7 @@ Arthritis
 0.97 ( 0.81 - 1.18 )
 </td>
 <td style="text-align:left;">
-0.85 ( 0.71 - 1.03 )
+1.17 ( 0.97 - 1.41 )
 </td>
 <td style="text-align:left;">
 0.03 %
@@ -2308,7 +2308,7 @@ Athsma
 0.71 ( 0.54 - 0.94 )
 </td>
 <td style="text-align:left;">
-0.95 ( 0.71 - 1.28 )
+1.05 ( 0.78 - 1.4 )
 </td>
 <td style="text-align:left;">
 0.16 %
@@ -2325,7 +2325,7 @@ Cancer
 0.98 ( 0.78 - 1.24 )
 </td>
 <td style="text-align:left;">
-0.83 ( 0.66 - 1.05 )
+1.21 ( 0.96 - 1.52 )
 </td>
 <td style="text-align:left;">
 0.04 %
@@ -2342,7 +2342,7 @@ Chronic Pain
 0.73 ( 0.59 - 0.9 )
 </td>
 <td style="text-align:left;">
-0.93 ( 0.74 - 1.16 )
+1.08 ( 0.87 - 1.35 )
 </td>
 <td style="text-align:left;">
 0.25 %
@@ -2359,7 +2359,7 @@ Diabetes
 0.93 ( 0.74 - 1.16 )
 </td>
 <td style="text-align:left;">
-1.24 ( 0.98 - 1.57 )
+0.81 ( 0.64 - 1.02 )
 </td>
 <td style="text-align:left;">
 0.14 %
@@ -2376,7 +2376,7 @@ Heart Attack
 0.84 ( 0.61 - 1.17 )
 </td>
 <td style="text-align:left;">
-1.2 ( 0.84 - 1.72 )
+0.83 ( 0.58 - 1.19 )
 </td>
 <td style="text-align:left;">
 0.09 %
@@ -2393,7 +2393,7 @@ Heart Disease
 1.01 ( 0.79 - 1.29 )
 </td>
 <td style="text-align:left;">
-1.13 ( 0.87 - 1.47 )
+0.88 ( 0.68 - 1.15 )
 </td>
 <td style="text-align:left;">
 0.03 %
@@ -2410,7 +2410,7 @@ High Cholesterol
 0.95 ( 0.79 - 1.15 )
 </td>
 <td style="text-align:left;">
-1.17 ( 0.97 - 1.41 )
+0.86 ( 0.71 - 1.03 )
 </td>
 <td style="text-align:left;">
 0.11 %
@@ -2427,7 +2427,7 @@ Hypertension
 0.83 ( 0.68 - 1 )
 </td>
 <td style="text-align:left;">
-1 ( 0.83 - 1.21 )
+1 ( 0.82 - 1.21 )
 </td>
 <td style="text-align:left;">
 0.09 %
@@ -2444,7 +2444,7 @@ Kidney Disease
 0.67 ( 0.45 - 1.01 )
 </td>
 <td style="text-align:left;">
-0.68 ( 0.45 - 1.04 )
+1.47 ( 0.96 - 2.24 )
 </td>
 <td style="text-align:left;">
 0.06 %
@@ -2461,7 +2461,7 @@ Liver Disease
 1.26 ( 0.68 - 2.35 )
 </td>
 <td style="text-align:left;">
-1.1 ( 0.58 - 2.07 )
+0.91 ( 0.48 - 1.71 )
 </td>
 <td style="text-align:left;">
 &lt; 0.01 %
@@ -2478,7 +2478,7 @@ Migrane
 1.1 ( 0.78 - 1.54 )
 </td>
 <td style="text-align:left;">
-0.94 ( 0.67 - 1.32 )
+1.06 ( 0.75 - 1.5 )
 </td>
 <td style="text-align:left;">
 &lt; 0.01 %
@@ -2495,7 +2495,7 @@ MS
 1.25 ( 0.29 - 5.3 )
 </td>
 <td style="text-align:left;">
-0.88 ( 0.23 - 3.46 )
+1.13 ( 0.29 - 4.45 )
 </td>
 <td style="text-align:left;">
 &lt; 0.01 %
@@ -2512,7 +2512,7 @@ Osteoporosis
 0.89 ( 0.62 - 1.3 )
 </td>
 <td style="text-align:left;">
-1.3 ( 0.88 - 1.93 )
+0.77 ( 0.52 - 1.14 )
 </td>
 <td style="text-align:left;">
 0.08 %
@@ -2529,7 +2529,7 @@ RA
 1.15 ( 0.79 - 1.66 )
 </td>
 <td style="text-align:left;">
-1.13 ( 0.77 - 1.66 )
+0.88 ( 0.6 - 1.3 )
 </td>
 <td style="text-align:left;">
 &lt; 0.01 %
@@ -2546,7 +2546,7 @@ Stroke
 0.83 ( 0.53 - 1.3 )
 </td>
 <td style="text-align:left;">
-1.44 ( 0.87 - 2.38 )
+0.7 ( 0.42 - 1.15 )
 </td>
 <td style="text-align:left;">
 0.12 %
@@ -2563,7 +2563,7 @@ AUD
 1.1 ( 0.91 - 1.33 )
 </td>
 <td style="text-align:left;">
-1.14 ( 0.95 - 1.38 )
+0.88 ( 0.73 - 1.06 )
 </td>
 <td style="text-align:left;">
 0.05 %
@@ -2580,7 +2580,7 @@ DUD
 0.83 ( 0.62 - 1.11 )
 </td>
 <td style="text-align:left;">
-0.99 ( 0.73 - 1.34 )
+1.01 ( 0.75 - 1.36 )
 </td>
 <td style="text-align:left;">
 0.11 %
@@ -2597,7 +2597,7 @@ MDD
 1.06 ( 0.84 - 1.35 )
 </td>
 <td style="text-align:left;">
-1.04 ( 0.82 - 1.31 )
+0.96 ( 0.76 - 1.22 )
 </td>
 <td style="text-align:left;">
 0.12 %
@@ -2614,7 +2614,7 @@ Nicotine Dep
 0.71 ( 0.55 - 0.91 )
 </td>
 <td style="text-align:left;">
-0.8 ( 0.62 - 1.04 )
+1.25 ( 0.96 - 1.62 )
 </td>
 <td style="text-align:left;">
 0.21 %
@@ -2631,7 +2631,7 @@ PTSD
 1.09 ( 0.79 - 1.49 )
 </td>
 <td style="text-align:left;">
-0.79 ( 0.58 - 1.08 )
+1.27 ( 0.93 - 1.74 )
 </td>
 <td style="text-align:left;">
 0.02 %
@@ -2648,7 +2648,7 @@ Suicidality
 1.04 ( 0.76 - 1.43 )
 </td>
 <td style="text-align:left;">
-1.1 ( 0.8 - 1.52 )
+0.91 ( 0.66 - 1.25 )
 </td>
 <td style="text-align:left;">
 0.07 %
