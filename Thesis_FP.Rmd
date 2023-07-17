@@ -94,7 +94,7 @@ Ins_Mod
 
 # create a varaible for significance using alpha correction threshold 
 Ins_Mod <- mutate(Ins_Mod, 
-                  sig = ifelse(p.value <= 0.016, 1, 0))
+                  sig = ifelse(p.value < 0.016, 1, 0))
 ```
 
 We are going to split these conditions into a mental and physical health dataframes.
@@ -138,11 +138,12 @@ Ins_Act[23,9] = 7
 Ins_Act
 
 Ins_Act <- mutate(Ins_Act, 
-                  sig = ifelse(p.value <= 0.016, 1, 0))
-Ins_Act
+                  sig = ifelse(p.value < 0.016, 1, 0))
 
 phc_IA <- Ins_Act[1:17,]
 mhc_IA <- Ins_Act[18:23,]
+
+Ins_Act
 ```
 
 ```{r, include=FALSE}
@@ -172,7 +173,10 @@ Act_Mod[22,9] = 6
 Act_Mod[23,9] = 7
 
 Act_Mod <- mutate(Act_Mod, 
-                  sig = ifelse(p.value <= 0.016, 1, 0))
+                  sig = ifelse(p.value < 0.016, 1, 0))
+
+
+Act_Mod
 
 phc_AM <- Act_Mod[1:17,]
 mhc_AM <- Act_Mod[18:23,]
@@ -210,7 +214,7 @@ Ins_Mod_Uni[22,9] = 23
 Ins_Mod_Uni[23,9] = 24
 # create a varaible for significance 
 Ins_Mod_Uni <- mutate(Ins_Mod_Uni, 
-                  sig = ifelse(p.value <= 0.016, 1, 0))
+                  sig = ifelse(p.value < 0.016, 1, 0))
 
 phc_IM_Uni <- Ins_Mod_Uni[1:17,]
 mhc_IM_Uni <- Ins_Mod_Uni[18:23,]
@@ -246,7 +250,8 @@ Ins_Act_Uni[22,9] = 23
 Ins_Act_Uni[23,9] = 24
 # create a varaible for significance 
 Ins_Act_Uni <- mutate(Ins_Act_Uni, 
-                  sig = ifelse(p.value <= 0.016, 1, 0))
+                  sig = ifelse(p.value < 0.016, 1, 0))
+
 phc_IA_Uni <- Ins_Act_Uni[1:17,]
 mhc_IA_Uni <- Ins_Act_Uni[18:23,]
 
@@ -282,7 +287,7 @@ Act_Mod_Uni[22,9] = 23
 Act_Mod_Uni[23,9] = 24
 # create a varaible for significance 
 Act_Mod_Uni <- mutate(Act_Mod_Uni, 
-                  sig = ifelse(p.value <= 0.016, 1, 0))
+                  sig = ifelse(p.value < 0.016, 1, 0))
 
 phc_AM_Uni <- Act_Mod_Uni[1:17,]
 mhc_AM_Uni <- Act_Mod_Uni[18:23,]
