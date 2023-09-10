@@ -247,6 +247,16 @@ library(MASS)
 library(nnet)
 library(performance)
 ```
+```{r}
+str(NHRVS_2019$Race_4Cat)
+tab<-table(NHRVS_2019$Race_4Cat)
+tab<- (tab[1:4]/length(NHRVS_2019$Race_4Cat))*100
+
+tab
+
+```
+
+
 
 # Create Data frames
 This first set of code is used to create the dataframes needed for our analysis. 
@@ -423,6 +433,8 @@ Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_PTSD,"PTSD
 #23. Suicidality
 Ins_Mod_Uni<-rbind(Ins_Mod_Uni,UniThesis(thesis_NHRVS,thesis_NHRVS$LT_Suicidal,"Suicidality", "Ins_Mod"))
 Ins_Mod_Uni <- Ins_Mod_Uni[-(1),]
+
+
 ```
 
 **Lets look at the table!**
@@ -561,7 +573,7 @@ This first block of the stepwise regression will do the same thing as we did for
 ### Part 1 Create values for table
 #1. Run the models
 Cov_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
-Cov_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
+Cov_Reg2<-multinom(relevel(Ex_3cat,ref = "Moderate")  ~ Age + College + Income_60k_plus + YN_work + BMI, data = thesis_NHRVS)
 
 #2. Coefficients 
   coefs_Cov_Reg <- abs(coef(Cov_Reg))
@@ -581,6 +593,7 @@ Cov_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k
   }
   p_val1<- P_value(Cov_Reg)
   p_val2<- P_value(Cov_Reg2)
+  
 #6. R^2 for model
   R2_Cov_Reg <- performance::r2(Cov_Reg)
   R2_Cov_Reg2 <- performance::r2(Cov_Reg2)
@@ -588,6 +601,8 @@ Cov_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k
   OR.CI_IvA <- paste(round(OR_Cov_Reg[2,2:6],2), "(",round(CI_Cov_Reg[2:6,3],2),"-", round(CI_Cov_Reg[2:6,4],2),")")
   OR.CI_IvM <- paste(round(OR_Cov_Reg[1,2:6],2), "(",round(CI_Cov_Reg[2:6,1],2),"-", round(CI_Cov_Reg[2:6,2],2),")")
   OR.CI_AvM <- paste(round(OR_Cov_Reg2[2,2:6],2),"(",round(CI_Cov_Reg2[2:6,3],2),"-", round(CI_Cov_Reg2[2:6,4],2),")")
+  
+  
 
 #### Part 2. Make the table and export 
 
@@ -595,24 +610,38 @@ Cov_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k
 cov_OR_tab <-  data.frame(cbind(
   variable = Cov_Reg$coefnames[2:length(Cov_Reg$coefnames)],
   IvA_ODDS = OR.CI_IvA,
-  IvA_p = round(p_val1[2,2:5],4),
+  IvA_p = round(p_val1[2,2:6],4),
   IvM_ODDS = OR.CI_IvM,
-  IvM_p = round(p_val1[1,2:5],4),
+  IvM_p = round(p_val1[1,2:6],4),
   AvM_ODDS = OR.CI_AvM, 
-  AvM_p = round(p_val2[2,2:5],4)
+  AvM_p = round(p_val2[2,2:6],4)
 ))
 #2. create the row for the R2
   paste("Block 1 R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
-  variable = paste("Block 1 R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
+  variable = paste0("Block 1 R^2 =", round((R2_Cov_Reg[[1]]*100),3),"%")
   R2TAB<-data.frame(cbind(
                     variable, IvA_ODDS = NA, IvA_p = NA, IvM_ODDS = NA,
                     IvM_p = NA,AvM_ODDS = NA, AvM_p = NA))
 
 #3. Bind the stuff together
   cov_OR_tab <- rbind(R2TAB, cov_OR_tab)
+  # cov_OR_tab <- mutate(cov_OR_tab,
+  #   IvA_ODDS = ifelse(IvA_p <= .05 & IvA_p > .01, paste(IvA_ODDS, "*"),
+  #              ifelse(IvA_p <= .01 & IvA_p > .001, paste(IvA_ODDS, "**"),
+  #              ifelse(IvA_p <= .001, paste(IvA_ODDS, "***"), IvA_ODDS))),
+  #   IvM_ODDS = ifelse(IvM_p <= .05 & IvM_p > .01, paste(IvM_ODDS, "*"),
+  #              ifelse(IvM_p <= .01 & IvM_p > .001, paste(IvM_ODDS, "**"),
+  #              ifelse(IvM_p <= .001, paste(IvM_ODDS, "***"), IvM_ODDS))),
+  #   AvM_ODDS = ifelse(round(AvM_p,2) <= .05 & AvM_p > .01, paste(AvM_ODDS, "*"),
+  #              ifelse(round(AvM_p,2) <= .01 & AvM_p > .001, paste(AvM_ODDS, "**"),
+  #              ifelse(AvM_p <= .001, paste(AvM_ODDS, "***"), AvM_ODDS)))
+  # )
+  
    
 #4. Export
   write_csv(cov_OR_tab,"~/Desktop/Coding/data/covSF8_OR_tab.csv")
+  
+  cov_OR_tab
 ```
 ```{r}
   knitr::kable(cov_OR_tab) %>%
@@ -627,11 +656,11 @@ Block to is idential to block one with the addition of the MCS and PCS to the re
 
   # Mental health composite score (MCS)
   Cov.MCS_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
-  Cov.MCS_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
+  Cov.MCS_Reg2<-multinom(relevel(Ex_3cat,ref = "Moderate")  ~ Age + College + Income_60k_plus + YN_work + BMI + MCS, data = thesis_NHRVS)
 
   # Physical health composite score (PCS)
   Cov.PCS_Reg<-multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
-  Cov.PCS_Reg2<-multinom(relevel(Ex_3cat,ref = "Active")  ~ Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
+  Cov.PCS_Reg2<-multinom(relevel(Ex_3cat,ref = "Moderate")  ~ Age + College + Income_60k_plus + YN_work + BMI + PCS, data = thesis_NHRVS)
 
 #2. Coefficients 
   #MCS
@@ -708,6 +737,7 @@ SF8_OR_tab <-  data.frame(cbind(
 #4. Export
   write_csv(SF8_OR_tab,"~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
   write_csv(Full_OR_tab, "~/Desktop/Coding/data/SF8.cov_OR_tab.csv")
+  
 ```
 ```{r}
   knitr::kable(Full_OR_tab) %>%
