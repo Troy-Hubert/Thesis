@@ -31,6 +31,7 @@ library(patchwork)
 # for reordering facctors in ggplot
 library(forcats)
 library(kableExtra)
+library(effectsize)
 
 options(knitr.table.format = "html") 
 ```
@@ -49,6 +50,40 @@ Ins_Mod <- read_csv("~/Desktop/Coding/data/Ins_Mod.csv")
 Ins_Act <- read_csv("~/Desktop/Coding/data/Ins_Act.csv")
 Act_Mod <- read_csv( "~/Desktop/Coding/data/Act_Mod.csv")
 ```
+
+```{r, include= FALSE}
+
+#ins vs active
+  # any disability 
+      abs(oddsratio_to_d(0.53, log = FALSE))
+  # asthma = 
+      abs(oddsratio_to_d(0.75, log = FALSE))
+  # Chronic pain = 
+      abs(oddsratio_to_d(0.79, log = FALSE))
+  # Disability = 
+      abs(oddsratio_to_d(0.82, log = FALSE))
+  # high cholesterol = 
+      abs(oddsratio_to_d(0.75, log = FALSE))
+  # STroke = 
+      abs(oddsratio_to_d(0.58, log = FALSE))
+  # PTSD = 
+      abs(oddsratio_to_d(1.38, log = FALSE))
+      
+#ins vs mod
+  # Disability = 
+      abs(oddsratio_to_d(0.62, log = FALSE))
+  # asthma = 
+      abs(oddsratio_to_d(0.71, log = FALSE))
+  # Chronic pain = 
+      abs(oddsratio_to_d(0.73, log = FALSE))
+  # hypertension = 
+      abs(oddsratio_to_d(0.83, log = FALSE))
+  # nicotine dependence = 
+      abs(oddsratio_to_d(0.71, log = FALSE))
+
+
+```
+
 
 Example of data frame 
 ```{r}
@@ -175,7 +210,6 @@ Act_Mod[23,9] = 7
 Act_Mod <- mutate(Act_Mod, 
                   sig = ifelse(p.value < 0.016, 1, 0))
 
-
 Act_Mod
 
 phc_AM <- Act_Mod[1:17,]
@@ -225,29 +259,29 @@ Ins_Act_Uni <- mutate(Ins_Act_Uni, order = 0)
 Ins_Act_Uni <- cbind(Ins_Act_Uni[,1:8],Ins_Act_Uni[,10])
 colnames(Ins_Act_Uni)[9] = "order"
 #update the values of the dataset to reflect the order we want
-Ins_Act_Uni[1,9]  = 2
-Ins_Act_Uni[2,9]  = 3
-Ins_Act_Uni[3,9]  = 4
-Ins_Act_Uni[4,9]  = 5
-Ins_Act_Uni[5,9]  = 6
-Ins_Act_Uni[6,9]  = 7
-Ins_Act_Uni[7,9]  = 8
-Ins_Act_Uni[8,9]  = 9
-Ins_Act_Uni[9,9]  = 10
-Ins_Act_Uni[10,9] = 11
-Ins_Act_Uni[11,9] = 12
-Ins_Act_Uni[12,9] = 13
-Ins_Act_Uni[13,9] = 14
-Ins_Act_Uni[14,9] = 15
-Ins_Act_Uni[15,9] = 16
-Ins_Act_Uni[16,9] = 17
-Ins_Act_Uni[17,9] = 18
-Ins_Act_Uni[18,9] = 19
-Ins_Act_Uni[19,9] = 20
-Ins_Act_Uni[20,9] = 21
-Ins_Act_Uni[21,9] = 22
-Ins_Act_Uni[22,9] = 23
-Ins_Act_Uni[23,9] = 24
+Ins_Act_Uni[1,9]  = 8
+Ins_Act_Uni[2,9]  = 9
+Ins_Act_Uni[3,9]  = 6
+Ins_Act_Uni[4,9]  = 13
+Ins_Act_Uni[5,9]  = 10
+Ins_Act_Uni[6,9]  = 12
+Ins_Act_Uni[7,9]  = 2
+Ins_Act_Uni[8,9]  = 3
+Ins_Act_Uni[9,9]  = 4
+Ins_Act_Uni[10,9] = 5
+Ins_Act_Uni[11,9] = 14
+Ins_Act_Uni[12,9] = 15
+Ins_Act_Uni[13,9] = 16
+Ins_Act_Uni[14,9] = 17
+Ins_Act_Uni[15,9] = 18
+Ins_Act_Uni[16,9] = 19
+Ins_Act_Uni[17,9] = 11
+Ins_Act_Uni[18,9] = 20
+Ins_Act_Uni[19,9] = 21
+Ins_Act_Uni[20,9] = 22
+Ins_Act_Uni[21,9] = 7
+Ins_Act_Uni[22,9] = 24
+Ins_Act_Uni[23,9] = 23
 # create a varaible for significance 
 Ins_Act_Uni <- mutate(Ins_Act_Uni, 
                   sig = ifelse(p.value < 0.016, 1, 0))
@@ -262,29 +296,29 @@ Act_Mod_Uni <- cbind(Act_Mod_Uni[,1:8],Act_Mod_Uni[,10])
 colnames(Act_Mod_Uni)[9] = "order"
 
 #update the values of the dataset to reflect the order we want
-Act_Mod_Uni[1,9]  = 2
-Act_Mod_Uni[2,9]  = 3
-Act_Mod_Uni[3,9]  = 4
-Act_Mod_Uni[4,9]  = 5
-Act_Mod_Uni[5,9]  = 6
-Act_Mod_Uni[6,9]  = 7
-Act_Mod_Uni[7,9]  = 8
-Act_Mod_Uni[8,9]  = 9
-Act_Mod_Uni[9,9]  = 10
-Act_Mod_Uni[10,9] = 11
-Act_Mod_Uni[11,9] = 12
-Act_Mod_Uni[12,9] = 13
-Act_Mod_Uni[13,9] = 14
-Act_Mod_Uni[14,9] = 15
-Act_Mod_Uni[15,9] = 16
-Act_Mod_Uni[16,9] = 17
-Act_Mod_Uni[17,9] = 18
-Act_Mod_Uni[18,9] = 19
-Act_Mod_Uni[19,9] = 20
-Act_Mod_Uni[20,9] = 21
-Act_Mod_Uni[21,9] = 22
-Act_Mod_Uni[22,9] = 23
-Act_Mod_Uni[23,9] = 24
+Act_Mod_Uni[1,9]  = 8
+Act_Mod_Uni[2,9]  = 9
+Act_Mod_Uni[3,9]  = 6
+Act_Mod_Uni[4,9]  = 13
+Act_Mod_Uni[5,9]  = 10
+Act_Mod_Uni[6,9]  = 12
+Act_Mod_Uni[7,9]  = 2
+Act_Mod_Uni[8,9]  = 3
+Act_Mod_Uni[9,9]  = 4
+Act_Mod_Uni[10,9] = 5
+Act_Mod_Uni[11,9] = 14
+Act_Mod_Uni[12,9] = 15
+Act_Mod_Uni[13,9] = 16
+Act_Mod_Uni[14,9] = 17
+Act_Mod_Uni[15,9] = 18
+Act_Mod_Uni[16,9] = 19
+Act_Mod_Uni[17,9] = 11
+Act_Mod_Uni[18,9] = 20
+Act_Mod_Uni[19,9] = 21
+Act_Mod_Uni[20,9] = 22
+Act_Mod_Uni[21,9] = 7
+Act_Mod_Uni[22,9] = 24
+Act_Mod_Uni[23,9] = 23
 # create a varaible for significance 
 Act_Mod_Uni <- mutate(Act_Mod_Uni, 
                   sig = ifelse(p.value < 0.016, 1, 0))
@@ -332,6 +366,55 @@ output <- data |>
 return (output)
 }
 ```
+
+
+```{r}
+phc_IA_Uni |>
+  #Plot the value variable (in descending order) assigning significance to the 
+  #values significant after Bon foroni alpha corrections
+  ggplot(aes(y = reorder(variable, -order),color = as.factor(sig))) +
+  #take away background
+  theme_classic() +
+  #make the forrest plot
+  geom_point(aes(x=estimate), shape=15, size=3,show.legend = FALSE) +
+  geom_linerange(aes(xmin=conf.low, xmax=conf.high),show.legend = FALSE) +
+  #add color 
+  scale_color_manual(values = c("#A6A6A6","blue"))+
+  #change Cordinates
+  labs(x="Odds Ratio") +
+  #adjust the dimentions. 
+  coord_cartesian(ylim = c(1,18), xlim=c(.25, 1.75)) +
+  #add a line at 0 for reference 
+  geom_vline(xintercept = 1, linetype="dashed") 
+  #add anotations to help suggests what each side means.
+  # annotate("text", x = .5, y = 18, label = "Less Likely") +
+  # annotate("text", x = 1.5, y = 18, label = "More Likely") +
+  #Git rid of the Y - Axis
+  # theme(axis.line.y = element_blank(),
+  #       axis.ticks.y= element_blank(),
+  #       axis.text.y= element_blank(),
+  #       axis.title.y= element_blank())
+
+mhc_IA_Uni |> 
+  #Plot the value variable (in descending order) assigning significance to the 
+  #values significant after Bon foroni alpha corrections
+  ggplot(aes(y = reorder(variable, -order),color = as.factor(sig))) +
+  #take away background
+  theme_classic() +
+  #make the forrest plot
+  geom_point(aes(x=estimate), shape=15, size=3,show.legend = FALSE) +
+  geom_linerange(aes(xmin=conf.low, xmax=conf.high),show.legend = FALSE) +
+  #add color 
+  scale_color_manual(values = c("#A6A6A6","blue"))+
+  #change Cordinates
+  labs(x="Odds Ratio") +
+  #adjust the dimentions. 
+  coord_cartesian(ylim = c(1,18), xlim=c(.25, 1.75)) +
+  #add a line at 0 for reference 
+  geom_vline(xintercept = 1, linetype="dashed") 
+
+```
+
 
 
 ### Applying the function
@@ -475,7 +558,7 @@ left_FP <- function(plot_data,type){
 
     # plot the left side of the plot 
     output <- plot_data %>% 
-      ggplot(aes(y = model)) +
+      ggplot(aes(y = model, order)) +
       geom_text(aes(x = 0, label = variable), hjust = 0, fontface = "bold")+
       geom_text(
       aes(x = 1, label = estimate_lab),
