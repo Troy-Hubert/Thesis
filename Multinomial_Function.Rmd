@@ -558,6 +558,24 @@ write.csv(Ins_Mod_Uni, "~/Desktop/Coding/data/Ins_Mod_Uni.csv")
 write.csv(Act_Mod_Uni, "~/Desktop/Coding/data/Act_Mod_Uni.csv")
 ```
 
+## Varience explained by health conditions alone
+
+```{r}
+# Variance explained:
+Uni_R_AD <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ Any_Disability, data = thesis_NHRVS)
+Uni_R_MS <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ MS, data = thesis_NHRVS)
+print(paste0("The varaince explained by physical health conditions for the univariate model ranges from ",
+     round(r2(Uni_R_MS)[[1]],5)," to ", round(r2(Uni_R_AD)[[1]],5)
+     ))
+
+thesis_NHRVS$LT_NicotineDep
+Uni_R_ND <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ LT_NicotineDep, data = thesis_NHRVS)
+Uni_R_PTSD <- multinom(relevel(Ex_3cat,ref = "Insufficient")  ~ LT_PTSD, data = thesis_NHRVS)
+print(paste0("The varaince explained by mental health conditions for the univariate model ranges from ",
+     round(r2(Uni_R_PTSD)[[1]],5)," to ", round(r2(Uni_R_ND)[[1]],5)
+     ))
+```
+
 # Step Wise Multivariate Logistic Multinomial Regression
 That's a mouthful! For the following section we will be running code for the full regression model, extracting values like we did for the univariate function, and putting these values into tables for the 3 comparisons at each of the 3 blocks. The blocks of this regession are as follows:
 
@@ -907,6 +925,8 @@ R2CHANGE<-data.frame(R2CHANGE)
   knitr::kable(R2CHANGE) %>%
           kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 write_csv(R2CHANGE,"~/Desktop/Coding/data/R2change.csv")
+
+
 ```
 
 We have the R^2 change values for each value, but for the table. I want to know what the the range of R2 for the full model within block 3. The highest and lowest values are for multiple socrosis (lowest R^2) and Lifetime nictotine dependence (highest R^2)
@@ -1176,3 +1196,36 @@ We have everything we need for our final table output!
     write_csv(OR_Table,"~/Desktop/Coding/data/Thesis_OR_Table.csv")
 
 ```
+
+Multicolinearity Analysis
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot)
+library(ggcorrplot)
+
+thesis_NHRVS$Hrt_dis
+```
+
+
+```{r}
+#physical health conditions
+corr1 <- thesis_NHRVS |>
+  dplyr::select(Ex_3cat,Any_Disability, Age, College , Income_60k_plus, YN_work , BMI , MCS
+    )
+
+model.matrix(~0+., data=corr1) %>% 
+  cor(use="pairwise.complete.obs") %>% 
+  ggcorrplot(show.diag=FALSE, type="lower", lab=TRUE, lab_size=2)
+
+# mental health conditions
+corr2 <- thesis_NHRVS |>
+  dplyr::select(Ex_3cat,LT_MDD, Age, College , Income_60k_plus, YN_work , BMI , PCS
+    )
+
+model.matrix(~0+., data=corr2) %>% 
+  cor(use="pairwise.complete.obs") %>% 
+  ggcorrplot(show.diag=FALSE, type="lower", lab=TRUE, lab_size=2)
+
+```
+
